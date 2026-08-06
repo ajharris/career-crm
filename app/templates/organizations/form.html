@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} · Career CRM{% endblock %}
+
+{% macro render_field(field, class_name='form-control') %}
+  <div class="mb-3">
+    {{ field.label(class='form-label') }}
+    {{ field(class=class_name + (' is-invalid' if field.errors else '')) }}
+    {% if field.description %}<div class="form-text">{{ field.description }}</div>{% endif %}
+    {% for error in field.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+  </div>
+{% endmacro %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+      <a class="text-decoration-none" href="{{ url_for('organizations.detail', organization_id=organization.id) if organization else url_for('organizations.index') }}">← Cancel</a>
+      <h1 class="h2 mt-2 mb-4">{{ page_title }}</h1>
+      <form class="card card-body border-0 shadow-sm p-4" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        {{ render_field(form.name) }}
+        <div class="row">
+          <div class="col-md-6">{{ render_field(form.organization_type, 'form-select') }}</div>
+          <div class="col-md-6">{{ render_field(form.priority, 'form-control') }}</div>
+        </div>
+        {{ render_field(form.website) }}
+        {{ render_field(form.location) }}
+        {{ render_field(form.notes) }}
+        <div class="d-flex justify-content-end gap-2">
+          <a class="btn btn-outline-secondary" href="{{ url_for('organizations.detail', organization_id=organization.id) if organization else url_for('organizations.index') }}">Cancel</a>
+          {{ form.submit(class='btn btn-primary') }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

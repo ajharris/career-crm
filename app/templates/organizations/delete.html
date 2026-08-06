@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Delete {{ organization.name }} · Career CRM{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <section class="card border-danger shadow-sm">
+        <div class="card-body p-4">
+          <h1 class="h3">Delete organization?</h1>
+          <p>Are you sure you want to delete <strong>{{ organization.name }}</strong>? This action cannot be undone.</p>
+          <form method="post">
+            {{ form.hidden_tag() }}
+            <div class="d-flex justify-content-end gap-2">
+              <a class="btn btn-outline-secondary" href="{{ url_for('organizations.detail', organization_id=organization.id) }}">Cancel</a>
+              {{ form.submit(class='btn btn-danger') }}
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}
