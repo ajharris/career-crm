@@ -11,6 +11,7 @@ from app.utils.enums import OrganizationType
 
 if TYPE_CHECKING:
     from app.models.contact import Contact
+    from app.models.job_posting import JobPosting
 
 
 class Organization(db.Model):
@@ -53,6 +54,11 @@ class Organization(db.Model):
         onupdate=func.now(),
     )
     contacts: Mapped[list["Contact"]] = relationship(
+        back_populates="organization",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    job_postings: Mapped[list["JobPosting"]] = relationship(
         back_populates="organization",
         cascade="all, delete-orphan",
         lazy="selectin",

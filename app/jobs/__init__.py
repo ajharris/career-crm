@@ -1,11 +1,8 @@
-# app/jobs/__init__.py
+"""Job posting management blueprint."""
 
 from flask import Blueprint
 
-bp = Blueprint(
-    "jobs",
-    __name__,
-    template_folder="../templates/jobs",
-)
 
-from app.jobs import routes
+bp = Blueprint("jobs", __name__, url_prefix="/jobs")
+
+from app.jobs import routes  # noqa: E402, F401

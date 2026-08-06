@@ -47,4 +47,23 @@
       </tbody>
     </table></div>
   </section>
+
+  <section class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+      <h2 class="h5 mb-0">Active Job Postings</h2>
+      <a class="btn btn-sm btn-primary" href="{{ url_for('jobs.create', organization_id=organization.id) }}">Add Job Posting</a>
+    </div>
+    <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+      <thead class="table-light"><tr><th>Title</th><th>Status</th><th>Priority</th><th>Closing date</th></tr></thead>
+      <tbody>
+        {% for job in active_jobs %}
+          <tr>
+            <td><a class="fw-semibold text-decoration-none" href="{{ url_for('jobs.detail', job_id=job.id) }}">{{ job.title }}</a></td>
+            <td>{{ job.status.label }}</td><td>{{ job.priority }}</td>
+            <td>{{ job.closing_date.strftime('%b %d, %Y') if job.closing_date else '—' }}</td>
+          </tr>
+        {% else %}<tr><td class="text-center text-body-secondary py-4" colspan="4">No active job postings.</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+  </section>
 {% endblock %}

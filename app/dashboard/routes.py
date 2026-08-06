@@ -3,16 +3,12 @@
 from flask import render_template
 
 from app.dashboard import bp
+from app.dashboard.services import dashboard_statistics
 
 
 @bp.get("/")
 def index() -> str:
     """Render the application dashboard."""
-    statistics = (
-        ("Organizations", 0),
-        ("Contacts", 0),
-        ("Job Postings", 0),
-        ("Applications", 0),
-        ("Follow-ups", 0),
+    return render_template(
+        "dashboard/index.html", statistics=dashboard_statistics()
     )
-    return render_template("dashboard/index.html", statistics=statistics)

@@ -56,9 +56,61 @@ class ApplicationStatus(StrEnum):
 
 
 class JobStatus(StrEnum):
+    """Lifecycle state of a job posting."""
+
     DISCOVERED = "discovered"
     RESEARCHING = "researching"
     READY_TO_APPLY = "ready_to_apply"
     APPLIED = "applied"
     CLOSED = "closed"
     SKIPPED = "skipped"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        return self.value.replace("_", " ").title()
+
+
+class EmploymentType(StrEnum):
+    """Supported employment arrangements."""
+
+    FULL_TIME = "full_time"
+    PART_TIME = "part_time"
+    CONTRACT = "contract"
+    INTERNSHIP = "internship"
+    TEMPORARY = "temporary"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        return self.value.replace("_", " ").title()
+
+
+class WorkMode(StrEnum):
+    """Supported workplace arrangements."""
+
+    ON_SITE = "on_site"
+    HYBRID = "hybrid"
+    REMOTE = "remote"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        return self.value.replace("_", " ").title()
+
+
+class JobSource(StrEnum):
+    """Discovery channel for a job posting."""
+
+    COMPANY_WEBSITE = "company_website"
+    LINKEDIN = "linkedin"
+    REFERRAL = "referral"
+    RECRUITER = "recruiter"
+    OTHER = "other"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        if self is self.LINKEDIN:
+            return "LinkedIn"
+        return self.value.replace("_", " ").title()

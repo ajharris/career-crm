@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import render_field %}
+
+{% block title %}{{ page_title }} · Career CRM{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center"><div class="col-xl-9">
+    <a class="text-decoration-none" href="{{ url_for('jobs.detail', job_id=job.id) if job else url_for('jobs.index') }}">← Cancel</a>
+    <h1 class="h2 mt-2 mb-4">{{ page_title }}</h1>
+    <form class="card card-body border-0 shadow-sm p-4" method="post" novalidate>
+      {{ form.hidden_tag() }}
+      {{ render_field(form.organization_id, 'form-select') }}
+      {{ render_field(form.title) }}
+      <div class="row"><div class="col-md-6">{{ render_field(form.department) }}</div><div class="col-md-6">{{ render_field(form.location) }}</div></div>
+      <div class="row"><div class="col-md-4">{{ render_field(form.employment_type, 'form-select') }}</div><div class="col-md-4">{{ render_field(form.work_mode, 'form-select') }}</div><div class="col-md-4">{{ render_field(form.source, 'form-select') }}</div></div>
+      <div class="row"><div class="col-md-4">{{ render_field(form.salary_min) }}</div><div class="col-md-4">{{ render_field(form.salary_max) }}</div><div class="col-md-4">{{ render_field(form.salary_currency, 'form-select') }}</div></div>
+      {{ render_field(form.posting_url) }}
+      <div class="row"><div class="col-md-4">{{ render_field(form.date_posted) }}</div><div class="col-md-4">{{ render_field(form.closing_date) }}</div><div class="col-md-4">{{ render_field(form.discovered_at) }}</div></div>
+      <div class="row"><div class="col-md-6">{{ render_field(form.priority) }}</div><div class="col-md-6">{{ render_field(form.status, 'form-select') }}</div></div>
+      {{ render_field(form.description) }}
+      {{ render_field(form.notes) }}
+      <div class="d-flex justify-content-end gap-2"><a class="btn btn-outline-secondary" href="{{ url_for('jobs.detail', job_id=job.id) if job else url_for('jobs.index') }}">Cancel</a>{{ form.submit(class='btn btn-primary') }}</div>
+    </form>
+  </div></div>
+{% endblock %}

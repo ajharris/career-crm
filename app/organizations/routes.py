@@ -40,9 +40,13 @@ def index() -> str:
 @bp.get("/<int:organization_id>")
 def detail(organization_id: int) -> str:
     """Show one organization."""
+    from app.jobs.services import active_jobs_for_organization
+
+    organization = get_organization(organization_id)
     return render_template(
         "organizations/detail.html",
-        organization=get_organization(organization_id),
+        organization=organization,
+        active_jobs=active_jobs_for_organization(organization.id),
     )
 
 
