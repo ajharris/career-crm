@@ -1,19 +1,51 @@
-# app/config.py
+"""Application configuration for each supported environment."""
 
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY", "development-only-secret")
+    """Settings shared by all environments."""
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
+    SECRET_KEY = os.getenv("SECRET_KEY", "development-only-secret")
+    SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
-        f"sqlite:///{BASE_DIR / 'instance' / 'job_crm.db'}",
+        f"sqlite:///{BASE_DIR / 'instance' / 'career_crm.db'}",
     )
-
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024
-    UPLOAD_FOLDER = BASE_DIR / "uploads"
+    WTF_CSRF_ENABLED = True
+
+
+class DevelopmentConfig(Config):
+    """Local development settings."""
+
+    DEBUG = True
+
+
+class TestingConfig(Config):
+    """Fast, isolated settings for automated tests."""
+
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = os.getenv("TEST_DATABASE_URL", "sqlite:///:memory:")
+    WTF_CSRF_ENABLED = False
+
+
+class ProductionConfig(Config):
+    """Production-safe defaults overridden through environment variables."""
+
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+
+
+CONFIGURATIONS: dict[str, type[Config]] = {
+    "development": DevelopmentConfig,
+    "testing": TestingConfig,
+    "production": ProductionConfig,
+}

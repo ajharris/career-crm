@@ -1,0 +1,43 @@
+# Milestone 1: Foundation
+# Flask application factory
+# SQLAlchemy
+# Flask-Migrate
+# Bootstrap
+# Base template
+# Home page
+# Database initialization
+
+Milestone 2: Organizations
+Organization model
+CRUD pages
+Search
+Pagination
+
+Milestone 3: Contacts
+Link contacts to organizations
+Contact detail page
+Communication history
+
+Milestone 4: Job Postings
+CRUD
+Skills
+Priority
+Status
+
+Milestone 5: Applications
+Application pipeline
+Interview stages
+Résumé versions
+Cover letter tracking
+
+Milestone 6: Dashboard
+KPIs
+Upcoming follow-ups
+Recently added jobs
+Organizations without outreach
+
+Milestone 7: Automation
+Career page importers
+Job scoring
+Email templates
+Reminders

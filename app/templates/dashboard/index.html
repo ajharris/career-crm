@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · Career CRM{% endblock %}
+
+{% block content %}
+  <div class="mb-4">
+    <h1 class="h2">Dashboard</h1>
+    <p class="text-body-secondary mb-0">Your job search at a glance.</p>
+  </div>
+  <div class="row g-4">
+    {% for label, value in statistics %}
+      <div class="col-12 col-sm-6 col-xl">
+        <section class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <h2 class="h6 text-body-secondary">{{ label }}</h2>
+            <p class="display-6 mb-0">{{ value }}</p>
+          </div>
+        </section>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

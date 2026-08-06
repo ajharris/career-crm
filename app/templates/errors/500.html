@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Server error · Career CRM{% endblock %}
+
+{% block content %}
+  <div class="text-center py-5">
+    <h1 class="display-4">500</h1>
+    <p class="lead">Something went wrong. Please try again.</p>
+    <a class="btn btn-primary" href="{{ url_for('dashboard.index') }}">Return to dashboard</a>
+  </div>
+{% endblock %}

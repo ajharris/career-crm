@@ -1,0 +1,11 @@
+body {
+  min-width: 320px;
+}
+
+.card {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
