@@ -50,6 +50,7 @@ def initialize_extensions(app: Flask) -> None:
     csrf.init_app(app)
 
     from app.auth.models import User
+    from app.models.contact import Contact
     from app.models.organization import Organization
 
     @login_manager.user_loader
@@ -63,10 +64,12 @@ def initialize_extensions(app: Flask) -> None:
 def register_blueprints(app: Flask) -> None:
     """Register blueprints implemented in this milestone."""
     from app.dashboard import bp as dashboard_bp
+    from app.contacts import bp as contacts_bp
     from app.organizations import bp as organizations_bp
 
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(organizations_bp)
+    app.register_blueprint(contacts_bp)
 
 
 def register_error_handlers(app: Flask) -> None:

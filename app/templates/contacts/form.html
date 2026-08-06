@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import render_field %}
+
+{% block title %}{{ page_title }} · Career CRM{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center"><div class="col-lg-8 col-xl-7">
+    <a class="text-decoration-none" href="{{ url_for('contacts.detail', contact_id=contact.id) if contact else url_for('contacts.index') }}">← Cancel</a>
+    <h1 class="h2 mt-2 mb-4">{{ page_title }}</h1>
+    <form class="card card-body border-0 shadow-sm p-4" method="post" novalidate>
+      {{ form.hidden_tag() }}
+      {{ render_field(form.organization_id, 'form-select') }}
+      <div class="row"><div class="col-md-6">{{ render_field(form.first_name) }}</div><div class="col-md-6">{{ render_field(form.last_name) }}</div></div>
+      <div class="row"><div class="col-md-6">{{ render_field(form.title) }}</div><div class="col-md-6">{{ render_field(form.department) }}</div></div>
+      <div class="row"><div class="col-md-6">{{ render_field(form.email) }}</div><div class="col-md-6">{{ render_field(form.phone) }}</div></div>
+      {{ render_field(form.linkedin_url) }}
+      <div class="row"><div class="col-md-6">{{ render_field(form.relationship_status, 'form-select') }}</div><div class="col-md-6">{{ render_field(form.last_contacted_at) }}</div></div>
+      {{ render_field(form.notes) }}
+      <div class="d-flex justify-content-end gap-2">
+        <a class="btn btn-outline-secondary" href="{{ url_for('contacts.detail', contact_id=contact.id) if contact else url_for('contacts.index') }}">Cancel</a>
+        {{ form.submit(class='btn btn-primary') }}
+      </div>
+    </form>
+  </div></div>
+{% endblock %}

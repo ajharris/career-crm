@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Contacts · Career CRM{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><h1 class="h2 mb-1">Contacts</h1><p class="text-body-secondary mb-0">People in your professional network.</p></div>
+    <a class="btn btn-primary" href="{{ url_for('contacts.create') }}">New Contact</a>
+  </div>
+
+  <form class="card card-body border-0 shadow-sm mb-4" method="get">
+    <div class="row g-3 align-items-end">
+      <div class="col-12 col-lg-5">
+        <label class="form-label" for="q">Search</label>
+        <input class="form-control" id="q" name="q" value="{{ search }}" placeholder="Name, organization, title, or email">
+      </div>
+      <div class="col-12 col-md-5 col-lg-3">
+        <label class="form-label" for="organization_id">Organization</label>
+        <select class="form-select" id="organization_id" name="organization_id">
+          <option value="">All organizations</option>
+          {% for id, name in organizations %}<option value="{{ id }}" {{ 'selected' if id == selected_organization_id }}>{{ name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-5 col-lg-2">
+        <label class="form-label" for="title">Title</label>
+        <select class="form-select" id="title" name="title">
+          <option value="">All titles</option>
+          {% for title in titles %}<option value="{{ title }}" {{ 'selected' if title == selected_title }}>{{ title }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-2 d-grid"><button class="btn btn-outline-primary">Apply</button></div>
+    </div>
+  </form>
+
+  <div class="card border-0 shadow-sm overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light"><tr><th>Name</th><th>Organization</th><th>Title</th><th>Email</th><th>Status</th><th>Last contacted</th></tr></thead>
+        <tbody>
+          {% for contact in pagination.items %}
+            <tr>
+              <td><a class="fw-semibold text-decoration-none" href="{{ url_for('contacts.detail', contact_id=contact.id) }}">{{ contact.full_name }}</a></td>
+              <td><a class="text-decoration-none" href="{{ url_for('organizations.detail', organization_id=contact.organization_id) }}">{{ contact.organization.name }}</a></td>
+              <td>{{ contact.title or '—' }}</td>
+              <td>{% if contact.email %}<a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% else %}—{% endif %}</td>
+              <td>{{ contact.relationship_status.label if contact.relationship_status else '—' }}</td>
+              <td>{{ contact.last_contacted_at.strftime('%b %d, %Y') if contact.last_contacted_at else '—' }}</td>
+            </tr>
+          {% else %}<tr><td class="text-center text-body-secondary py-5" colspan="6">No contacts found.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if pagination.pages > 1 %}
+    <nav class="mt-4" aria-label="Contact pages"><ul class="pagination justify-content-center">
+      {% for page_number in pagination.iter_pages() %}
+        {% if page_number %}<li class="page-item {{ 'active' if page_number == pagination.page }}"><a class="page-link" href="{{ url_for('contacts.index', page=page_number, q=search, organization_id=selected_organization_id, title=selected_title) }}">{{ page_number }}</a></li>
+        {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+      {% endfor %}
+    </ul></nav>
+  {% endif %}
+{% endblock %}

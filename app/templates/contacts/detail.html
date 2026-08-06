@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}{{ contact.full_name }} · Career CRM{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <a class="text-decoration-none" href="{{ url_for('organizations.detail', organization_id=contact.organization_id) }}">← Back to {{ contact.organization.name }}</a>
+      <h1 class="h2 mt-2 mb-0">{{ contact.full_name }}</h1>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-primary" href="{{ url_for('contacts.edit', contact_id=contact.id) }}">Edit</a>
+      <a class="btn btn-outline-danger" href="{{ url_for('contacts.delete', contact_id=contact.id) }}">Delete</a>
+    </div>
+  </div>
+  <section class="card border-0 shadow-sm"><div class="card-body p-4"><dl class="row mb-0">
+    <dt class="col-sm-3">Organization</dt><dd class="col-sm-9"><a href="{{ url_for('organizations.detail', organization_id=contact.organization_id) }}">{{ contact.organization.name }}</a></dd>
+    <dt class="col-sm-3">Title</dt><dd class="col-sm-9">{{ contact.title or '—' }}</dd>
+    <dt class="col-sm-3">Department</dt><dd class="col-sm-9">{{ contact.department or '—' }}</dd>
+    <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{% if contact.email %}<a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% else %}—{% endif %}</dd>
+    <dt class="col-sm-3">Phone</dt><dd class="col-sm-9">{% if contact.phone %}<a href="tel:{{ contact.phone }}">{{ contact.phone }}</a>{% else %}—{% endif %}</dd>
+    <dt class="col-sm-3">LinkedIn</dt><dd class="col-sm-9">{% if contact.linkedin_url %}<a href="{{ contact.linkedin_url }}" rel="noopener noreferrer">View profile</a>{% else %}—{% endif %}</dd>
+    <dt class="col-sm-3">Relationship status</dt><dd class="col-sm-9">{{ contact.relationship_status.label if contact.relationship_status else '—' }}</dd>
+    <dt class="col-sm-3">Last contacted</dt><dd class="col-sm-9">{{ contact.last_contacted_at.strftime('%B %d, %Y at %H:%M') if contact.last_contacted_at else '—' }}</dd>
+    <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ contact.notes or '—' }}</dd>
+  </dl></div></section>
+{% endblock %}

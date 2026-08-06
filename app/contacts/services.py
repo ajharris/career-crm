@@ -1,0 +1,135 @@
+"""Business operations and queries for contacts."""
+
+from datetime import datetime
+from typing import TypedDict, Unpack
+
+from flask_sqlalchemy.pagination import Pagination
+from sqlalchemy import func, or_, select
+
+from app.extensions import db
+from app.models.contact import Contact
+from app.models.organization import Organization
+
+
+class ContactValues(TypedDict, total=False):
+    """Values accepted when creating or updating a contact."""
+
+    organization_id: int
+    first_name: str
+    last_name: str
+    title: str | None
+    department: str | None
+    email: str | None
+    phone: str | None
+    linkedin_url: str | None
+    notes: str | None
+    relationship_status: str | None
+    last_contacted_at: datetime | None
+
+
+def list_contacts(
+    *,
+    search: str = "",
+    organization_id: int | None = None,
+    title: str = "",
+    page: int = 1,
+) -> Pagination:
+    """Return a filtered and searched page of contacts."""
+    statement = select(Contact).join(Contact.organization)
+    if search := search.strip():
+        pattern = f"%{_escape_like(search)}%"
+        statement = statement.where(
+            or_(
+                Contact.first_name.ilike(pattern, escape="\\"),
+                Contact.last_name.ilike(pattern, escape="\\"),
+                Organization.name.ilike(pattern, escape="\\"),
+                Contact.title.ilike(pattern, escape="\\"),
+                Contact.email.ilike(pattern, escape="\\"),
+            )
+        )
+    if organization_id is not None:
+        statement = statement.where(Contact.organization_id == organization_id)
+    if title := title.strip():
+        statement = statement.where(func.lower(Contact.title) == title.lower())
+    statement = statement.order_by(Contact.last_name, Contact.first_name, Contact.id)
+    return db.paginate(statement, page=max(page, 1), per_page=25, error_out=False)
+
+
+def get_contact(contact_id: int) -> Contact:
+    """Return one contact or raise a 404 response."""
+    return db.get_or_404(Contact, contact_id)
+
+
+def create_contact(**values: Unpack[ContactValues]) -> Contact:
+    """Create and persist a contact belonging to an organization."""
+    contact = Contact()
+    _apply_values(contact, values)
+    _require_organization(contact.organization_id)
+    db.session.add(contact)
+    db.session.commit()
+    return contact
+
+
+def update_contact(contact: Contact, **values: Unpack[ContactValues]) -> Contact:
+    """Update and persist a contact."""
+    _apply_values(contact, values)
+    _require_organization(contact.organization_id)
+    db.session.commit()
+    return contact
+
+
+def delete_contact(contact: Contact) -> None:
+    """Delete a contact."""
+    db.session.delete(contact)
+    db.session.commit()
+
+
+def organization_choices() -> list[tuple[int, str]]:
+    """Return organizations ordered for form and filter controls."""
+    organizations = db.session.scalars(
+        select(Organization).order_by(Organization.name)
+    ).all()
+    return [(organization.id, organization.name) for organization in organizations]
+
+
+def title_choices() -> list[str]:
+    """Return distinct non-empty contact titles for filtering."""
+    return list(
+        db.session.scalars(
+            select(Contact.title)
+            .where(Contact.title.is_not(None), Contact.title != "")
+            .distinct()
+            .order_by(Contact.title)
+        ).all()
+    )
+
+
+def _apply_values(contact: Contact, values: ContactValues) -> None:
+    allowed = {
+        "organization_id",
+        "first_name",
+        "last_name",
+        "title",
+        "department",
+        "email",
+        "phone",
+        "linkedin_url",
+        "notes",
+        "relationship_status",
+        "last_contacted_at",
+    }
+    for field in allowed:
+        if field in values:
+            value = values[field]
+            if field not in {"first_name", "last_name"} and isinstance(value, str):
+                value = value.strip() or None
+            setattr(contact, field, value)
+
+
+def _require_organization(organization_id: int) -> None:
+    if db.session.get(Organization, organization_id) is None:
+        raise ValueError("A valid organization is required.")
+
+
+def _escape_like(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")

@@ -18,7 +18,7 @@
           <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'dashboard' }}" {% if request.blueprint == 'dashboard' %}aria-current="page"{% endif %} href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
             <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'organizations' }}" {% if request.blueprint == 'organizations' %}aria-current="page"{% endif %} href="{{ url_for('organizations.index') }}">Organizations</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Contacts</a></li>
+            <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'contacts' }}" {% if request.blueprint == 'contacts' %}aria-current="page"{% endif %} href="{{ url_for('contacts.index') }}">Contacts</a></li>
             <li class="nav-item"><a class="nav-link" href="#">Jobs</a></li>
             <li class="nav-item"><a class="nav-link" href="#">Applications</a></li>
             <li class="nav-item"><a class="nav-link" href="#">Tasks</a></li>

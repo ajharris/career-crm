@@ -1,12 +1,16 @@
 """Organization database model."""
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, DateTime, Enum, Index, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.extensions import db
 from app.utils.enums import OrganizationType
+
+if TYPE_CHECKING:
+    from app.models.contact import Contact
 
 
 class Organization(db.Model):
@@ -47,6 +51,11 @@ class Organization(db.Model):
         nullable=False,
         server_default=func.now(),
         onupdate=func.now(),
+    )
+    contacts: Mapped[list["Contact"]] = relationship(
+        back_populates="organization",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
     @validates("name")

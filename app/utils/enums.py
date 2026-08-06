@@ -27,6 +27,23 @@ class OrganizationType(StrEnum):
         return labels.get(self, self.value.replace("_", " ").title())
 
 
+class RelationshipStatus(StrEnum):
+    """Current high-level relationship stage for a contact."""
+
+    NEW = "new"
+    CONTACTED = "contacted"
+    RESPONDED = "responded"
+    INTERVIEWING = "interviewing"
+    LONG_TERM_CONNECTION = "long_term_connection"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        if self is self.LONG_TERM_CONNECTION:
+            return "Long-term Connection"
+        return self.value.title()
+
+
 class ApplicationStatus(StrEnum):
     PLANNED = "planned"
     APPLIED = "applied"
