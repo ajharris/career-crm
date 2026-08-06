@@ -10,25 +10,41 @@
 
   <form class="card card-body border-0 shadow-sm mb-4" method="get">
     <div class="row g-3 align-items-end">
-      <div class="col-12 col-lg-5">
+      <div class="col-12 col-lg-4">
         <label class="form-label" for="q">Search</label>
         <input class="form-control" id="q" name="q" value="{{ search }}" placeholder="Name, organization, title, or email">
       </div>
-      <div class="col-12 col-md-5 col-lg-3">
+      <div class="col-12 col-md-6 col-lg-3">
         <label class="form-label" for="organization_id">Organization</label>
         <select class="form-select" id="organization_id" name="organization_id">
           <option value="">All organizations</option>
           {% for id, name in organizations %}<option value="{{ id }}" {{ 'selected' if id == selected_organization_id }}>{{ name }}</option>{% endfor %}
         </select>
       </div>
-      <div class="col-12 col-md-5 col-lg-2">
+      <div class="col-12 col-md-6 col-lg-3">
         <label class="form-label" for="title">Title</label>
         <select class="form-select" id="title" name="title">
           <option value="">All titles</option>
           {% for title in titles %}<option value="{{ title }}" {{ 'selected' if title == selected_title }}>{{ title }}</option>{% endfor %}
         </select>
       </div>
-      <div class="col-12 col-md-2 d-grid"><button class="btn btn-outline-primary">Apply</button></div>
+      <div class="col-6 col-lg-3">
+        <label class="form-label" for="sort">Sort by</label>
+        <select class="form-select" id="sort" name="sort">
+          <option value="last_name" {{ 'selected' if sort == 'last_name' }}>Last name</option>
+          <option value="organization" {{ 'selected' if sort == 'organization' }}>Organization</option>
+          <option value="created_at" {{ 'selected' if sort == 'created_at' }}>Created date</option>
+          <option value="last_contacted_at" {{ 'selected' if sort == 'last_contacted_at' }}>Last contacted</option>
+        </select>
+      </div>
+      <div class="col-6 col-lg-3">
+        <label class="form-label" for="direction">Direction</label>
+        <select class="form-select" id="direction" name="direction">
+          <option value="asc" {{ 'selected' if direction == 'asc' }}>Ascending</option>
+          <option value="desc" {{ 'selected' if direction == 'desc' }}>Descending</option>
+        </select>
+      </div>
+      <div class="col-12 col-lg-2 d-grid"><button class="btn btn-outline-primary">Apply</button></div>
     </div>
   </form>
 
@@ -55,7 +71,7 @@
   {% if pagination.pages > 1 %}
     <nav class="mt-4" aria-label="Contact pages"><ul class="pagination justify-content-center">
       {% for page_number in pagination.iter_pages() %}
-        {% if page_number %}<li class="page-item {{ 'active' if page_number == pagination.page }}"><a class="page-link" href="{{ url_for('contacts.index', page=page_number, q=search, organization_id=selected_organization_id, title=selected_title) }}">{{ page_number }}</a></li>
+        {% if page_number %}<li class="page-item {{ 'active' if page_number == pagination.page }}"><a class="page-link" href="{{ url_for('contacts.index', page=page_number, q=search, organization_id=selected_organization_id, title=selected_title, sort=sort, direction=direction) }}">{{ page_number }}</a></li>
         {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
       {% endfor %}
     </ul></nav>

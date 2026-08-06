@@ -6,6 +6,7 @@ from app.contacts import bp
 from app.contacts.forms import ContactForm, DeleteContactForm
 from app.contacts.services import (
     ContactValues,
+    SORT_COLUMNS,
     create_contact,
     delete_contact,
     get_contact,
@@ -22,11 +23,17 @@ def index() -> str:
     search = request.args.get("q", "").strip()
     organization_id = request.args.get("organization_id", type=int)
     title = request.args.get("title", "").strip()
+    sort = request.args.get("sort", "last_name")
+    direction = request.args.get("direction", "asc")
+    sort = sort if sort in SORT_COLUMNS else "last_name"
+    direction = direction if direction in {"asc", "desc"} else "asc"
     page = request.args.get("page", 1, type=int) or 1
     pagination = list_contacts(
         search=search,
         organization_id=organization_id,
         title=title,
+        sort=sort,
+        direction=direction,
         page=page,
     )
     return render_template(
@@ -35,6 +42,8 @@ def index() -> str:
         search=search,
         selected_organization_id=organization_id,
         selected_title=title,
+        sort=sort,
+        direction=direction,
         organizations=organization_choices(),
         titles=title_choices(),
     )

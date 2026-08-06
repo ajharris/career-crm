@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TypedDict, Unpack
 
 from flask_sqlalchemy.pagination import Pagination
-from sqlalchemy import func, or_, select
+from sqlalchemy import Select, asc, desc, func, or_, select
 
 from app.extensions import db
 from app.models.contact import Contact
@@ -27,11 +27,21 @@ class ContactValues(TypedDict, total=False):
     last_contacted_at: datetime | None
 
 
+SORT_COLUMNS = {
+    "last_name": Contact.last_name,
+    "organization": Organization.name,
+    "created_at": Contact.created_at,
+    "last_contacted_at": Contact.last_contacted_at,
+}
+
+
 def list_contacts(
     *,
     search: str = "",
     organization_id: int | None = None,
     title: str = "",
+    sort: str = "last_name",
+    direction: str = "asc",
     page: int = 1,
 ) -> Pagination:
     """Return a filtered and searched page of contacts."""
@@ -51,7 +61,7 @@ def list_contacts(
         statement = statement.where(Contact.organization_id == organization_id)
     if title := title.strip():
         statement = statement.where(func.lower(Contact.title) == title.lower())
-    statement = statement.order_by(Contact.last_name, Contact.first_name, Contact.id)
+    statement = _apply_sort(statement, sort, direction)
     return db.paginate(statement, page=max(page, 1), per_page=25, error_out=False)
 
 
@@ -129,6 +139,18 @@ def _apply_values(contact: Contact, values: ContactValues) -> None:
 def _require_organization(organization_id: int) -> None:
     if db.session.get(Organization, organization_id) is None:
         raise ValueError("A valid organization is required.")
+
+
+def _apply_sort(
+    statement: Select[tuple[Contact]], sort: str, direction: str
+) -> Select[tuple[Contact]]:
+    """Apply an allow-listed stable sort to a contact query."""
+    column = SORT_COLUMNS.get(sort, Contact.last_name)
+    order = desc if direction == "desc" else asc
+    primary_order = order(column)
+    if sort == "last_contacted_at":
+        primary_order = primary_order.nulls_last()
+    return statement.order_by(primary_order, asc(Contact.last_name), asc(Contact.id))
 
 
 def _escape_like(value: str) -> str:

@@ -7,16 +7,16 @@
 # Home page
 # Database initialization
 
-Milestone 2: Organizations
-Organization model
-CRUD pages
-Search
-Pagination
+# Milestone 2: Organizations
+# Organization model
+# CRUD pages
+# Search
+# Pagination
 
-Milestone 3: Contacts
-Link contacts to organizations
-Contact detail page
-Communication history
+# Milestone 3: Contacts
+# Link contacts to organizations
+# Contact detail page
+# Communication history
 
 Milestone 4: Job Postings
 CRUD

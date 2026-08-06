@@ -138,6 +138,8 @@ def test_create_and_detail_routes(client: FlaskClient) -> None:
     assert b"Contact created successfully." in response.data
     assert b"Alex Morgan" in response.data
     assert b"Contacted" in response.data
+    assert b"Created" in response.data
+    assert b"Updated" in response.data
 
 
 def test_create_route_validates_fields(client: FlaskClient) -> None:
@@ -231,6 +233,74 @@ def test_filters_by_organization_and_title(client: FlaskClient) -> None:
     assert b"Alex Morgan" not in by_organization.data
     assert b"Bailey Morgan" in by_title.data
     assert b"Alex Morgan" not in by_title.data
+
+
+def test_search_and_filters_work_together(client: FlaskClient) -> None:
+    first = make_organization("First Organization")
+    second = make_organization("Second Organization")
+    create_contact(**service_data(first.id, "Alex"))
+    create_contact(**service_data(second.id, "Bailey"))
+
+    response = client.get(
+        "/contacts",
+        query_string={"q": "bailey", "organization_id": second.id},
+    )
+
+    assert b"Bailey Morgan" in response.data
+    assert b"Alex Morgan" not in response.data
+
+
+def test_contact_sorting_options(app) -> None:
+    alpha_organization = make_organization("Alpha Organization")
+    zulu_organization = make_organization("Zulu Organization")
+    first_values = service_data(zulu_organization.id, "First")
+    first_values.update(
+        last_name="Zulu",
+        last_contacted_at=datetime(2026, 1, 1, 9, 0),
+    )
+    second_values = service_data(alpha_organization.id, "Second")
+    second_values.update(
+        last_name="Alpha",
+        last_contacted_at=datetime(2026, 2, 1, 9, 0),
+    )
+    first = create_contact(**first_values)
+    second = create_contact(**second_values)
+    first.created_at = datetime(2026, 1, 1)
+    second.created_at = datetime(2026, 2, 1)
+    db.session.commit()
+
+    assert [item.id for item in list_contacts(sort="last_name").items] == [
+        second.id,
+        first.id,
+    ]
+    assert [item.id for item in list_contacts(sort="organization").items] == [
+        second.id,
+        first.id,
+    ]
+    assert [item.id for item in list_contacts(sort="created_at").items] == [
+        first.id,
+        second.id,
+    ]
+    assert [
+        item.id
+        for item in list_contacts(
+            sort="last_contacted_at", direction="desc"
+        ).items
+    ] == [second.id, first.id]
+
+
+def test_sorting_route(client: FlaskClient) -> None:
+    organization = make_organization()
+    first = create_contact(**service_data(organization.id, "First"))
+    second = create_contact(**service_data(organization.id, "Second"))
+    update_contact(first, last_name="Alpha")
+    update_contact(second, last_name="Zulu")
+
+    response = client.get(
+        "/contacts?sort=last_name&direction=desc"
+    )
+
+    assert response.data.index(b"Second Zulu") < response.data.index(b"First Alpha")
 
 
 def test_pagination_displays_25_contacts(client: FlaskClient) -> None:

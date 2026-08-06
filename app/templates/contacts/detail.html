@@ -22,6 +22,8 @@
     <dt class="col-sm-3">LinkedIn</dt><dd class="col-sm-9">{% if contact.linkedin_url %}<a href="{{ contact.linkedin_url }}" rel="noopener noreferrer">View profile</a>{% else %}—{% endif %}</dd>
     <dt class="col-sm-3">Relationship status</dt><dd class="col-sm-9">{{ contact.relationship_status.label if contact.relationship_status else '—' }}</dd>
     <dt class="col-sm-3">Last contacted</dt><dd class="col-sm-9">{{ contact.last_contacted_at.strftime('%B %d, %Y at %H:%M') if contact.last_contacted_at else '—' }}</dd>
+    <dt class="col-sm-3">Created</dt><dd class="col-sm-9">{{ contact.created_at.strftime('%B %d, %Y at %H:%M') }}</dd>
+    <dt class="col-sm-3">Updated</dt><dd class="col-sm-9">{{ contact.updated_at.strftime('%B %d, %Y at %H:%M') }}</dd>
     <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ contact.notes or '—' }}</dd>
   </dl></div></section>
 {% endblock %}
