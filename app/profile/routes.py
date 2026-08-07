@@ -2,7 +2,7 @@
 
 from typing import Any, cast
 
-from flask import flash, redirect, render_template, url_for
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
 
 from app.models.career_profile import (
@@ -57,6 +57,7 @@ STEPS = (
     "Job Search Strategy",
     "Review",
 )
+REPEATABLE_STEPS = {2, 3, 6, 7}
 
 
 @bp.get("")
@@ -97,14 +98,14 @@ def step(step: int):
             save_profile_step(profile, _values(form), 2)
         elif step == 2:
             create_education(_values(form))
-            save_profile_step(profile, {}, 3)
+            return _after_repeatable_save(profile, step, "Education saved.")
         elif step == 3:
             try:
                 save_skill(_values(form))
             except ValueError as exc:
                 form.name.errors = (*form.name.errors, str(exc))
                 return _render_step(step, form)
-            save_profile_step(profile, {}, 4)
+            return _after_repeatable_save(profile, step, "Skill saved.")
         elif step == 4:
             save_interests(
                 form.preferred_roles.data or "",
@@ -116,10 +117,10 @@ def step(step: int):
             save_work_preferences(_values(form))
         elif step == 6:
             save_priority(_values(form))
-            save_profile_step(profile, {}, 7)
+            return _after_repeatable_save(profile, step, "Career priority saved.")
         elif step == 7:
             create_portfolio(_values(form))
-            save_profile_step(profile, {}, 8)
+            return _after_repeatable_save(profile, step, "Portfolio item saved.")
         elif step == 8:
             save_profile_step(profile, _values(form), 9)
         elif step == 9:
@@ -134,12 +135,29 @@ def step(step: int):
 @login_required
 def skip_step(step: int):
     """Persist progress past an optional repeatable-record step."""
-    if step not in {2, 3, 6, 7}:
+    if step not in REPEATABLE_STEPS:
         return redirect(url_for("profile.step", step=step))
     form = CompleteForm()
     if form.validate_on_submit():
         save_profile_step(get_profile(), {}, step + 1)
     return redirect(url_for("profile.step", step=step + 1))
+
+
+def _after_repeatable_save(profile, step: int, message: str):
+    """Keep repeatable sections open or advance based on the clicked button."""
+    add_another = request.form.get("action") == "add_another"
+    next_step = step if add_another else step + 1
+    save_profile_step(profile, {}, next_step)
+    flash(message, "success")
+    return redirect(url_for("profile.step", step=next_step))
+
+
+def _profile_return_destination() -> str:
+    """Allow profile CRUD to return only to a local profile page."""
+    destination = request.values.get("next", "")
+    if destination.startswith("/profile/") and not destination.startswith("//"):
+        return destination
+    return url_for("profile.index")
 
 
 @bp.post("/<kind>/<int:record_id>/delete")
@@ -158,7 +176,7 @@ def delete_record(kind: str, record_id: int):
         return redirect(url_for("profile.index"))
     delete_owned(models[kind], record_id)
     flash("Profile record deleted.", "success")
-    return redirect(url_for("profile.index"))
+    return redirect(_profile_return_destination())
 
 
 @bp.route("/<kind>/new", methods=["GET", "POST"])
@@ -193,7 +211,7 @@ def edit_record(kind: str, record_id: int | None = None):
             flash(str(exc), "danger")
         else:
             flash("Profile record saved.", "success")
-            return redirect(url_for("profile.index"))
+            return redirect(_profile_return_destination())
     return render_template("profile/edit_record.html", form=form, kind=kind)
 
 

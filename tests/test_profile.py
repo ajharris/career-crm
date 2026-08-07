@@ -67,6 +67,56 @@ def test_progress_is_saved_and_resumed(client):
     assert profile.onboarding_step == 3
 
 
+def test_education_can_save_multiple_entries_before_continuing(client):
+    register(client)
+    first = client.post(
+        "/profile/onboarding/2",
+        data={"institution": "First University", "action": "add_another"},
+    )
+    assert first.location == "/profile/onboarding/2"
+    page = client.get(first.location)
+    assert b"Education saved" in page.data
+    assert b"First University" in page.data
+    assert b"Save &amp; Add Another" in page.data
+
+    second = client.post(
+        "/profile/onboarding/2",
+        data={"institution": "Second University", "action": "continue"},
+    )
+    assert second.location == "/profile/onboarding/3"
+    assert db.session.scalar(db.select(db.func.count(Education.id))) == 2
+
+
+def test_onboarding_saved_entry_supports_edit_delete_and_step_return(client):
+    register(client)
+    client.post(
+        "/profile/onboarding/2",
+        data={"institution": "Original University", "action": "add_another"},
+    )
+    education = db.session.scalar(
+        db.select(Education).where(Education.institution == "Original University")
+    )
+    assert education is not None
+    page = client.get("/profile/onboarding/2")
+    assert f"/profile/education/{education.id}/edit?next=".encode() in page.data
+    assert f"/profile/education/{education.id}/delete".encode() in page.data
+
+    edited = client.post(
+        f"/profile/education/{education.id}/edit?next=/profile/onboarding/2",
+        data={"institution": "Updated University"},
+    )
+    assert edited.location == "/profile/onboarding/2"
+    assert education.institution == "Updated University"
+
+    education_id = education.id
+    deleted = client.post(
+        f"/profile/education/{education_id}/delete",
+        data={"next": "/profile/onboarding/2"},
+    )
+    assert deleted.location == "/profile/onboarding/2"
+    assert db.session.get(Education, education_id) is None
+
+
 def test_completion_unlocks_dashboard(client):
     register(client)
     response = client.post("/profile/onboarding/9", follow_redirects=True)
