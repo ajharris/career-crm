@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask_login import UserMixin
 from sqlalchemy import Boolean, DateTime, String, func
-from sqlalchemy.orm import Mapped, mapped_column, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.extensions import db
@@ -35,6 +35,25 @@ class User(UserMixin, db.Model):
         onupdate=func.now(),
     )
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    owned_contacts: Mapped[list["Contact"]] = relationship(back_populates="owner")
+    owned_applications: Mapped[list["Application"]] = relationship(
+        back_populates="owner"
+    )
+    owned_activities: Mapped[list["Activity"]] = relationship(back_populates="owner")
+    owned_tasks: Mapped[list["Task"]] = relationship(back_populates="owner")
+    organizations_created: Mapped[list["Organization"]] = relationship(
+        back_populates="created_by", foreign_keys="Organization.created_by_id"
+    )
+    organizations_updated: Mapped[list["Organization"]] = relationship(
+        back_populates="updated_by", foreign_keys="Organization.updated_by_id"
+    )
+    job_postings_created: Mapped[list["JobPosting"]] = relationship(
+        back_populates="created_by", foreign_keys="JobPosting.created_by_id"
+    )
+    job_postings_updated: Mapped[list["JobPosting"]] = relationship(
+        back_populates="updated_by", foreign_keys="JobPosting.updated_by_id"
+    )
 
     @validates("email")
     def normalize_email(self, key: str, value: str) -> str:

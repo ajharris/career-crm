@@ -20,17 +20,19 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
+from app.auth.permissions import actor_id
 from app.extensions import db
 from app.utils.enums import ApplicationStatus
 
 if TYPE_CHECKING:
+    from app.auth.models import User
     from app.models.activity import Activity
     from app.models.job_posting import JobPosting
     from app.models.task import Task
 
 
 class Application(db.Model):
-    """A candidate application to one unique job posting."""
+    """One user's application to a shared job posting."""
 
     __tablename__ = "applications"
     __table_args__ = (
@@ -42,7 +44,9 @@ class Application(db.Model):
             "offer_salary IS NULL OR offer_salary > 0",
             name="ck_applications_offer_salary_positive",
         ),
-        UniqueConstraint("job_posting_id", name="uq_applications_job_posting_id"),
+        UniqueConstraint(
+            "owner_id", "job_posting_id", name="uq_applications_owner_job_posting"
+        ),
         Index("ix_applications_status", "status"),
         Index("ix_applications_application_date", "application_date"),
         Index("ix_applications_interview_date", "interview_date"),
@@ -50,6 +54,12 @@ class Application(db.Model):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+        default=actor_id,
+    )
     job_posting_id: Mapped[int] = mapped_column(
         ForeignKey("job_postings.id", ondelete="CASCADE"),
         nullable=False,
@@ -91,8 +101,9 @@ class Application(db.Model):
     )
 
     job_posting: Mapped["JobPosting"] = relationship(
-        back_populates="application", lazy="joined"
+        back_populates="applications", lazy="joined"
     )
+    owner: Mapped["User"] = relationship(back_populates="owned_applications")
     activities: Mapped[list["Activity"]] = relationship(
         back_populates="application", lazy="selectin"
     )

@@ -6,10 +6,12 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Date, DateTime, Enum, ForeignKey, Index, String, Text, Time, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
+from app.auth.permissions import actor_id
 from app.extensions import db
 from app.utils.enums import TaskPriority, TaskStatus, TaskType
 
 if TYPE_CHECKING:
+    from app.auth.models import User
     from app.models.application import Application
     from app.models.contact import Contact
     from app.models.job_posting import JobPosting
@@ -39,6 +41,12 @@ class Task(db.Model):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+        default=actor_id,
+    )
     organization_id: Mapped[int | None] = mapped_column(
         ForeignKey("organizations.id", ondelete="SET NULL"), index=True
     )
@@ -80,6 +88,7 @@ class Task(db.Model):
     )
 
     organization: Mapped["Organization | None"] = relationship(back_populates="tasks")
+    owner: Mapped["User"] = relationship(back_populates="owned_tasks")
     contact: Mapped["Contact | None"] = relationship(back_populates="tasks")
     job_posting: Mapped["JobPosting | None"] = relationship(back_populates="tasks")
     application: Mapped["Application | None"] = relationship(back_populates="tasks")

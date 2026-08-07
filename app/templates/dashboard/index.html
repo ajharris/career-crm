@@ -29,7 +29,7 @@
         <a class="card h-100 border-0 shadow-sm text-decoration-none text-body" href="{{ url_for(endpoint, overdue=1) if label == 'Overdue Tasks' else url_for(endpoint) }}">
           <div class="card-body d-flex align-items-center gap-3">
             <span class="dashboard-icon rounded-circle bg-primary-subtle text-primary" aria-hidden="true">{{ icon }}</span>
-            <div><h2 class="h6 text-body-secondary">{{ label }}</h2><p class="display-6 mb-0{% if label == 'Overdue Tasks' %} text-danger{% endif %}">{{ count }}</p></div>
+            <div><h2 class="h6 text-body-secondary">{{ label }}</h2><span class="badge rounded-pill text-bg-light">{{ 'Shared' if label in ['Organizations', 'Job Postings'] else 'Yours' }}</span><p class="display-6 mb-0{% if label == 'Overdue Tasks' %} text-danger{% endif %}">{{ count }}</p></div>
           </div>
         </a>
       </div>

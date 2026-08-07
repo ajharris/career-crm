@@ -2,6 +2,7 @@
 
 from flask import flash, redirect, render_template, request, url_for
 
+from app.auth.permissions import require_shared_editor
 from app.organizations import bp
 from app.organizations.forms import DeleteOrganizationForm, OrganizationForm
 from app.organizations.services import (
@@ -41,6 +42,7 @@ def index() -> str:
 def detail(organization_id: int) -> str:
     """Show one organization."""
     from app.activities.services import recent_activities
+    from app.contacts.services import contacts_for_organization
     from app.jobs.services import active_jobs_for_organization
     from app.tasks.services import context_tasks
 
@@ -48,6 +50,7 @@ def detail(organization_id: int) -> str:
     return render_template(
         "organizations/detail.html",
         organization=organization,
+        contacts=contacts_for_organization(organization.id),
         active_jobs=active_jobs_for_organization(organization.id),
         recent_activities=recent_activities(organization_id=organization.id),
         active_tasks=context_tasks(organization_id=organization.id),
@@ -77,6 +80,7 @@ def create() -> str:
 def edit(organization_id: int) -> str:
     """Edit an existing organization."""
     organization = get_organization(organization_id)
+    require_shared_editor(organization)
     form = OrganizationForm(obj=organization)
     if form.validate_on_submit():
         try:
@@ -100,6 +104,7 @@ def edit(organization_id: int) -> str:
 def delete(organization_id: int) -> str:
     """Confirm and delete an organization."""
     organization = get_organization(organization_id)
+    require_shared_editor(organization)
     form = DeleteOrganizationForm()
     if form.validate_on_submit():
         delete_organization(organization)

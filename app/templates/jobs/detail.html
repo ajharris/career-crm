@@ -6,7 +6,7 @@
 {% block content %}
   <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
     <div><a class="text-decoration-none" href="{{ url_for('organizations.detail', organization_id=job.organization_id) }}">← Back to {{ job.organization.name }}</a><h1 class="h2 mt-2 mb-0">{{ job.title }}</h1></div>
-    <div class="d-flex flex-wrap gap-2">{% if job.posting_url %}<a class="btn btn-primary" href="{{ job.posting_url }}" rel="noopener noreferrer">Visit Posting</a>{% endif %}<a class="btn btn-outline-primary" href="{{ url_for('jobs.edit', job_id=job.id) }}">Edit</a><a class="btn btn-outline-danger" href="{{ url_for('jobs.delete', job_id=job.id) }}">Delete</a></div>
+    <div class="d-flex flex-wrap gap-2">{% if job.posting_url %}<a class="btn btn-primary" href="{{ job.posting_url }}" rel="noopener noreferrer">Visit Posting</a>{% endif %}{% if current_user.is_admin or current_user.id == job.created_by_id %}<a class="btn btn-outline-primary" href="{{ url_for('jobs.edit', job_id=job.id) }}">Edit</a><a class="btn btn-outline-danger" href="{{ url_for('jobs.delete', job_id=job.id) }}">Delete</a>{% endif %}</div>
   </div>
   <section class="card border-0 shadow-sm"><div class="card-body p-4"><dl class="row mb-0">
     <dt class="col-sm-3">Organization</dt><dd class="col-sm-9"><a href="{{ url_for('organizations.detail', organization_id=job.organization_id) }}">{{ job.organization.name }}</a></dd>
@@ -22,19 +22,21 @@
     <dt class="col-sm-3">Date posted</dt><dd class="col-sm-9">{{ job.date_posted.strftime('%B %d, %Y') if job.date_posted else '—' }}</dd>
     <dt class="col-sm-3">Closing date</dt><dd class="col-sm-9">{{ job.closing_date.strftime('%B %d, %Y') if job.closing_date else '—' }}</dd>
     <dt class="col-sm-3">Discovered</dt><dd class="col-sm-9">{{ job.discovered_at.strftime('%B %d, %Y at %H:%M') }}</dd>
-    <dt class="col-sm-3">Created</dt><dd class="col-sm-9">{{ job.created_at.strftime('%B %d, %Y at %H:%M') }}</dd>
-    <dt class="col-sm-3">Updated</dt><dd class="col-sm-9">{{ job.updated_at.strftime('%B %d, %Y at %H:%M') }}</dd>
+    <dt class="col-sm-3">Created By</dt><dd class="col-sm-9">{{ job.created_by.full_name }}</dd>
+    <dt class="col-sm-3">Created Date</dt><dd class="col-sm-9">{{ job.created_at.strftime('%B %d, %Y at %H:%M') }}</dd>
+    <dt class="col-sm-3">Last Updated By</dt><dd class="col-sm-9">{{ job.updated_by.full_name }}</dd>
+    <dt class="col-sm-3">Updated Date</dt><dd class="col-sm-9">{{ job.updated_at.strftime('%B %d, %Y at %H:%M') }}</dd>
     <dt class="col-sm-3">Description</dt><dd class="col-sm-9 text-pre-wrap">{{ job.description or '—' }}</dd>
     <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ job.notes or '—' }}</dd>
   </dl></div></section>
 
   <section class="card border-0 shadow-sm mt-4">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3"><h2 class="h5 mb-0">Application</h2>{% if not job.application %}<a class="btn btn-sm btn-primary" href="{{ url_for('applications.create', job_posting_id=job.id) }}">Create Application</a>{% endif %}</div>
-    {% if job.application %}<div class="card-body"><dl class="row mb-3">
-      <dt class="col-sm-3">Current status</dt><dd class="col-sm-9">{{ job.application.status.label }}</dd>
-      <dt class="col-sm-3">Application date</dt><dd class="col-sm-9">{{ job.application.application_date.strftime('%B %d, %Y') if job.application.application_date else '—' }}</dd>
-      <dt class="col-sm-3">Interview date</dt><dd class="col-sm-9">{{ job.application.interview_date.strftime('%B %d, %Y at %H:%M') if job.application.interview_date else '—' }}</dd>
-    </dl><div class="d-flex gap-2"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('applications.detail', application_id=job.application.id) }}">View Application</a><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('applications.edit', application_id=job.application.id) }}">Edit Application</a></div></div>{% endif %}
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3"><h2 class="h5 mb-0">Your Application</h2>{% if not application %}<a class="btn btn-sm btn-primary" href="{{ url_for('applications.create', job_posting_id=job.id) }}">Create Application</a>{% endif %}</div>
+    {% if application %}<div class="card-body"><dl class="row mb-3">
+      <dt class="col-sm-3">Current status</dt><dd class="col-sm-9">{{ application.status.label }}</dd>
+      <dt class="col-sm-3">Application date</dt><dd class="col-sm-9">{{ application.application_date.strftime('%B %d, %Y') if application.application_date else '—' }}</dd>
+      <dt class="col-sm-3">Interview date</dt><dd class="col-sm-9">{{ application.interview_date.strftime('%B %d, %Y at %H:%M') if application.interview_date else '—' }}</dd>
+    </dl><div class="d-flex gap-2"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('applications.detail', application_id=application.id) }}">View Application</a><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('applications.edit', application_id=application.id) }}">Edit Application</a></div></div>{% endif %}
   </section>
   <section class="card border-0 shadow-sm mt-4"><div class="card-header bg-white d-flex justify-content-between align-items-center py-3"><h2 class="h5 mb-0">Open Tasks</h2><a class="btn btn-sm btn-primary" href="{{ url_for('tasks.create', job_posting_id=job.id) }}">Add Task</a></div><div class="card-body py-0">{% from "macros/tasks.html" import task_list %}{{ task_list(active_tasks) }}</div></section>
   <section class="card border-0 shadow-sm mt-4"><div class="card-header bg-white d-flex justify-content-between align-items-center py-3"><h2 class="h5 mb-0">Recent Activity</h2><a class="btn btn-sm btn-primary" href="{{ url_for('activities.create', job_posting_id=job.id) }}">Add Activity</a></div><div class="card-body py-0">{{ activity_timeline(recent_activities) }}</div></section>

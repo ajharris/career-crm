@@ -7,8 +7,10 @@ from typing import TypedDict, Unpack
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import Select, asc, desc, func, inspect, or_, select
 
+from app.auth.permissions import actor_id, private_scope, require_shared_editor
 from app.extensions import db
 from app.models.job_posting import JobPosting
+from app.models.application import Application
 from app.models.organization import Organization
 from app.utils.enums import JobStatus
 
@@ -115,6 +117,8 @@ def get_job_posting(job_id: int) -> JobPosting:
 def create_job_posting(**values: Unpack[JobPostingValues]) -> JobPosting:
     """Create and persist a job posting."""
     job = JobPosting()
+    job.created_by_id = actor_id()
+    job.updated_by_id = job.created_by_id
     _apply_values(job, values)
     _validate_job(job)
     db.session.add(job)
@@ -126,7 +130,9 @@ def update_job_posting(
     job: JobPosting, **values: Unpack[JobPostingValues]
 ) -> JobPosting:
     """Update and persist a job posting."""
+    require_shared_editor(job)
     _apply_values(job, values)
+    job.updated_by_id = actor_id()
     _validate_job(job)
     db.session.commit()
     return job
@@ -134,6 +140,7 @@ def update_job_posting(
 
 def delete_job_posting(job: JobPosting) -> None:
     """Delete a job posting."""
+    require_shared_editor(job)
     db.session.delete(job)
     db.session.commit()
 
@@ -144,6 +151,15 @@ def organization_choices() -> list[tuple[int, str]]:
         select(Organization).order_by(Organization.name)
     ).all()
     return [(organization.id, organization.name) for organization in organizations]
+
+
+def application_for_job(job_id: int) -> Application | None:
+    """Return only the current user's application for a shared job."""
+    return db.session.scalar(
+        select(Application).where(
+            Application.job_posting_id == job_id, private_scope(Application)
+        )
+    )
 
 
 def _apply_values(job: JobPosting, values: JobPostingValues) -> None:

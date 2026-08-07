@@ -9,10 +9,10 @@
       <a class="text-decoration-none" href="{{ url_for('organizations.index') }}">← Organizations</a>
       <h1 class="h2 mt-2 mb-0">{{ organization.name }}</h1>
     </div>
-    <div class="d-flex gap-2">
+    {% if current_user.is_admin or current_user.id == organization.created_by_id %}<div class="d-flex gap-2">
       <a class="btn btn-outline-primary" href="{{ url_for('organizations.edit', organization_id=organization.id) }}">Edit</a>
       <a class="btn btn-outline-danger" href="{{ url_for('organizations.delete', organization_id=organization.id) }}">Delete</a>
-    </div>
+    </div>{% endif %}
   </div>
 
   <section class="card border-0 shadow-sm">
@@ -22,8 +22,10 @@
         <dt class="col-sm-3">Website</dt><dd class="col-sm-9">{% if organization.website %}<a href="{{ organization.website }}" rel="noopener noreferrer">{{ organization.website }}</a>{% else %}—{% endif %}</dd>
         <dt class="col-sm-3">Location</dt><dd class="col-sm-9">{{ organization.location or '—' }}</dd>
         <dt class="col-sm-3">Priority</dt><dd class="col-sm-9">{{ organization.priority }} / 5</dd>
-        <dt class="col-sm-3">Created</dt><dd class="col-sm-9">{{ organization.created_at.strftime('%B %d, %Y') }}</dd>
-        <dt class="col-sm-3">Updated</dt><dd class="col-sm-9">{{ organization.updated_at.strftime('%B %d, %Y') }}</dd>
+        <dt class="col-sm-3">Created By</dt><dd class="col-sm-9">{{ organization.created_by.full_name }}</dd>
+        <dt class="col-sm-3">Created Date</dt><dd class="col-sm-9">{{ organization.created_at.strftime('%B %d, %Y') }}</dd>
+        <dt class="col-sm-3">Last Updated By</dt><dd class="col-sm-9">{{ organization.updated_by.full_name }}</dd>
+        <dt class="col-sm-3">Updated Date</dt><dd class="col-sm-9">{{ organization.updated_at.strftime('%B %d, %Y') }}</dd>
         <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ organization.notes or '—' }}</dd>
       </dl>
     </div>
@@ -37,7 +39,7 @@
     <div class="table-responsive"><table class="table table-hover align-middle mb-0">
       <thead class="table-light"><tr><th>Name</th><th>Title</th><th>Email</th><th>Last contacted</th></tr></thead>
       <tbody>
-        {% for contact in organization.contacts %}
+        {% for contact in contacts %}
           <tr>
             <td><a class="fw-semibold text-decoration-none" href="{{ url_for('contacts.detail', contact_id=contact.id) }}">{{ contact.full_name }}</a></td>
             <td>{{ contact.title or '—' }}</td>

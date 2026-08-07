@@ -6,6 +6,7 @@ from typing import TypedDict, Unpack
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import case, inspect, or_, select
 
+from app.auth.permissions import actor_id, private_scope, require_private_record
 from app.extensions import db
 from app.models.activity import Activity
 from app.models.application import Application
@@ -74,6 +75,7 @@ def list_tasks(
         .outerjoin(Task.organization)
         .outerjoin(Task.contact)
         .outerjoin(Task.job_posting)
+        .where(private_scope(Task))
     )
     if search := search.strip():
         pattern = f"%{search}%"
@@ -125,11 +127,14 @@ def list_tasks(
 
 
 def get_task(task_id: int) -> Task:
-    return db.get_or_404(Task, task_id)
+    return db.first_or_404(
+        select(Task).where(Task.id == task_id, private_scope(Task))
+    )
 
 
 def create_task(**values: Unpack[TaskValues]) -> Task:
     task = Task()
+    task.owner_id = actor_id()
     _apply(task, values)
     db.session.add(task)
     db.session.commit()
@@ -137,17 +142,20 @@ def create_task(**values: Unpack[TaskValues]) -> Task:
 
 
 def update_task(task: Task, **values: Unpack[TaskValues]) -> Task:
+    require_private_record(task)
     _apply(task, values)
     db.session.commit()
     return task
 
 
 def delete_task(task: Task) -> None:
+    require_private_record(task)
     db.session.delete(task)
     db.session.commit()
 
 
 def complete_task(task: Task) -> Task:
+    require_private_record(task)
     task.status = TaskStatus.COMPLETED
     task.completed_at = datetime.now(UTC)
     activity_types = {
@@ -165,6 +173,7 @@ def complete_task(task: Task) -> Task:
     ):
         db.session.add(
             Activity(
+                owner_id=task.owner_id,
                 organization_id=task.organization_id,
                 contact_id=task.contact_id,
                 job_posting_id=task.job_posting_id,
@@ -181,6 +190,7 @@ def complete_task(task: Task) -> Task:
 
 
 def reopen_task(task: Task) -> Task:
+    require_private_record(task)
     task.status = TaskStatus.OPEN
     task.completed_at = None
     db.session.commit()
@@ -196,7 +206,7 @@ def context_tasks(
     completed=False,
     limit=5,
 ) -> list[Task]:
-    statement = select(Task)
+    statement = select(Task).where(private_scope(Task))
     for column, value in (
         (Task.organization_id, organization_id),
         (Task.contact_id, contact_id),
@@ -220,7 +230,7 @@ def context_tasks(
 def dashboard_tasks() -> dict:
     if not inspect(db.engine).has_table(Task.__tablename__):
         return {"open": 0, "overdue": 0, "today": 0, "follow_ups": 0, "upcoming": []}
-    active = select(Task).where(Task.status.in_(ACTIVE))
+    active = select(Task).where(private_scope(Task), Task.status.in_(ACTIVE))
     all_active = list(db.session.scalars(active))
     today = date.today()
     upcoming = list(
@@ -260,7 +270,10 @@ def _apply(task: Task, values: TaskValues) -> None:
 
 
 def _require(model, entity_id):
-    entity = db.session.get(model, entity_id)
+    statement = select(model).where(model.id == entity_id)
+    if model in {Contact, Application}:
+        statement = statement.where(private_scope(model))
+    entity = db.session.scalar(statement)
     if entity is None:
         raise ValueError(f"Invalid {model.__name__.lower()}.")
     return entity

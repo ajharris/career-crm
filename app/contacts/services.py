@@ -6,6 +6,7 @@ from typing import TypedDict, Unpack
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import Select, asc, desc, func, or_, select
 
+from app.auth.permissions import actor_id, private_scope, require_private_record
 from app.extensions import db
 from app.models.contact import Contact
 from app.models.organization import Organization
@@ -45,7 +46,7 @@ def list_contacts(
     page: int = 1,
 ) -> Pagination:
     """Return a filtered and searched page of contacts."""
-    statement = select(Contact).join(Contact.organization)
+    statement = select(Contact).join(Contact.organization).where(private_scope(Contact))
     if search := search.strip():
         pattern = f"%{_escape_like(search)}%"
         statement = statement.where(
@@ -67,12 +68,15 @@ def list_contacts(
 
 def get_contact(contact_id: int) -> Contact:
     """Return one contact or raise a 404 response."""
-    return db.get_or_404(Contact, contact_id)
+    return db.first_or_404(
+        select(Contact).where(Contact.id == contact_id, private_scope(Contact))
+    )
 
 
 def create_contact(**values: Unpack[ContactValues]) -> Contact:
     """Create and persist a contact belonging to an organization."""
     contact = Contact()
+    contact.owner_id = actor_id()
     _apply_values(contact, values)
     _require_organization(contact.organization_id)
     db.session.add(contact)
@@ -82,6 +86,7 @@ def create_contact(**values: Unpack[ContactValues]) -> Contact:
 
 def update_contact(contact: Contact, **values: Unpack[ContactValues]) -> Contact:
     """Update and persist a contact."""
+    require_private_record(contact)
     _apply_values(contact, values)
     _require_organization(contact.organization_id)
     db.session.commit()
@@ -90,6 +95,7 @@ def update_contact(contact: Contact, **values: Unpack[ContactValues]) -> Contact
 
 def delete_contact(contact: Contact) -> None:
     """Delete a contact."""
+    require_private_record(contact)
     db.session.delete(contact)
     db.session.commit()
 
@@ -106,11 +112,26 @@ def title_choices() -> list[str]:
     """Return distinct non-empty contact titles for filtering."""
     titles = db.session.scalars(
         select(Contact.title)
-        .where(Contact.title.is_not(None), Contact.title != "")
+        .where(
+            private_scope(Contact), Contact.title.is_not(None), Contact.title != ""
+        )
         .distinct()
         .order_by(Contact.title)
     ).all()
     return [title for title in titles if title is not None]
+
+
+def contacts_for_organization(organization_id: int) -> list[Contact]:
+    """Return the current user's contacts for a shared organization."""
+    return list(
+        db.session.scalars(
+            select(Contact)
+            .where(
+                Contact.organization_id == organization_id, private_scope(Contact)
+            )
+            .order_by(Contact.last_name, Contact.first_name)
+        )
+    )
 
 
 def _apply_values(contact: Contact, values: ContactValues) -> None:

@@ -8,6 +8,7 @@ from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import Select, asc, desc, extract, func, inspect, or_, select
 from sqlalchemy.exc import IntegrityError
 
+from app.auth.permissions import actor_id, private_scope, require_private_record
 from app.extensions import db
 from app.models.application import Application
 from app.models.job_posting import JobPosting
@@ -64,6 +65,7 @@ def list_applications(
     """Return a searched, filtered, sorted page of applications."""
     statement = (
         select(Application).join(Application.job_posting).join(JobPosting.organization)
+        .where(private_scope(Application))
     )
     if search := search.strip():
         pattern = f"%{_escape_like(search)}%"
@@ -94,12 +96,17 @@ def list_applications(
 
 def get_application(application_id: int) -> Application:
     """Return one application or raise a 404 response."""
-    return db.get_or_404(Application, application_id)
+    return db.first_or_404(
+        select(Application).where(
+            Application.id == application_id, private_scope(Application)
+        )
+    )
 
 
 def create_application(**values: Unpack[ApplicationValues]) -> Application:
     """Create and persist an application."""
     application = Application()
+    application.owner_id = actor_id()
     _apply_values(application, values)
     _validate_application(application)
     db.session.add(application)
@@ -111,6 +118,7 @@ def update_application(
     application: Application, **values: Unpack[ApplicationValues]
 ) -> Application:
     """Update and persist an application."""
+    require_private_record(application)
     _apply_values(application, values)
     _validate_application(application)
     _commit(application)
@@ -119,6 +127,7 @@ def update_application(
 
 def delete_application(application: Application) -> None:
     """Delete an application."""
+    require_private_record(application)
     db.session.delete(application)
     db.session.commit()
 
@@ -128,12 +137,16 @@ def available_job_choices(
 ) -> list[tuple[int, str]]:
     """Return unapplied jobs, plus the current selection while editing."""
     statement = select(JobPosting).join(JobPosting.organization)
+    owner_id = actor_id()
     if current_application is None:
-        statement = statement.where(~JobPosting.application.has())
+        statement = statement.where(
+            ~JobPosting.applications.any(Application.owner_id == owner_id)
+        )
     else:
+        require_private_record(current_application)
         statement = statement.where(
             or_(
-                ~JobPosting.application.has(),
+                ~JobPosting.applications.any(Application.owner_id == owner_id),
                 JobPosting.id == current_application.job_posting_id,
             )
         )
@@ -155,7 +168,9 @@ def applied_year_choices() -> list[int]:
     """Return distinct application years in descending order."""
     years = db.session.scalars(
         select(extract("year", Application.application_date))
-        .where(Application.application_date.is_not(None))
+        .where(
+            private_scope(Application), Application.application_date.is_not(None)
+        )
         .distinct()
         .order_by(extract("year", Application.application_date).desc())
     ).all()
@@ -166,7 +181,12 @@ def count_applications() -> int:
     """Return the total application count, including before schema setup."""
     if not inspect(db.engine).has_table(Application.__tablename__):
         return 0
-    return db.session.scalar(select(func.count(Application.id))) or 0
+    return (
+        db.session.scalar(
+            select(func.count(Application.id)).where(private_scope(Application))
+        )
+        or 0
+    )
 
 
 def _apply_values(application: Application, values: ApplicationValues) -> None:
@@ -193,7 +213,7 @@ def _commit(application: Application, *, add_submission_activity: bool = False) 
     except IntegrityError as exc:
         db.session.rollback()
         error_text = str(exc.orig).lower()
-        if "job_posting_id" in error_text or "uq_applications_job" in error_text:
+        if "job_posting_id" in error_text or "uq_applications_owner" in error_text:
             raise DuplicateApplicationError(
                 f"Job posting {application.job_posting_id} already has an application."
             ) from exc

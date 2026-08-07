@@ -24,6 +24,12 @@ def app() -> Iterator[Flask]:
     )
     with application.app_context():
         db.create_all()
+        create_user(
+            first_name="Test",
+            last_name="User",
+            email="test@example.com",
+            password="correct horse battery staple",
+        )
         yield application
         db.session.remove()
         db.drop_all()
@@ -38,13 +44,8 @@ def client(app: Flask) -> FlaskClient:
 
 @pytest.fixture
 def user(app: Flask) -> User:
-    """Create a reusable account for authenticated tests."""
-    return create_user(
-        first_name="Test",
-        last_name="User",
-        email="test@example.com",
-        password="correct horse battery staple",
-    )
+    """Return the default account used by authenticated tests."""
+    return db.session.scalar(db.select(User).where(User.email == "test@example.com"))
 
 
 @pytest.fixture

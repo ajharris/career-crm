@@ -2,6 +2,7 @@
 
 from flask import flash, redirect, render_template, request, url_for
 
+from app.auth.permissions import require_shared_editor
 from app.jobs import bp
 from app.jobs.forms import DeleteJobPostingForm, JobPostingForm
 from app.jobs.services import (
@@ -9,6 +10,7 @@ from app.jobs.services import (
     JobPostingValues,
     create_job_posting,
     delete_job_posting,
+    application_for_job,
     get_job_posting,
     list_job_postings,
     organization_choices,
@@ -43,6 +45,7 @@ def detail(job_id: int) -> str:
     return render_template(
         "jobs/detail.html",
         job=job,
+        application=application_for_job(job.id),
         recent_activities=recent_activities(job_posting_id=job.id),
         active_tasks=context_tasks(job_posting_id=job.id),
     )
@@ -68,6 +71,7 @@ def create() -> str:
 def edit(job_id: int) -> str:
     """Edit an existing job posting."""
     job = get_job_posting(job_id)
+    require_shared_editor(job)
     form = JobPostingForm(obj=job)
     _set_organization_choices(form)
     if form.validate_on_submit():
@@ -83,6 +87,7 @@ def edit(job_id: int) -> str:
 def delete(job_id: int) -> str:
     """Confirm and delete a job posting."""
     job = get_job_posting(job_id)
+    require_shared_editor(job)
     organization_id = job.organization_id
     form = DeleteJobPostingForm()
     if form.validate_on_submit():

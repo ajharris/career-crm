@@ -6,6 +6,7 @@ from typing import TypedDict, Unpack
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import Select, asc, desc, inspect, or_, select
 
+from app.auth.permissions import actor_id, private_scope, require_private_record
 from app.extensions import db
 from app.models.activity import Activity
 from app.models.application import Application
@@ -65,6 +66,7 @@ def list_activities(
     """Return a searched, filtered, sorted page of activities."""
     statement = (
         select(Activity).outerjoin(Activity.organization).outerjoin(Activity.contact)
+        .where(private_scope(Activity))
     )
     if search := search.strip():
         pattern = f"%{_escape_like(search)}%"
@@ -104,12 +106,15 @@ def list_activities(
 
 def get_activity(activity_id: int) -> Activity:
     """Return one activity or raise a 404 response."""
-    return db.get_or_404(Activity, activity_id)
+    return db.first_or_404(
+        select(Activity).where(Activity.id == activity_id, private_scope(Activity))
+    )
 
 
 def create_activity(**values: Unpack[ActivityValues]) -> Activity:
     """Create and persist an activity."""
     activity = Activity()
+    activity.owner_id = actor_id()
     _apply_values(activity, values)
     _prepare_activity(activity)
     db.session.add(activity)
@@ -119,6 +124,7 @@ def create_activity(**values: Unpack[ActivityValues]) -> Activity:
 
 def update_activity(activity: Activity, **values: Unpack[ActivityValues]) -> Activity:
     """Update and persist an activity."""
+    require_private_record(activity)
     _apply_values(activity, values)
     _prepare_activity(activity)
     db.session.commit()
@@ -127,6 +133,7 @@ def update_activity(activity: Activity, **values: Unpack[ActivityValues]) -> Act
 
 def delete_activity(activity: Activity) -> None:
     """Delete an activity."""
+    require_private_record(activity)
     db.session.delete(activity)
     db.session.commit()
 
@@ -140,7 +147,7 @@ def recent_activities(
     limit: int = 5,
 ) -> list[Activity]:
     """Return recent activities for one detail-page context."""
-    statement = select(Activity)
+    statement = select(Activity).where(private_scope(Activity))
     filters = {
         Activity.organization_id: organization_id,
         Activity.contact_id: contact_id,
@@ -166,6 +173,7 @@ def latest_activities(limit: int = 5) -> list[Activity]:
     return list(
         db.session.scalars(
             select(Activity)
+            .where(private_scope(Activity))
             .order_by(Activity.occurred_at.desc(), Activity.id.desc())
             .limit(limit)
         )
@@ -185,6 +193,7 @@ def add_application_submitted_activity(application: Application) -> Activity | N
         else datetime.now(UTC)
     )
     activity = Activity(
+        owner_id=application.owner_id,
         organization_id=job.organization_id,
         job_posting_id=job.id,
         application_id=application.id,
@@ -202,11 +211,16 @@ def entity_choices() -> dict[str, list[tuple[int, str]]]:
     """Return ordered choices for forms and filters."""
     organizations = db.session.scalars(select(Organization).order_by(Organization.name))
     contacts = db.session.scalars(
-        select(Contact).order_by(Contact.last_name, Contact.first_name)
+        select(Contact)
+        .where(private_scope(Contact))
+        .order_by(Contact.last_name, Contact.first_name)
     )
     jobs = db.session.scalars(select(JobPosting).order_by(JobPosting.title))
     applications = db.session.scalars(
-        select(Application).join(Application.job_posting).order_by(JobPosting.title)
+        select(Application)
+        .join(Application.job_posting)
+        .where(private_scope(Application))
+        .order_by(JobPosting.title)
     )
     return {
         "organizations": [(item.id, item.name) for item in organizations],
@@ -239,7 +253,10 @@ def _prepare_activity(activity: Activity) -> None:
 
 
 def _require(model: type, entity_id: int):
-    entity = db.session.get(model, entity_id)
+    statement = select(model).where(model.id == entity_id)
+    if model in {Contact, Application}:
+        statement = statement.where(private_scope(model))
+    entity = db.session.scalar(statement)
     if entity is None:
         raise ValueError(f"Invalid {model.__name__.replace('_', ' ').lower()}.")
     return entity

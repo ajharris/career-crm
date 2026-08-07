@@ -6,6 +6,7 @@ from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import Select, asc, desc, or_, select
 from sqlalchemy.exc import IntegrityError
 
+from app.auth.permissions import actor_id, require_shared_editor
 from app.extensions import db
 from app.models.organization import Organization
 
@@ -59,6 +60,8 @@ def get_organization(organization_id: int) -> Organization:
 def create_organization(**values: Unpack[OrganizationValues]) -> Organization:
     """Create and persist an organization."""
     organization = Organization()
+    organization.created_by_id = actor_id()
+    organization.updated_by_id = organization.created_by_id
     _apply_values(organization, values)
     db.session.add(organization)
     _commit(organization.name)
@@ -69,13 +72,16 @@ def update_organization(
     organization: Organization, **values: Unpack[OrganizationValues]
 ) -> Organization:
     """Update and persist an organization."""
+    require_shared_editor(organization)
     _apply_values(organization, values)
+    organization.updated_by_id = actor_id()
     _commit(organization.name)
     return organization
 
 
 def delete_organization(organization: Organization) -> None:
     """Delete an organization."""
+    require_shared_editor(organization)
     db.session.delete(organization)
     db.session.commit()
 

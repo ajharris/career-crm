@@ -18,10 +18,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
+from app.auth.permissions import actor_id
 from app.extensions import db
 from app.utils.enums import EmploymentType, JobSource, JobStatus, WorkMode
 
 if TYPE_CHECKING:
+    from app.auth.models import User
     from app.models.activity import Activity
     from app.models.application import Application
     from app.models.organization import Organization
@@ -62,6 +64,18 @@ class JobPosting(db.Model):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    created_by_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+        default=actor_id,
+    )
+    updated_by_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+        default=actor_id,
+    )
     organization_id: Mapped[int] = mapped_column(
         ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True
     )
@@ -103,15 +117,19 @@ class JobPosting(db.Model):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    created_by: Mapped["User"] = relationship(
+        back_populates="job_postings_created", foreign_keys=[created_by_id]
+    )
+    updated_by: Mapped["User"] = relationship(
+        back_populates="job_postings_updated", foreign_keys=[updated_by_id]
+    )
 
     organization: Mapped["Organization"] = relationship(
         back_populates="job_postings", lazy="joined"
     )
-    application: Mapped["Application | None"] = relationship(
+    applications: Mapped[list["Application"]] = relationship(
         back_populates="job_posting",
         cascade="all, delete-orphan",
-        single_parent=True,
-        uselist=False,
         lazy="selectin",
     )
     activities: Mapped[list["Activity"]] = relationship(

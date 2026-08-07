@@ -67,22 +67,22 @@
 / Password hashing
 / Session management
 
-Milestone 10 – Multi-User Ownership
-
-Refactor the data model.
-
-Introduce:
-
-User model
-owner_id
-created_by
-updated_by
-Access control
-Shared vs private records
-Authorization decorators
-Audit fields
-
-This is probably the biggest architectural milestone.
+/ Milestone 10 – Multi-User Ownership
+/ 
+/ Refactor the data model.
+/ 
+/ Introduce:
+/ 
+/ User model
+/ owner_id
+/ created_by
+/ updated_by
+/ Access control
+/ Shared vs private records
+/ Authorization decorators
+/ Audit fields
+/ 
+/ This is probably the biggest architectural milestone.
 
 Milestone 10.5 – Onboarding & Career Profile
 

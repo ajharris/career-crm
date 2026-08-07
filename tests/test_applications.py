@@ -88,7 +88,7 @@ def test_application_creation_and_relationship(app) -> None:
 
     assert application.id is not None
     assert application.job_posting is job
-    assert job.application is application
+    assert job.applications == [application]
     assert application.job_posting.organization is organization
 
 

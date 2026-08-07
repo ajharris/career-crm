@@ -64,7 +64,10 @@ def test_registration_page_and_success(client):
     response = client.post("/auth/register", data=registration_data())
     assert response.status_code == 302 and response.location == "/"
     assert client.get("/auth/profile").status_code == 200
-    assert db.session.scalar(db.select(User)).email == "ada@example.com"
+    registered = db.session.scalar(
+        db.select(User).where(User.email == "ada@example.com")
+    )
+    assert registered is not None
 
 
 def test_registration_validation(client, user):
