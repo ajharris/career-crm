@@ -1,7 +1,7 @@
 """expand user accounts
 
 Revision ID: c92d10af34e8
-Revises: b14f8e7c9a21
+Revises: 3fa1dda11764
 Create Date: 2026-08-06 23:15:00
 """
 
@@ -9,7 +9,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "c92d10af34e8"
-down_revision = "b14f8e7c9a21"
+down_revision = "3fa1dda11764"
 branch_labels = None
 depends_on = None
 

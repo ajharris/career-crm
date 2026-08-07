@@ -53,19 +53,19 @@
 / Charts
 / Saved dashboard widgets
 
-Milestone 9 – Authentication & User Accounts
-
-Introduce:
-
-Registration
-Login
-Logout
-Password reset
-Email verification (optional)
-User profile
-Flask-Login integration
-Password hashing
-Session management
+/ Milestone 9 – Authentication & User Accounts
+/ 
+/ Introduce:
+/ 
+/ Registration
+/ Login
+/ Logout
+/ Password reset
+/ Email verification (optional)
+/ User profile
+/ Flask-Login integration
+/ Password hashing
+/ Session management
 
 Milestone 10 – Multi-User Ownership
 
