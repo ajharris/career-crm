@@ -3,19 +3,10 @@
 from flask import render_template
 
 from app.dashboard import bp
-from app.dashboard.services import (
-    dashboard_recent_activities,
-    dashboard_statistics,
-    dashboard_task_summary,
-)
+from app.dashboard.services import dashboard_data
 
 
 @bp.get("/")
 def index() -> str:
-    """Render the application dashboard."""
-    return render_template(
-        "dashboard/index.html",
-        statistics=dashboard_statistics(),
-        recent_activities=dashboard_recent_activities(),
-        task_summary=dashboard_task_summary(),
-    )
+    """Render the read-only job-search command center."""
+    return render_template("dashboard/index.html", **dashboard_data())

@@ -13,3 +13,29 @@ body {
 .text-pre-wrap {
   white-space: pre-wrap;
 }
+
+.dashboard-icon {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 2.5rem;
+  font-size: 1.25rem;
+  height: 2.5rem;
+  justify-content: center;
+}
+
+.dashboard-metrics > div {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+}
+
+.dashboard-metrics dt {
+  font-weight: 400;
+}
+
+.dashboard-metrics dd {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0;
+}
