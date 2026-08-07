@@ -52,7 +52,14 @@ def index() -> str:
 @bp.get("/<int:contact_id>")
 def detail(contact_id: int) -> str:
     """Show one contact."""
-    return render_template("contacts/detail.html", contact=get_contact(contact_id))
+    from app.activities.services import recent_activities
+
+    contact = get_contact(contact_id)
+    return render_template(
+        "contacts/detail.html",
+        contact=contact,
+        recent_activities=recent_activities(contact_id=contact.id),
+    )
 
 
 @bp.route("/new", methods=["GET", "POST"])

@@ -18,23 +18,23 @@
 # Contact detail page
 # Communication history
 
-Milestone 4: Job Postings
-CRUD
-Skills
-Priority
-Status
+# Milestone 4: Job Postings
+# CRUD
+# Skills
+# Priority
+# Status
 
-Milestone 5: Applications
-Application pipeline
-Interview stages
-Résumé versions
-Cover letter tracking
+# Milestone 5: Applications
+# Application pipeline
+# Interview stages
+# Résumé versions
+# Cover letter tracking
 
-Milestone 6: Dashboard
-KPIs
-Upcoming follow-ups
-Recently added jobs
-Organizations without outreach
+# Milestone 6: Dashboard
+# KPIs
+# Upcoming follow-ups
+# Recently added jobs
+# Organizations without outreach
 
 Milestone 7: Automation
 Career page importers

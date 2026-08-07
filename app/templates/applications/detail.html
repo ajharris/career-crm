@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "macros/activities.html" import activity_timeline %}
+
+{% block title %}{{ application.job_posting.title }} · Application · Career CRM{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><a class="text-decoration-none" href="{{ url_for('jobs.detail', job_id=application.job_posting_id) }}">← Back to Job Posting</a><h1 class="h2 mt-2 mb-0">{{ application.job_posting.title }}</h1><p class="text-body-secondary mb-0">Application</p></div><div class="d-flex gap-2"><a class="btn btn-outline-primary" href="{{ url_for('applications.edit', application_id=application.id) }}">Edit</a><a class="btn btn-outline-danger" href="{{ url_for('applications.delete', application_id=application.id) }}">Delete</a></div></div>
+  <section class="card border-0 shadow-sm"><div class="card-body p-4"><dl class="row mb-0">
+    <dt class="col-sm-3">Organization</dt><dd class="col-sm-9"><a href="{{ url_for('organizations.detail', organization_id=application.job_posting.organization_id) }}">{{ application.job_posting.organization.name }}</a></dd>
+    <dt class="col-sm-3">Job posting</dt><dd class="col-sm-9"><a href="{{ url_for('jobs.detail', job_id=application.job_posting_id) }}">{{ application.job_posting.title }}</a></dd>
+    <dt class="col-sm-3">Application date</dt><dd class="col-sm-9">{{ application.application_date.strftime('%B %d, %Y') if application.application_date else '—' }}</dd>
+    <dt class="col-sm-3">Current status</dt><dd class="col-sm-9">{{ application.status.label }}</dd>
+    <dt class="col-sm-3">Source</dt><dd class="col-sm-9">{{ application.source or '—' }}</dd>
+    <dt class="col-sm-3">Résumé</dt><dd class="col-sm-9">{% if application.resume_version %}<a href="{{ application.resume_version }}" rel="noopener noreferrer">Open résumé</a>{% else %}—{% endif %}</dd>
+    <dt class="col-sm-3">Cover letter</dt><dd class="col-sm-9">{% if application.cover_letter_version %}<a href="{{ application.cover_letter_version }}" rel="noopener noreferrer">Open cover letter</a>{% else %}—{% endif %}</dd>
+    <dt class="col-sm-3">Recruiter</dt><dd class="col-sm-9">{{ application.recruiter_name or '—' }}{% if application.recruiter_email %} · <a href="mailto:{{ application.recruiter_email }}">{{ application.recruiter_email }}</a>{% endif %}</dd>
+    <dt class="col-sm-3">Salary requested</dt><dd class="col-sm-9">{{ '${:,.2f}'.format(application.salary_requested) if application.salary_requested is not none else '—' }}</dd>
+    <dt class="col-sm-3">Interview date</dt><dd class="col-sm-9">{{ application.interview_date.strftime('%B %d, %Y at %H:%M') if application.interview_date else '—' }}</dd>
+    <dt class="col-sm-3">Interview location</dt><dd class="col-sm-9">{{ application.interview_location or '—' }}</dd>
+    <dt class="col-sm-3">Rejection reason</dt><dd class="col-sm-9 text-pre-wrap">{{ application.rejection_reason or '—' }}</dd>
+    <dt class="col-sm-3">Offer salary</dt><dd class="col-sm-9">{{ '${:,.2f}'.format(application.offer_salary) if application.offer_salary is not none else '—' }}</dd>
+    <dt class="col-sm-3">Accepted</dt><dd class="col-sm-9">{{ 'Yes' if application.accepted else 'No' }}</dd>
+    <dt class="col-sm-3">Withdrawn</dt><dd class="col-sm-9">{{ 'Yes' if application.withdrawn else 'No' }}</dd>
+    <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ application.notes or '—' }}</dd>
+    <dt class="col-sm-3">Created</dt><dd class="col-sm-9">{{ application.created_at.strftime('%B %d, %Y at %H:%M') }}</dd>
+    <dt class="col-sm-3">Updated</dt><dd class="col-sm-9">{{ application.updated_at.strftime('%B %d, %Y at %H:%M') }}</dd>
+  </dl></div></section>
+  <section class="card border-0 shadow-sm mt-4"><div class="card-header bg-white d-flex justify-content-between align-items-center py-3"><h2 class="h5 mb-0">Activity History</h2><a class="btn btn-sm btn-primary" href="{{ url_for('activities.create', application_id=application.id) }}">Add Activity</a></div><div class="card-body py-0">{{ activity_timeline(recent_activities) }}</div></section>
+{% endblock %}

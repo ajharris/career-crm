@@ -36,7 +36,14 @@ def index() -> str:
 @bp.get("/<int:job_id>")
 def detail(job_id: int) -> str:
     """Show one job posting."""
-    return render_template("jobs/detail.html", job=get_job_posting(job_id))
+    from app.activities.services import recent_activities
+
+    job = get_job_posting(job_id)
+    return render_template(
+        "jobs/detail.html",
+        job=job,
+        recent_activities=recent_activities(job_posting_id=job.id),
+    )
 
 
 @bp.route("/new", methods=["GET", "POST"])

@@ -40,6 +40,7 @@ def index() -> str:
 @bp.get("/<int:organization_id>")
 def detail(organization_id: int) -> str:
     """Show one organization."""
+    from app.activities.services import recent_activities
     from app.jobs.services import active_jobs_for_organization
 
     organization = get_organization(organization_id)
@@ -47,6 +48,7 @@ def detail(organization_id: int) -> str:
         "organizations/detail.html",
         organization=organization,
         active_jobs=active_jobs_for_organization(organization.id),
+        recent_activities=recent_activities(organization_id=organization.id),
     )
 
 

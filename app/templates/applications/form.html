@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import render_field %}
+
+{% block title %}{{ page_title }} · Career CRM{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center"><div class="col-xl-9">
+    <a class="text-decoration-none" href="{{ url_for('applications.detail', application_id=application.id) if application else url_for('applications.index') }}">← Cancel</a><h1 class="h2 mt-2 mb-4">{{ page_title }}</h1>
+    <form class="card card-body border-0 shadow-sm p-4" method="post" novalidate>{{ form.hidden_tag() }}
+      {{ render_field(form.job_posting_id, 'form-select') }}
+      <div class="row"><div class="col-md-6">{{ render_field(form.application_date) }}</div><div class="col-md-6">{{ render_field(form.status, 'form-select') }}</div></div>
+      {{ render_field(form.source) }}
+      <div class="row"><div class="col-md-6">{{ render_field(form.resume_version) }}</div><div class="col-md-6">{{ render_field(form.cover_letter_version) }}</div></div>
+      <div class="row"><div class="col-md-6">{{ render_field(form.recruiter_name) }}</div><div class="col-md-6">{{ render_field(form.recruiter_email) }}</div></div>
+      <div class="row"><div class="col-md-6">{{ render_field(form.salary_requested) }}</div><div class="col-md-6">{{ render_field(form.offer_salary) }}</div></div>
+      <div class="row"><div class="col-md-6">{{ render_field(form.interview_date) }}</div><div class="col-md-6">{{ render_field(form.interview_location) }}</div></div>
+      {{ render_field(form.rejection_reason) }}
+      <div class="d-flex gap-4 mb-3"><div class="form-check">{{ form.accepted(class='form-check-input') }}{{ form.accepted.label(class='form-check-label') }}</div><div class="form-check">{{ form.withdrawn(class='form-check-input') }}{{ form.withdrawn.label(class='form-check-label') }}</div></div>
+      {{ render_field(form.notes) }}
+      <div class="d-flex justify-content-end gap-2"><a class="btn btn-outline-secondary" href="{{ url_for('applications.detail', application_id=application.id) if application else url_for('applications.index') }}">Cancel</a>{{ form.submit(class='btn btn-primary') }}</div>
+    </form>
+  </div></div>
+{% endblock %}

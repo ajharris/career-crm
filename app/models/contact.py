@@ -10,6 +10,7 @@ from app.extensions import db
 from app.utils.enums import RelationshipStatus
 
 if TYPE_CHECKING:
+    from app.models.activity import Activity
     from app.models.organization import Organization
 
 
@@ -57,6 +58,9 @@ class Contact(db.Model):
 
     organization: Mapped["Organization"] = relationship(
         back_populates="contacts", lazy="joined"
+    )
+    activities: Mapped[list["Activity"]] = relationship(
+        back_populates="contact", lazy="selectin"
     )
 
     @validates("first_name", "last_name")

@@ -10,6 +10,7 @@ from app.extensions import db
 from app.utils.enums import OrganizationType
 
 if TYPE_CHECKING:
+    from app.models.activity import Activity
     from app.models.contact import Contact
     from app.models.job_posting import JobPosting
 
@@ -62,6 +63,9 @@ class Organization(db.Model):
         back_populates="organization",
         cascade="all, delete-orphan",
         lazy="selectin",
+    )
+    activities: Mapped[list["Activity"]] = relationship(
+        back_populates="organization", lazy="selectin"
     )
 
     @validates("name")

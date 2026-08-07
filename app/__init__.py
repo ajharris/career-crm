@@ -50,6 +50,8 @@ def initialize_extensions(app: Flask) -> None:
     csrf.init_app(app)
 
     from app.auth.models import User
+    from app.models.activity import Activity
+    from app.models.application import Application
     from app.models.contact import Contact
     from app.models.job_posting import JobPosting
     from app.models.organization import Organization
@@ -65,11 +67,15 @@ def initialize_extensions(app: Flask) -> None:
 def register_blueprints(app: Flask) -> None:
     """Register blueprints implemented in this milestone."""
     from app.dashboard import bp as dashboard_bp
+    from app.activities import bp as activities_bp
+    from app.applications import bp as applications_bp
     from app.contacts import bp as contacts_bp
     from app.jobs import bp as jobs_bp
     from app.organizations import bp as organizations_bp
 
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(activities_bp)
+    app.register_blueprint(applications_bp)
     app.register_blueprint(organizations_bp)
     app.register_blueprint(contacts_bp)
     app.register_blueprint(jobs_bp)

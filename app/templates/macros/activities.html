@@ -1,0 +1,10 @@
+{% macro activity_timeline(activities, empty_message='No activities yet.') %}
+  <div class="list-group list-group-flush">
+    {% for activity in activities %}
+      <a class="list-group-item list-group-item-action px-0" href="{{ url_for('activities.detail', activity_id=activity.id) }}">
+        <div class="d-flex justify-content-between gap-3"><span class="fw-semibold">{{ activity.subject or activity.activity_type.label }}</span><time class="small text-body-secondary text-nowrap">{{ activity.occurred_at.strftime('%b %d, %Y %H:%M') }}</time></div>
+        <div class="small text-body-secondary">{{ activity.activity_type.label }} · {{ activity.direction.label }}{% if activity.outcome %} · {{ activity.outcome|truncate(80) }}{% endif %}</div>
+      </a>
+    {% else %}<p class="text-body-secondary mb-0 py-3">{{ empty_message }}</p>{% endfor %}
+  </div>
+{% endmacro %}

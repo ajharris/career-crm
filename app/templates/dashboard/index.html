@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/activities.html" import activity_timeline %}
 
 {% block title %}Dashboard · Career CRM{% endblock %}
 
@@ -19,4 +20,5 @@
       </div>
     {% endfor %}
   </div>
+  <section class="card border-0 shadow-sm mt-4"><div class="card-header bg-white d-flex justify-content-between align-items-center py-3"><h2 class="h5 mb-0">Recent Activity</h2><a class="btn btn-sm btn-outline-primary" href="{{ url_for('activities.index') }}">View Timeline</a></div><div class="card-body py-0">{{ activity_timeline(recent_activities) }}</div></section>
 {% endblock %}

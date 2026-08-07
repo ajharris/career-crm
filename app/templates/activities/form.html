@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import render_field %}
+
+{% block title %}{{ page_title }} · Career CRM{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center"><div class="col-xl-9"><a class="text-decoration-none" href="{{ url_for('activities.detail', activity_id=activity.id) if activity else url_for('activities.index') }}">← Cancel</a><h1 class="h2 mt-2 mb-4">{{ page_title }}</h1><form class="card card-body border-0 shadow-sm p-4" method="post" novalidate>{{ form.hidden_tag() }}
+    <p class="text-body-secondary">Select at least one related entity. Related Organization and Job context is filled automatically where possible.</p>
+    <div class="row"><div class="col-md-6">{{ render_field(form.organization_id, 'form-select') }}</div><div class="col-md-6">{{ render_field(form.contact_id, 'form-select') }}</div></div>
+    <div class="row"><div class="col-md-6">{{ render_field(form.job_posting_id, 'form-select') }}</div><div class="col-md-6">{{ render_field(form.application_id, 'form-select') }}</div></div>
+    <div class="row"><div class="col-md-4">{{ render_field(form.activity_type, 'form-select') }}</div><div class="col-md-4">{{ render_field(form.direction, 'form-select') }}</div><div class="col-md-4">{{ render_field(form.occurred_at) }}</div></div>
+    {{ render_field(form.subject) }}{{ render_field(form.summary) }}{{ render_field(form.outcome) }}
+    <div class="form-check mb-3">{{ form.follow_up_needed(class='form-check-input') }}{{ form.follow_up_needed.label(class='form-check-label') }}</div>
+    {{ render_field(form.notes) }}
+    <div class="d-flex justify-content-end gap-2"><a class="btn btn-outline-secondary" href="{{ url_for('activities.detail', activity_id=activity.id) if activity else url_for('activities.index') }}">Cancel</a>{{ form.submit(class='btn btn-primary') }}</div>
+  </form></div></div>
+{% endblock %}

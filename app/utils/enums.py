@@ -45,14 +45,25 @@ class RelationshipStatus(StrEnum):
 
 
 class ApplicationStatus(StrEnum):
+    """Hiring-pipeline stage for an application."""
+
     PLANNED = "planned"
+    PREPARING = "preparing"
     APPLIED = "applied"
     SCREENING = "screening"
-    INTERVIEW = "interview"
-    ASSESSMENT = "assessment"
+    PHONE_INTERVIEW = "phone_interview"
+    TECHNICAL_INTERVIEW = "technical_interview"
+    PANEL_INTERVIEW = "panel_interview"
+    FINAL_INTERVIEW = "final_interview"
     OFFER = "offer"
+    ACCEPTED = "accepted"
     REJECTED = "rejected"
     WITHDRAWN = "withdrawn"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        return self.value.replace("_", " ").title()
 
 
 class JobStatus(StrEnum):
@@ -114,3 +125,39 @@ class JobSource(StrEnum):
         if self is self.LINKEDIN:
             return "LinkedIn"
         return self.value.replace("_", " ").title()
+
+
+class ActivityType(StrEnum):
+    """Supported kinds of completed job-search interactions."""
+
+    EMAIL = "email"
+    LINKEDIN_MESSAGE = "linkedin_message"
+    PHONE_CALL = "phone_call"
+    INTERVIEW = "interview"
+    NETWORKING = "networking"
+    RECRUITER_CONTACT = "recruiter_contact"
+    APPLICATION_SUBMITTED = "application_submitted"
+    FOLLOW_UP = "follow_up"
+    RESEARCH = "research"
+    MEETING = "meeting"
+    OTHER = "other"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        if self is self.LINKEDIN_MESSAGE:
+            return "LinkedIn Message"
+        return self.value.replace("_", " ").title()
+
+
+class ActivityDirection(StrEnum):
+    """Direction of an interaction relative to the user."""
+
+    OUTBOUND = "outbound"
+    INBOUND = "inbound"
+    INTERNAL = "internal"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        return self.value.title()

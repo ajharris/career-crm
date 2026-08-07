@@ -22,6 +22,8 @@ from app.extensions import db
 from app.utils.enums import EmploymentType, JobSource, JobStatus, WorkMode
 
 if TYPE_CHECKING:
+    from app.models.activity import Activity
+    from app.models.application import Application
     from app.models.organization import Organization
 
 
@@ -103,6 +105,16 @@ class JobPosting(db.Model):
 
     organization: Mapped["Organization"] = relationship(
         back_populates="job_postings", lazy="joined"
+    )
+    application: Mapped["Application | None"] = relationship(
+        back_populates="job_posting",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        uselist=False,
+        lazy="selectin",
+    )
+    activities: Mapped[list["Activity"]] = relationship(
+        back_populates="job_posting", lazy="selectin"
     )
 
     @validates("title")
