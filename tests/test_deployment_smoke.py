@@ -17,6 +17,7 @@ def test_configuration_classes_are_distinct_and_safe(monkeypatch):
     assert TestingConfig.WTF_CSRF_ENABLED is False
     assert ProductionConfig.SESSION_COOKIE_SECURE is True
     monkeypatch.delenv("SECRET_KEY", raising=False)
+    monkeypatch.setattr(ProductionConfig, "SECRET_KEY", "development-only-secret")
     with pytest.raises(RuntimeError, match="SECRET_KEY"):
         create_app("production")
 

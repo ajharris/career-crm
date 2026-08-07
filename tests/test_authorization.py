@@ -40,6 +40,7 @@ def second_user(app) -> User:
         email="second@example.com",
         password=PASSWORD,
     )
+    assert user.career_profile is not None
     user.career_profile.onboarding_completed = True
     db.session.commit()
     return user

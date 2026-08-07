@@ -65,7 +65,9 @@ def test_relationship_and_set_null_history(app):
     task_id = task.id
     db.session.delete(org)
     db.session.commit()
-    assert db.session.get(Task, task_id).organization_id is None
+    saved_task = db.session.get(Task, task_id)
+    assert saved_task is not None
+    assert saved_task.organization_id is None
 
 
 def test_services_create_update_delete(app):

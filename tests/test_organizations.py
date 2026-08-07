@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from app.extensions import db
 from app.models.organization import Organization
 from app.organizations.services import (
+    OrganizationValues,
     create_organization,
     delete_organization,
     list_organizations,
@@ -17,14 +18,20 @@ from app.organizations.services import (
 from app.utils.enums import OrganizationType
 
 
-def organization_data(name: str = "Toronto General") -> dict[str, object]:
+def organization_data(
+    name: str = "Toronto General",
+    *,
+    organization_type: str = OrganizationType.HOSPITAL.value,
+    location: str = "Toronto",
+    priority: int = 4,
+) -> OrganizationValues:
     """Return valid form/service data."""
     return {
         "name": name,
-        "organization_type": OrganizationType.HOSPITAL.value,
+        "organization_type": organization_type,
         "website": "https://example.org",
-        "location": "Toronto",
-        "priority": 4,
+        "location": location,
+        "priority": priority,
         "notes": "Potential employer",
     }
 
@@ -117,7 +124,9 @@ def test_create_route_displays_validation_errors(
     authenticated_client: FlaskClient,
 ) -> None:
     data = organization_data()
-    data.update(name="", website="not-a-url", priority=8)
+    data["name"] = ""
+    data["website"] = "not-a-url"
+    data["priority"] = 8
 
     response = authenticated_client.post("/organizations/new", data=data)
 
@@ -168,11 +177,11 @@ def test_delete_route(authenticated_client: FlaskClient) -> None:
 def test_search_is_case_insensitive(authenticated_client: FlaskClient) -> None:
     create_organization(**organization_data("Alpha Hospital"))
     create_organization(
-        **{
-            **organization_data("Beta Research"),
-            "organization_type": OrganizationType.RESEARCH_INSTITUTE.value,
-            "location": "Montreal",
-        }
+        **organization_data(
+            "Beta Research",
+            organization_type=OrganizationType.RESEARCH_INSTITUTE.value,
+            location="Montreal",
+        )
     )
 
     response = authenticated_client.get("/organizations?q=montREAL")
@@ -185,8 +194,8 @@ def test_search_is_case_insensitive(authenticated_client: FlaskClient) -> None:
 
 
 def test_sorting_route(authenticated_client: FlaskClient) -> None:
-    create_organization(**{**organization_data("Low"), "priority": 1})
-    create_organization(**{**organization_data("High"), "priority": 5})
+    create_organization(**organization_data("Low", priority=1))
+    create_organization(**organization_data("High", priority=5))
 
     response = authenticated_client.get("/organizations?sort=priority&direction=desc")
 
@@ -194,8 +203,8 @@ def test_sorting_route(authenticated_client: FlaskClient) -> None:
 
 
 def test_sorting_by_priority_descending(app) -> None:
-    create_organization(**{**organization_data("Low"), "priority": 1})
-    create_organization(**{**organization_data("High"), "priority": 5})
+    create_organization(**organization_data("Low", priority=1))
+    create_organization(**organization_data("High", priority=5))
 
     pagination = list_organizations(sort="priority", direction="desc")
 

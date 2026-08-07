@@ -1,5 +1,7 @@
 """Onboarding, normalized profile, and profile-privacy tests."""
 
+from typing import Any
+
 from app.auth.models import User
 from app.extensions import db
 from app.models.career_profile import (
@@ -143,7 +145,7 @@ def test_all_private_child_edit_routes_reject_another_user(app, client):
     )
     db.session.add(skill)
     db.session.flush()
-    records = {
+    records: dict[str, Any] = {
         "education": Education(user_id=owner.id, institution="Secret School"),
         "certification": Certification(user_id=owner.id, name="Secret Cert"),
         "language": UserLanguage(

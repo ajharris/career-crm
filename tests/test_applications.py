@@ -2,6 +2,7 @@
 
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Any, cast
 
 import pytest
 from flask.testing import FlaskClient
@@ -97,7 +98,7 @@ def test_application_status_is_constrained(app) -> None:
 
     assert application.status is ApplicationStatus.PLANNED
     with pytest.raises(ValueError, match="Invalid application status"):
-        application.status = "unknown"
+        cast(Any, application).status = "unknown"
 
 
 def test_one_application_per_job_database_constraint(app) -> None:

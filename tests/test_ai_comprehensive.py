@@ -1,6 +1,7 @@
 """AI prompt, provider parsing, failure handling, and ownership tests."""
 
 import io
+from email.message import Message
 from urllib.error import HTTPError, URLError
 
 import pytest
@@ -52,7 +53,7 @@ def test_provider_request_and_output_parsing(app, monkeypatch):
     "error",
     [
         URLError("offline"),
-        HTTPError("https://provider.invalid", 429, "rate limited", {}, None),
+        HTTPError("https://provider.invalid", 429, "rate limited", Message(), None),
     ],
 )
 def test_provider_failures_become_safe_runtime_errors(app, monkeypatch, error):

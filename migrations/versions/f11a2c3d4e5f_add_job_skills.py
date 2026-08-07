@@ -18,8 +18,18 @@ def upgrade() -> None:
     op.create_table(
         "job_skills",
         sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("job_posting_id", sa.Integer(), sa.ForeignKey("job_postings.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("skill_id", sa.Integer(), sa.ForeignKey("skills.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "job_posting_id",
+            sa.Integer(),
+            sa.ForeignKey("job_postings.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "skill_id",
+            sa.Integer(),
+            sa.ForeignKey("skills.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("required", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column("importance", sa.Integer(), nullable=False, server_default="3"),
         sa.Column("notes", sa.Text()),

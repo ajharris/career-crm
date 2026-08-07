@@ -85,7 +85,9 @@ def test_login_success_remember_last_login_and_safe_next(client, user):
     )
     assert response.location == "/organizations"
     assert "remember_token=" in response.headers.get("Set-Cookie", "")
-    assert isinstance(db.session.get(User, user.id).last_login_at, datetime)
+    logged_in_user = db.session.get(User, user.id)
+    assert logged_in_user is not None
+    assert isinstance(logged_in_user.last_login_at, datetime)
 
 
 def test_login_rejects_invalid_credentials_and_external_next(client, user):

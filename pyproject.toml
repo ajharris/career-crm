@@ -1,10 +1,10 @@
 [tool.black]
 line-length = 88
-target-version = ["py313"]
+target-version = ["py312"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py313"
+target-version = "py312"
 exclude = ["migrations/versions"]
 
 [tool.ruff.lint]
@@ -32,6 +32,9 @@ disable_error_code = ["name-defined", "literal-required", "return-value"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--cov=app --cov-report=term-missing --cov-report=xml"
+filterwarnings = [
+  'ignore:datetime.datetime.utcnow\(\) is deprecated.*:DeprecationWarning:flask_login.login_manager',
+]
 
 [tool.coverage.run]
 branch = true
