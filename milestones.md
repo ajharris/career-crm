@@ -36,22 +36,23 @@
 / Email templates
 / Reminders
 
-Milestone 8 – Dashboard & Analytics
+/ Milestone 8 – Dashboard & Analytics
+/ 
+/ Turn the collected data into actionable insights.
+/ 
+/ Features:
+/ 
+/ Pipeline by stage
+/ Applications this month
+/ Interview rate
+/ Response rate
+/ Upcoming deadlines
+/ Overdue tasks
+/ Activity timeline
+/ Organization statistics
+/ Charts
+/ Saved dashboard widgets
 
-Turn the collected data into actionable insights.
-
-Features:
-
-Pipeline by stage
-Applications this month
-Interview rate
-Response rate
-Upcoming deadlines
-Overdue tasks
-Activity timeline
-Organization statistics
-Charts
-Saved dashboard widgets
 Milestone 9 – Authentication & User Accounts
 
 Introduce:
