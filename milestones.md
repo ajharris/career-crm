@@ -84,108 +84,108 @@
 / 
 / This is probably the biggest architectural milestone.
 
-Milestone 10.5 – Onboarding & Career Profile
-
-When a new user logs in for the first time, they complete a guided onboarding questionnaire. The responses populate their career profile and drive recommendations throughout the application.
-
-Personal Background
-Highest education level
-Degrees
-Fields of study
-Certifications
-Years of experience
-Technical skills
-Soft skills
-Languages
-Career Interests
-Industries of interest
-Job families
-Preferred roles
-Research vs. industry
-Startup vs. enterprise
-Management interest
-Hands-on technical work vs. leadership
-Work Preferences
-Remote / Hybrid / On-site
-Preferred locations
-Willingness to relocate
-Willingness to travel
-Salary expectations
-Employment type
-Security clearance status
-Work authorization
-Job Search Priorities
-
-Users rank what's most important, for example:
-
-Compensation
-Stability
-Interesting work
-Career growth
-Work-life balance
-Mission or social impact
-Prestige
-Flexible schedule
-Technical Profile
-
-Users can self-assess or import:
-
-Programming languages
-Frameworks
-Databases
-Cloud platforms
-AI/ML experience
-Medical imaging experience
-Domain expertise
-Portfolio
-GitHub
-LinkedIn
-Personal website
-Publications
-Patents
-Open-source contributions
-Job Search Strategy
-
-Questions such as:
-
-How many applications per week?
-Interested in networking?
-Cold outreach?
-Recruiter outreach?
-Conferences?
-Government positions?
-Academic positions?
-How the profile would be used
-
-Once completed, the CRM could:
-
-Score job postings against the user's profile.
-Highlight missing skills.
-Recommend organizations.
-Recommend networking contacts.
-Tailor dashboard metrics.
-Prioritize follow-up tasks.
-Generate personalized reports.
-Database design
-
-Rather than storing the questionnaire responses directly, I'd separate questions from the resulting career profile.
-
-For example:
-
-User
-│
-├── CareerProfile
-│
-├── Education
-├── Certifications
-├── WorkPreferences
-├── CareerGoals
-├── UserSkills
-└── QuestionnaireResponses (optional)
-
-This keeps the profile normalized and makes it easier to evolve the questionnaire over time without changing the rest of the application.
-
-One feature that would make this particularly powerful is a weighted preference system. Instead of simply asking whether salary or remote work matters, ask users to rank or assign importance (e.g., 1–5) to factors like compensation, stability, mission, flexibility, technical challenge, and advancement. Later, the job-matching engine can score opportunities based on those priorities rather than treating every preference as equally important.
+/ Milestone 10.5 – Onboarding & Career Profile
+/ 
+/ When a new user logs in for the first time, they complete a guided onboarding / questionnaire. The responses populate their career profile and drive recommendations / throughout the application.
+/ 
+/ Personal Background
+/ Highest education level
+/ Degrees
+/ Fields of study
+/ Certifications
+/ Years of experience
+/ Technical skills
+/ Soft skills
+/ Languages
+/ Career Interests
+/ Industries of interest
+/ Job families
+/ Preferred roles
+/ Research vs. industry
+/ Startup vs. enterprise
+/ Management interest
+/ Hands-on technical work vs. leadership
+/ Work Preferences
+/ Remote / Hybrid / On-site
+/ Preferred locations
+/ Willingness to relocate
+/ Willingness to travel
+/ Salary expectations
+/ Employment type
+/ Security clearance status
+/ Work authorization
+/ Job Search Priorities
+/ 
+/ Users rank what's most important, for example:
+/ 
+/ Compensation
+/ Stability
+/ Interesting work
+/ Career growth
+/ Work-life balance
+/ Mission or social impact
+/ Prestige
+/ Flexible schedule
+/ Technical Profile
+/ 
+/ Users can self-assess or import:
+/ 
+/ Programming languages
+/ Frameworks
+/ Databases
+/ Cloud platforms
+/ AI/ML experience
+/ Medical imaging experience
+/ Domain expertise
+/ Portfolio
+/ GitHub
+/ LinkedIn
+/ Personal website
+/ Publications
+/ Patents
+/ Open-source contributions
+/ Job Search Strategy
+/ 
+/ Questions such as:
+/ 
+/ How many applications per week?
+/ Interested in networking?
+/ Cold outreach?
+/ Recruiter outreach?
+/ Conferences?
+/ Government positions?
+/ Academic positions?
+/ How the profile would be used
+/ 
+/ Once completed, the CRM could:
+/ 
+/ Score job postings against the user's profile.
+/ Highlight missing skills.
+/ Recommend organizations.
+/ Recommend networking contacts.
+/ Tailor dashboard metrics.
+/ Prioritize follow-up tasks.
+/ Generate personalized reports.
+/ Database design
+/ 
+/ Rather than storing the questionnaire responses directly, I'd separate questions from the / resulting career profile.
+/ 
+/ For example:
+/ 
+/ User
+/ │
+/ ├── CareerProfile
+/ │
+/ ├── Education
+/ ├── Certifications
+/ ├── WorkPreferences
+/ ├── CareerGoals
+/ ├── UserSkills
+/ └── QuestionnaireResponses (optional)
+/ 
+/ This keeps the profile normalized and makes it easier to evolve the questionnaire over time / without changing the rest of the application.
+/ 
+/ One feature that would make this particularly powerful is a weighted preference system. / Instead of simply asking whether salary or remote work matters, ask users to rank or assign / importance (e.g., 1–5) to factors like compensation, stability, mission, flexibility, / technical challenge, and advancement. Later, the job-matching engine can score / opportunities based on those priorities rather than treating every preference as equally / important.
 
 Milestone 11 – Skills & Job Matching
 
