@@ -1,6 +1,6 @@
 -r requirements.txt
 
-black>=25.1,<27
+black>=26.5.1,<27
 mypy>=1.15,<2
 pre-commit>=4,<5
 pytest-cov>=6,<8
