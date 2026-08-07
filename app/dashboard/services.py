@@ -9,6 +9,7 @@ from app.extensions import db
 from app.models.activity import Activity
 from app.models.application import Application
 from app.models.contact import Contact
+from app.models.dashboard_widget import DashboardWidget
 from app.models.job_posting import JobPosting
 from app.models.organization import Organization
 from app.models.task import Task
@@ -26,6 +27,16 @@ ACTIVE_JOB_STATUSES = (
     JobStatus.RESEARCHING,
     JobStatus.READY_TO_APPLY,
     JobStatus.APPLIED,
+)
+WIDGETS = (
+    ("pipeline", "Pipeline by stage"),
+    ("tasks", "Overdue tasks"),
+    ("deadlines", "Upcoming deadlines"),
+    ("activity", "Activity timeline"),
+    ("applications", "Recent applications"),
+    ("interviews", "Upcoming interviews"),
+    ("organizations", "Organization statistics"),
+    ("analytics", "Analytics summaries"),
 )
 
 
@@ -51,6 +62,7 @@ def dashboard_data(today: date | None = None) -> dict:
 
     task_groups = _task_groups(today, week_end)
     pipeline = _pipeline()
+    rates = _application_rates()
     recent_activities = list(
         db.session.scalars(
             select(Activity)
@@ -99,6 +111,15 @@ def dashboard_data(today: date | None = None) -> dict:
         .order_by(func.count(Activity.id).desc(), Organization.name)
         .limit(10)
     ).all()
+    upcoming_deadlines = _upcoming_deadlines(today)
+    applications_this_month = _count(
+        Application.id,
+        Application.application_date >= month_start,
+        Application.application_date <= today,
+        Application.status.not_in(
+            (ApplicationStatus.PLANNED, ApplicationStatus.PREPARING)
+        ),
+    )
 
     summary_cards = (
         ("Organizations", _count(Organization.id), "organizations.index", "▦"),
@@ -132,7 +153,22 @@ def dashboard_data(today: date | None = None) -> dict:
         "summary_cards": summary_cards,
         "pipeline": pipeline,
         "pipeline_total": sum(item[1] for item in pipeline),
+        "chart_data": {
+            "pipeline": {
+                "labels": [status.label for status, _ in pipeline],
+                "values": [count for _, count in pipeline],
+            },
+            "activities": {
+                "labels": [kind.label for kind in activities_by_type],
+                "values": list(activities_by_type.values()),
+            },
+        },
+        "insights": {
+            "applications_this_month": applications_this_month,
+            **rates,
+        },
         "task_groups": task_groups,
+        "upcoming_deadlines": upcoming_deadlines,
         "recent_activities": recent_activities,
         "recent_applications": recent_applications,
         "upcoming_interviews": upcoming_interviews,
@@ -164,14 +200,7 @@ def dashboard_data(today: date | None = None) -> dict:
                 Task.completed_at >= _start_of(week_start),
                 Task.completed_at < _start_of(today + timedelta(days=1)),
             ),
-            "applications_submitted_month": _count(
-                Application.id,
-                Application.application_date >= month_start,
-                Application.application_date <= today,
-                Application.status.not_in(
-                    (ApplicationStatus.PLANNED, ApplicationStatus.PREPARING)
-                ),
-            ),
+            "applications_submitted_month": applications_this_month,
             "organizations_contacted_month": _count(
                 distinct(Activity.organization_id),
                 Activity.organization_id.is_not(None),
@@ -185,6 +214,7 @@ def dashboard_data(today: date | None = None) -> dict:
                 Activity.occurred_at <= now,
             ),
         },
+        "widgets": get_widget_preferences(),
     }
 
 
@@ -220,6 +250,138 @@ def _pipeline() -> list[tuple[ApplicationStatus, int]]:
     return [(status, counts.get(status, 0)) for status in ApplicationStatus]
 
 
+def _application_rates() -> dict[str, float | int]:
+    submitted = list(
+        db.session.scalars(
+            select(Application).where(
+                Application.status.not_in(
+                    (ApplicationStatus.PLANNED, ApplicationStatus.PREPARING)
+                )
+            )
+        )
+    )
+    total = len(submitted)
+    if not total:
+        return {"interview_rate": 0.0, "response_rate": 0.0}
+    response_statuses = {
+        ApplicationStatus.SCREENING,
+        ApplicationStatus.PHONE_INTERVIEW,
+        ApplicationStatus.TECHNICAL_INTERVIEW,
+        ApplicationStatus.PANEL_INTERVIEW,
+        ApplicationStatus.FINAL_INTERVIEW,
+        ApplicationStatus.OFFER,
+        ApplicationStatus.ACCEPTED,
+        ApplicationStatus.REJECTED,
+    }
+    interview_statuses = {
+        ApplicationStatus.PHONE_INTERVIEW,
+        ApplicationStatus.TECHNICAL_INTERVIEW,
+        ApplicationStatus.PANEL_INTERVIEW,
+        ApplicationStatus.FINAL_INTERVIEW,
+        ApplicationStatus.OFFER,
+        ApplicationStatus.ACCEPTED,
+    }
+    interviewed_ids = set(
+        db.session.scalars(
+            select(Activity.application_id).where(
+                Activity.activity_type == ActivityType.INTERVIEW,
+                Activity.application_id.is_not(None),
+            )
+        )
+    )
+    responses = sum(application.status in response_statuses for application in submitted)
+    interviews = sum(
+        application.status in interview_statuses
+        or application.interview_date is not None
+        or application.id in interviewed_ids
+        for application in submitted
+    )
+    return {
+        "interview_rate": round(interviews / total * 100, 1),
+        "response_rate": round(responses / total * 100, 1),
+    }
+
+
+def _upcoming_deadlines(today: date, limit: int = 10) -> list[dict]:
+    cutoff = today + timedelta(days=30)
+    deadlines = [
+        {
+            "date": task.due_date,
+            "kind": "Task",
+            "title": task.title,
+            "organization": task.organization.name if task.organization else None,
+            "endpoint": "tasks.detail",
+            "parameters": {"task_id": task.id},
+        }
+        for task in db.session.scalars(
+            select(Task)
+            .options(joinedload(Task.organization))
+            .where(
+                Task.status.in_(ACTIVE_TASK_STATUSES),
+                Task.due_date >= today,
+                Task.due_date <= cutoff,
+            )
+        )
+    ]
+    deadlines.extend(
+        {
+            "date": job.closing_date,
+            "kind": "Posting closes",
+            "title": job.title,
+            "organization": job.organization.name,
+            "endpoint": "jobs.detail",
+            "parameters": {"job_id": job.id},
+        }
+        for job in db.session.scalars(
+            select(JobPosting)
+            .options(joinedload(JobPosting.organization))
+            .where(
+                JobPosting.status.in_(ACTIVE_JOB_STATUSES),
+                JobPosting.closing_date >= today,
+                JobPosting.closing_date <= cutoff,
+            )
+        )
+    )
+    return sorted(deadlines, key=lambda item: (item["date"], item["title"]))[:limit]
+
+
+def get_widget_preferences() -> list[dict]:
+    """Return saved widget settings, supplemented by enabled defaults."""
+    if not inspect(db.engine).has_table(DashboardWidget.__tablename__):
+        saved = {}
+    else:
+        saved = {
+            widget.widget_key: widget
+            for widget in db.session.scalars(select(DashboardWidget))
+        }
+    preferences = []
+    for position, (key, label) in enumerate(WIDGETS):
+        widget = saved.get(key)
+        preferences.append(
+            {
+                "key": key,
+                "label": label,
+                "enabled": widget.enabled if widget else True,
+                "position": widget.position if widget else position,
+            }
+        )
+    return sorted(preferences, key=lambda item: item["position"])
+
+
+def save_widget_preferences(enabled_keys: set[str]) -> None:
+    """Persist the selected widgets in the canonical display order."""
+    saved = {
+        widget.widget_key: widget
+        for widget in db.session.scalars(select(DashboardWidget))
+    }
+    for position, (key, _) in enumerate(WIDGETS):
+        widget = saved.get(key) or DashboardWidget(widget_key=key)
+        widget.position = position
+        widget.enabled = key in enabled_keys
+        db.session.add(widget)
+    db.session.commit()
+
+
 def _count(column, *criteria) -> int:
     return db.session.scalar(select(func.count(column)).where(*criteria)) or 0
 
@@ -241,7 +403,17 @@ def _empty_dashboard() -> dict:
         ),
         "pipeline": [(status, 0) for status in ApplicationStatus],
         "pipeline_total": 0,
+        "chart_data": {
+            "pipeline": {"labels": [], "values": []},
+            "activities": {"labels": [], "values": []},
+        },
+        "insights": {
+            "applications_this_month": 0,
+            "interview_rate": 0.0,
+            "response_rate": 0.0,
+        },
         "task_groups": {"overdue": [], "today": [], "week": []},
+        "upcoming_deadlines": [],
         "recent_activities": [],
         "recent_applications": [],
         "upcoming_interviews": [],
@@ -254,6 +426,10 @@ def _empty_dashboard() -> dict:
             "organizations_contacted_month": 0,
             "interviews_completed_year": 0,
         },
+        "widgets": [
+            {"key": key, "label": label, "enabled": True, "position": position}
+            for position, (key, label) in enumerate(WIDGETS)
+        ],
     }
 
 

@@ -53,6 +53,7 @@ def initialize_extensions(app: Flask) -> None:
     from app.models.activity import Activity  # noqa: F401
     from app.models.application import Application  # noqa: F401
     from app.models.contact import Contact  # noqa: F401
+    from app.models.dashboard_widget import DashboardWidget  # noqa: F401
     from app.models.job_posting import JobPosting  # noqa: F401
     from app.models.organization import Organization  # noqa: F401
     from app.models.task import Task  # noqa: F401

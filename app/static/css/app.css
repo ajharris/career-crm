@@ -39,3 +39,12 @@ body {
   font-weight: 600;
   margin: 0;
 }
+
+.dashboard-chart {
+  min-height: 340px;
+  position: relative;
+}
+
+.dashboard-chart-sm {
+  min-height: 260px;
+}

@@ -15,9 +15,12 @@
 {% block title %}Dashboard · Career CRM{% endblock %}
 
 {% block content %}
+  {% set enabled = widgets|selectattr('enabled')|map(attribute='key')|list %}
   <header class="mb-4">
-    <h1 class="h2 mb-1">Dashboard</h1>
-    <p class="text-body-secondary mb-0">Your job search at a glance.</p>
+    <div class="d-flex justify-content-between align-items-start gap-3">
+      <div><h1 class="h2 mb-1">Dashboard</h1><p class="text-body-secondary mb-0">Your job search at a glance.</p></div>
+      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('dashboard.settings') }}">Customize</a>
+    </div>
   </header>
 
   <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3 mb-4">
@@ -33,24 +36,27 @@
     {% endfor %}
   </div>
 
+  <div class="row row-cols-1 row-cols-sm-3 g-3 mb-4">
+    <div class="col"><div class="card card-body border-0 shadow-sm h-100"><span class="small text-body-secondary">Applications this month</span><strong class="display-6">{{ insights.applications_this_month }}</strong></div></div>
+    <div class="col"><div class="card card-body border-0 shadow-sm h-100"><span class="small text-body-secondary">Interview rate</span><strong class="display-6">{{ insights.interview_rate }}%</strong><span class="small text-body-secondary">Of submitted applications</span></div></div>
+    <div class="col"><div class="card card-body border-0 shadow-sm h-100"><span class="small text-body-secondary">Response rate</span><strong class="display-6">{{ insights.response_rate }}%</strong><span class="small text-body-secondary">Advanced beyond applied</span></div></div>
+  </div>
+
+  {% if 'pipeline' in enabled or 'tasks' in enabled %}
   <div class="row g-4 mb-4">
+    {% if 'pipeline' in enabled %}
     <div class="col-12 col-xl-7">
       <section class="card border-0 shadow-sm h-100">
         {{ card_header('Hiring Pipeline', 'applications.index', 'View applications') }}
         <div class="card-body">
           {% if pipeline_total %}
-            {% for status, count in pipeline %}
-              <div class="mb-3">
-                <div class="d-flex justify-content-between small mb-1"><span>{{ status.label }}</span><strong>{{ count }}</strong></div>
-                <div class="progress" role="progressbar" aria-label="{{ status.label }}" aria-valuenow="{{ count }}" aria-valuemin="0" aria-valuemax="{{ pipeline_total }}">
-                  <div class="progress-bar" style="width: {{ (count / pipeline_total * 100)|round(1) }}%"></div>
-                </div>
-              </div>
-            {% endfor %}
+            <div class="dashboard-chart"><canvas id="pipelineChart" aria-label="Applications by pipeline stage"></canvas></div>
           {% else %}{{ empty('No applications have been created yet.') }}{% endif %}
         </div>
       </section>
     </div>
+    {% endif %}
+    {% if 'tasks' in enabled %}
     <div class="col-12 col-xl-5">
       <section class="card border-0 shadow-sm h-100">
         {{ card_header('Tasks', 'tasks.index', 'View tasks') }}
@@ -72,9 +78,13 @@
         </div>
       </section>
     </div>
+    {% endif %}
   </div>
+  {% endif %}
 
+  {% if 'activity' in enabled or 'applications' in enabled %}
   <div class="row g-4 mb-4">
+    {% if 'activity' in enabled %}
     <div class="col-12 col-lg-6"><section class="card border-0 shadow-sm h-100">
       {{ card_header('Recent Activity', 'activities.index', 'View timeline') }}
       <div class="card-body table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Date</th><th>Type</th><th>Organization</th><th>Subject</th></tr></thead><tbody>
@@ -82,6 +92,8 @@
         {% else %}<tr><td colspan="4">{{ empty('No activities have been recorded yet.') }}</td></tr>{% endfor %}
       </tbody></table></div>
     </section></div>
+    {% endif %}
+    {% if 'applications' in enabled %}
     <div class="col-12 col-lg-6"><section class="card border-0 shadow-sm h-100">
       {{ card_header('Recent Applications', 'applications.index') }}
       <div class="card-body table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Organization</th><th>Position</th><th>Status</th><th>Applied</th></tr></thead><tbody>
@@ -89,9 +101,24 @@
         {% else %}<tr><td colspan="4">{{ empty('No applications have been created yet.') }}</td></tr>{% endfor %}
       </tbody></table></div>
     </section></div>
+    {% endif %}
   </div>
+  {% endif %}
 
+  {% if 'deadlines' in enabled %}
+  <section class="card border-0 shadow-sm mb-4">
+    {{ card_header('Upcoming Deadlines') }}
+    <div class="list-group list-group-flush">
+      {% for deadline in upcoming_deadlines %}
+        <a class="list-group-item list-group-item-action d-flex justify-content-between gap-3 p-3" href="{{ url_for(deadline.endpoint, **deadline.parameters) }}"><span><span class="badge text-bg-light me-2">{{ deadline.kind }}</span><strong>{{ deadline.title }}</strong>{% if deadline.organization %}<span class="text-body-secondary"> · {{ deadline.organization }}</span>{% endif %}</span><time class="text-nowrap">{{ deadline.date.strftime('%b %d, %Y') }}</time></a>
+      {% else %}<div class="card-body">{{ empty('No deadlines in the next 30 days.') }}</div>{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if 'interviews' in enabled or 'organizations' in enabled %}
   <div class="row g-4 mb-4">
+    {% if 'interviews' in enabled %}
     <div class="col-12 col-lg-6"><section class="card border-0 shadow-sm h-100">
       {{ card_header('Upcoming Interviews', 'applications.index', 'View applications') }}
       <div class="list-group list-group-flush">
@@ -99,6 +126,8 @@
         {% else %}<div class="card-body">{{ empty('No upcoming interviews scheduled. Keep building momentum!') }}</div>{% endfor %}
       </div>
     </section></div>
+    {% endif %}
+    {% if 'organizations' in enabled %}
     <div class="col-12 col-lg-6"><section class="card border-0 shadow-sm h-100">
       {{ card_header('Top Organizations by Activity', 'organizations.index', 'View organizations') }}
       <div class="list-group list-group-flush">
@@ -106,11 +135,30 @@
         {% else %}<div class="card-body">{{ empty('No organization activity has been recorded yet.') }}</div>{% endfor %}
       </div>
     </section></div>
+    {% endif %}
   </div>
+  {% endif %}
 
+  {% if 'analytics' in enabled %}
   <div class="row row-cols-1 row-cols-lg-3 g-4">
     <div class="col"><section class="card border-0 shadow-sm h-100">{{ card_header('Job Postings') }}<div class="card-body"><dl class="dashboard-metrics mb-0"><div><dt>Active postings</dt><dd>{{ job_summary.active }}</dd></div><div><dt>Closed postings</dt><dd>{{ job_summary.closed }}</dd></div><div><dt>Applied postings</dt><dd>{{ job_summary.applied }}</dd></div></dl></div></section></div>
-    <div class="col"><section class="card border-0 shadow-sm h-100">{{ card_header('Activity Summary') }}<div class="card-body"><dl class="dashboard-metrics"><div><dt>Activities this week</dt><dd>{{ activity_summary.week }}</dd></div><div><dt>Activities this month</dt><dd>{{ activity_summary.month }}</dd></div></dl><h3 class="h6">By type</h3>{% for type, count in activity_summary.by_type.items() %}<div class="d-flex justify-content-between small py-1"><span>{{ type.label }}</span><strong>{{ count }}</strong></div>{% else %}<span class="small text-body-secondary">No activities yet.</span>{% endfor %}</div></section></div>
+    <div class="col"><section class="card border-0 shadow-sm h-100">{{ card_header('Activity Summary') }}<div class="card-body"><dl class="dashboard-metrics"><div><dt>Activities this week</dt><dd>{{ activity_summary.week }}</dd></div><div><dt>Activities this month</dt><dd>{{ activity_summary.month }}</dd></div></dl>{% if activity_summary.by_type %}<div class="dashboard-chart dashboard-chart-sm"><canvas id="activityChart" aria-label="Activities by type"></canvas></div>{% else %}<span class="small text-body-secondary">No activities yet.</span>{% endif %}</div></section></div>
     <div class="col"><section class="card border-0 shadow-sm h-100">{{ card_header('Productivity') }}<div class="card-body"><dl class="dashboard-metrics mb-0"><div><dt>Tasks completed this week</dt><dd>{{ productivity.tasks_completed_week }}</dd></div><div><dt>Applications submitted this month</dt><dd>{{ productivity.applications_submitted_month }}</dd></div><div><dt>Organizations contacted this month</dt><dd>{{ productivity.organizations_contacted_month }}</dd></div><div><dt>Interviews completed this year</dt><dd>{{ productivity.interviews_completed_year }}</dd></div></dl></div></section></div>
   </div>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}
+  {% if pipeline_total or activity_summary.by_type %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+    <script>
+      (() => {
+        const data = {{ chart_data|tojson }};
+        const pipeline = document.getElementById("pipelineChart");
+        if (pipeline) new Chart(pipeline, {type: "bar", data: {labels: data.pipeline.labels, datasets: [{label: "Applications", data: data.pipeline.values, backgroundColor: "#0d6efd"}]}, options: {indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: {legend: {display: false}}, scales: {x: {beginAtZero: true, ticks: {precision: 0}}}}});
+        const activity = document.getElementById("activityChart");
+        if (activity) new Chart(activity, {type: "doughnut", data: {labels: data.activities.labels, datasets: [{data: data.activities.values, backgroundColor: ["#0d6efd", "#6f42c1", "#198754", "#ffc107", "#dc3545", "#0dcaf0", "#6c757d"]}]}, options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {position: "bottom"}}}});
+      })();
+    </script>
+  {% endif %}
 {% endblock %}
