@@ -1163,6 +1163,24 @@ Instead of simply recording which jobs a user has applied to, it should help ans
 
 The long-term goal is a system that combines CRM workflows, structured career data, analytics, and optional AI assistance while preserving user privacy and control.
 
+# Environment Variables
+
+| Variable                    | Required | Description                                                      |
+| --------------------------- | -------- | ---------------------------------------------------------------- |
+| `APP_ENV`                   | Yes      | Application environment (`development`, `testing`, `production`) |
+| `SECRET_KEY`                | Yes      | Flask session and CSRF signing key                               |
+| `DATABASE_URL`              | Yes      | SQLAlchemy connection string                                     |
+| `UPLOAD_FOLDER`             | Yes      | Directory for uploaded files                                     |
+| `MAX_UPLOAD_SIZE`           | No       | Maximum upload size in bytes                                     |
+| `CREDENTIAL_ENCRYPTION_KEY` | Yes      | Encrypts user API credentials at rest                            |
+| `AI_PROVIDER`               | No       | Default AI provider (`deterministic` by default)                 |
+| `AI_MODEL`                  | No       | Default model used by AI providers                               |
+| `AI_API_URL`                | No       | Server-owned AI endpoint (optional)                              |
+| `AI_API_KEY`                | No       | Server-owned AI key (optional)                                   |
+| `REDIS_URL`                 | Future   | Background jobs and caching                                      |
+| `SMTP_*`                    | Future   | Email notifications                                              |
+
+
 ---
 
 # License
