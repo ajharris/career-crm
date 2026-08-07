@@ -221,9 +221,7 @@ def test_edit_route(client: FlaskClient) -> None:
     values = job_data(organization.id, "Senior Physicist")
     values["status"] = JobStatus.READY_TO_APPLY.value
 
-    response = client.post(
-        f"/jobs/{job.id}/edit", data=values, follow_redirects=True
-    )
+    response = client.post(f"/jobs/{job.id}/edit", data=values, follow_redirects=True)
 
     assert response.status_code == 200
     assert b"Job posting updated successfully." in response.data
@@ -337,6 +335,6 @@ def test_dashboard_job_count(client: FlaskClient) -> None:
 
     response = client.get("/")
 
-    marker = b"<h2 class=\"h6 text-body-secondary\">Job Postings</h2>"
+    marker = b'<h2 class="h6 text-body-secondary">Job Postings</h2>'
     assert marker in response.data
     assert b'<p class="display-6 mb-0">1</p>' in response.data

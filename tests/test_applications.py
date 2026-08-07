@@ -103,13 +103,9 @@ def test_application_status_is_constrained(app) -> None:
 def test_one_application_per_job_database_constraint(app) -> None:
     organization = make_organization()
     job = make_job(organization)
-    db.session.add(
-        Application(job_posting_id=job.id, status=ApplicationStatus.PLANNED)
-    )
+    db.session.add(Application(job_posting_id=job.id, status=ApplicationStatus.PLANNED))
     db.session.commit()
-    db.session.add(
-        Application(job_posting_id=job.id, status=ApplicationStatus.APPLIED)
-    )
+    db.session.add(Application(job_posting_id=job.id, status=ApplicationStatus.APPLIED))
 
     with pytest.raises(IntegrityError):
         db.session.commit()
@@ -348,9 +344,7 @@ def test_pagination_displays_25_applications(client: FlaskClient) -> None:
         create_application(**service_data(job.id))
 
     pagination = list_applications(page=1)
-    second_page = client.get(
-        "/applications?page=2&sort=job_title&direction=asc"
-    )
+    second_page = client.get("/applications?page=2&sort=job_title&direction=asc")
 
     assert len(pagination.items) == 25
     assert pagination.total == 27

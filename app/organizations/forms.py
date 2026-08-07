@@ -2,7 +2,7 @@
 
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SelectField, StringField, SubmitField, TextAreaField
-from wtforms.validators import InputRequired, Length, NumberRange, Optional, URL
+from wtforms.validators import URL, InputRequired, Length, NumberRange, Optional
 
 from app.utils.enums import OrganizationType
 
@@ -17,9 +17,8 @@ class OrganizationForm(FlaskForm):
     )
     organization_type = SelectField(
         "Organization type",
-        choices=[("", "Select a type")] + [
-            (item.value, item.label) for item in OrganizationType
-        ],
+        choices=[("", "Select a type")]
+        + [(item.value, item.label) for item in OrganizationType],
         validators=[Optional()],
     )
     website = StringField(

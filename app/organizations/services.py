@@ -80,9 +80,7 @@ def delete_organization(organization: Organization) -> None:
     db.session.commit()
 
 
-def _apply_values(
-    organization: Organization, values: OrganizationValues
-) -> None:
+def _apply_values(organization: Organization, values: OrganizationValues) -> None:
     allowed = {
         "name",
         "organization_type",

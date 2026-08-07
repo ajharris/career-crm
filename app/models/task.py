@@ -79,13 +79,9 @@ class Task(db.Model):
         onupdate=func.now(),
     )
 
-    organization: Mapped["Organization | None"] = relationship(
-        back_populates="tasks"
-    )
+    organization: Mapped["Organization | None"] = relationship(back_populates="tasks")
     contact: Mapped["Contact | None"] = relationship(back_populates="tasks")
-    job_posting: Mapped["JobPosting | None"] = relationship(
-        back_populates="tasks"
-    )
+    job_posting: Mapped["JobPosting | None"] = relationship(back_populates="tasks")
     application: Mapped["Application | None"] = relationship(back_populates="tasks")
 
     @validates("title")
@@ -100,9 +96,7 @@ class Task(db.Model):
         return self._validated_enum(TaskType, value, "task type")
 
     @validates("priority")
-    def validate_priority(
-        self, key: str, value: TaskPriority | str
-    ) -> TaskPriority:
+    def validate_priority(self, key: str, value: TaskPriority | str) -> TaskPriority:
         return self._validated_enum(TaskPriority, value, "task priority")
 
     @validates("status")

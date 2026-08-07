@@ -14,12 +14,12 @@ from wtforms import (
     TextAreaField,
 )
 from wtforms.validators import (
+    URL,
     Email,
     InputRequired,
     Length,
     NumberRange,
     Optional,
-    URL,
     ValidationError,
 )
 
@@ -82,9 +82,7 @@ class ApplicationForm(FlaskForm):
     def validate_interview_date(self, field: DateTimeLocalField) -> None:
         if self.application_date.data is not None and field.data is not None:
             if field.data.date() < self.application_date.data:
-                raise ValidationError(
-                    "Interview date cannot precede application date."
-                )
+                raise ValidationError("Interview date cannot precede application date.")
 
 
 class DeleteApplicationForm(FlaskForm):

@@ -1,7 +1,7 @@
 """Queries used by the foundation dashboard."""
 
-from app.applications.services import count_applications
 from app.activities.services import latest_activities
+from app.applications.services import count_applications
 from app.jobs.services import count_job_postings
 from app.models.activity import Activity
 from app.tasks.services import dashboard_tasks

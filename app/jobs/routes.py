@@ -117,6 +117,5 @@ def _query_options() -> dict:
 def _form_values(form: JobPostingForm) -> JobPostingValues:
     """Extract model fields accepted by the service layer."""
     return {
-        field: getattr(form, field).data
-        for field in JobPostingValues.__annotations__
+        field: getattr(form, field).data for field in JobPostingValues.__annotations__
     }

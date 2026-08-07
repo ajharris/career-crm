@@ -195,9 +195,7 @@ def test_delete_route(client: FlaskClient) -> None:
     contact = create_contact(**service_data(organization.id))
     contact_id = contact.id
 
-    response = client.post(
-        f"/contacts/{contact_id}/delete", follow_redirects=True
-    )
+    response = client.post(f"/contacts/{contact_id}/delete", follow_redirects=True)
 
     assert response.status_code == 200
     assert b"Contact deleted successfully." in response.data
@@ -283,9 +281,7 @@ def test_contact_sorting_options(app) -> None:
     ]
     assert [
         item.id
-        for item in list_contacts(
-            sort="last_contacted_at", direction="desc"
-        ).items
+        for item in list_contacts(sort="last_contacted_at", direction="desc").items
     ] == [second.id, first.id]
 
 
@@ -296,9 +292,7 @@ def test_sorting_route(client: FlaskClient) -> None:
     update_contact(first, last_name="Alpha")
     update_contact(second, last_name="Zulu")
 
-    response = client.get(
-        "/contacts?sort=last_name&direction=desc"
-    )
+    response = client.get("/contacts?sort=last_name&direction=desc")
 
     assert response.data.index(b"Second Zulu") < response.data.index(b"First Alpha")
 

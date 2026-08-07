@@ -8,7 +8,7 @@ from wtforms import (
     SubmitField,
     TextAreaField,
 )
-from wtforms.validators import Email, InputRequired, Length, Optional, URL
+from wtforms.validators import URL, Email, InputRequired, Length, Optional
 
 from app.utils.enums import RelationshipStatus
 
@@ -24,14 +24,10 @@ class ContactForm(FlaskForm):
         validators=[InputRequired(), Length(max=100)],
         render_kw={"autofocus": True},
     )
-    last_name = StringField(
-        "Last name", validators=[InputRequired(), Length(max=100)]
-    )
+    last_name = StringField("Last name", validators=[InputRequired(), Length(max=100)])
     title = StringField("Title", validators=[Optional(), Length(max=200)])
     department = StringField("Department", validators=[Optional(), Length(max=200)])
-    email = StringField(
-        "Email", validators=[Optional(), Email(), Length(max=320)]
-    )
+    email = StringField("Email", validators=[Optional(), Email(), Length(max=320)])
     phone = StringField("Phone", validators=[Optional(), Length(max=50)])
     linkedin_url = StringField(
         "LinkedIn URL",
@@ -40,9 +36,8 @@ class ContactForm(FlaskForm):
     )
     relationship_status = SelectField(
         "Relationship status",
-        choices=[("", "Select a status")] + [
-            (item.value, item.label) for item in RelationshipStatus
-        ],
+        choices=[("", "Select a status")]
+        + [(item.value, item.label) for item in RelationshipStatus],
         validators=[Optional()],
     )
     last_contacted_at = DateTimeLocalField(

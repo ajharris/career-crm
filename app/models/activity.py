@@ -85,9 +85,7 @@ class Activity(db.Model):
         back_populates="activities"
     )
     contact: Mapped["Contact | None"] = relationship(back_populates="activities")
-    job_posting: Mapped["JobPosting | None"] = relationship(
-        back_populates="activities"
-    )
+    job_posting: Mapped["JobPosting | None"] = relationship(back_populates="activities")
     application: Mapped["Application | None"] = relationship(
         back_populates="activities"
     )

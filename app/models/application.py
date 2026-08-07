@@ -42,9 +42,7 @@ class Application(db.Model):
             "offer_salary IS NULL OR offer_salary > 0",
             name="ck_applications_offer_salary_positive",
         ),
-        UniqueConstraint(
-            "job_posting_id", name="uq_applications_job_posting_id"
-        ),
+        UniqueConstraint("job_posting_id", name="uq_applications_job_posting_id"),
         Index("ix_applications_status", "status"),
         Index("ix_applications_application_date", "application_date"),
         Index("ix_applications_interview_date", "interview_date"),

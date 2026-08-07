@@ -50,12 +50,12 @@ def initialize_extensions(app: Flask) -> None:
     csrf.init_app(app)
 
     from app.auth.models import User
-    from app.models.activity import Activity
-    from app.models.application import Application
-    from app.models.contact import Contact
-    from app.models.job_posting import JobPosting
-    from app.models.organization import Organization
-    from app.models.task import Task
+    from app.models.activity import Activity  # noqa: F401
+    from app.models.application import Application  # noqa: F401
+    from app.models.contact import Contact  # noqa: F401
+    from app.models.job_posting import JobPosting  # noqa: F401
+    from app.models.organization import Organization  # noqa: F401
+    from app.models.task import Task  # noqa: F401
 
     @login_manager.user_loader
     def load_user(user_id: str) -> User | None:
@@ -67,10 +67,10 @@ def initialize_extensions(app: Flask) -> None:
 
 def register_blueprints(app: Flask) -> None:
     """Register blueprints implemented in this milestone."""
-    from app.dashboard import bp as dashboard_bp
     from app.activities import bp as activities_bp
     from app.applications import bp as applications_bp
     from app.contacts import bp as contacts_bp
+    from app.dashboard import bp as dashboard_bp
     from app.jobs import bp as jobs_bp
     from app.organizations import bp as organizations_bp
     from app.tasks import bp as tasks_bp
@@ -99,6 +99,7 @@ def register_error_handlers(app: Flask) -> None:
 
 def register_commands(app: Flask) -> None:
     """Register database-related Flask CLI commands."""
+
     @app.cli.command("init-db")
     def init_db_command() -> None:
         """Create tables for a fresh development installation."""

@@ -14,7 +14,6 @@ from app.activities.services import (
     list_activities,
     update_activity,
 )
-from app.models.activity import Activity
 from app.utils.enums import ActivityDirection, ActivityType
 
 
@@ -37,9 +36,7 @@ def index() -> str:
 @bp.get("/<int:activity_id>")
 def detail(activity_id: int) -> str:
     """Show one activity."""
-    return render_template(
-        "activities/detail.html", activity=get_activity(activity_id)
-    )
+    return render_template("activities/detail.html", activity=get_activity(activity_id))
 
 
 @bp.route("/new", methods=["GET", "POST"])
@@ -53,9 +50,7 @@ def create() -> str:
         activity = create_activity(**_form_values(form))
         flash("Activity created successfully.", "success")
         return redirect(url_for("activities.detail", activity_id=activity.id))
-    return render_template(
-        "activities/form.html", form=form, page_title="New activity"
-    )
+    return render_template("activities/form.html", form=form, page_title="New activity")
 
 
 @bp.route("/<int:activity_id>/edit", methods=["GET", "POST"])
@@ -85,21 +80,15 @@ def delete(activity_id: int) -> str:
         delete_activity(activity)
         flash("Activity deleted successfully.", "success")
         return redirect(url_for("activities.index"))
-    return render_template(
-        "activities/delete.html", activity=activity, form=form
-    )
+    return render_template("activities/delete.html", activity=activity, form=form)
 
 
 def _set_entity_choices(form: ActivityForm) -> None:
     choices = entity_choices()
-    form.organization_id.choices = [("", "No organization")] + choices[
-        "organizations"
-    ]
+    form.organization_id.choices = [("", "No organization")] + choices["organizations"]
     form.contact_id.choices = [("", "No contact")] + choices["contacts"]
     form.job_posting_id.choices = [("", "No job posting")] + choices["jobs"]
-    form.application_id.choices = [("", "No application")] + choices[
-        "applications"
-    ]
+    form.application_id.choices = [("", "No application")] + choices["applications"]
 
 
 def _apply_context_defaults(form: ActivityForm) -> None:
@@ -140,6 +129,5 @@ def _query_options(form: ActivityFilterForm) -> dict:
 def _form_values(form: ActivityForm) -> ActivityValues:
     """Extract model fields accepted by the service layer."""
     return {
-        field: getattr(form, field).data
-        for field in ActivityValues.__annotations__
+        field: getattr(form, field).data for field in ActivityValues.__annotations__
     }

@@ -5,8 +5,8 @@ from flask import flash, redirect, render_template, request, url_for
 from app.contacts import bp
 from app.contacts.forms import ContactForm, DeleteContactForm
 from app.contacts.services import (
-    ContactValues,
     SORT_COLUMNS,
+    ContactValues,
     create_contact,
     delete_contact,
     get_contact,

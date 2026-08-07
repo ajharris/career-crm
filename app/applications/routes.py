@@ -147,6 +147,5 @@ def _optional_bool(value: str) -> bool | None:
 def _form_values(form: ApplicationForm) -> ApplicationValues:
     """Extract model fields accepted by the service layer."""
     return {
-        field: getattr(form, field).data
-        for field in ApplicationValues.__annotations__
+        field: getattr(form, field).data for field in ApplicationValues.__annotations__
     }

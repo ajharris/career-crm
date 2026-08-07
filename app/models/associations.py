@@ -4,7 +4,6 @@ from sqlalchemy import Column, ForeignKey, Table
 
 from app.extensions import db
 
-
 job_posting_skills = Table(
     "job_posting_skills",
     db.metadata,

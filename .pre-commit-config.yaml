@@ -1,0 +1,31 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff lint
+        entry: ruff check --fix
+        language: python
+        additional_dependencies: ["ruff>=0.11,<1"]
+        types: [python]
+      - id: black
+        name: Black format
+        entry: black
+        language: python
+        additional_dependencies: ["black>=25.1,<27"]
+        types: [python]
+      - id: mypy
+        name: MyPy type check
+        entry: mypy
+        language: python
+        additional_dependencies:
+          - "mypy>=1.15,<2"
+          - "SQLAlchemy==2.0.51"
+          - "Flask-SQLAlchemy==3.1.1"
+        pass_filenames: false
+        types: [python]
+      - id: tests
+        name: Pytest suite
+        entry: venv/bin/python -m pytest -q
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

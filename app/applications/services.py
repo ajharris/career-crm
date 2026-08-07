@@ -63,9 +63,7 @@ def list_applications(
 ) -> Pagination:
     """Return a searched, filtered, sorted page of applications."""
     statement = (
-        select(Application)
-        .join(Application.job_posting)
-        .join(JobPosting.organization)
+        select(Application).join(Application.job_posting).join(JobPosting.organization)
     )
     if search := search.strip():
         pattern = f"%{_escape_like(search)}%"
@@ -184,9 +182,7 @@ def _validate_application(application: Application) -> None:
     application.validate_business_rules()
 
 
-def _commit(
-    application: Application, *, add_submission_activity: bool = False
-) -> None:
+def _commit(application: Application, *, add_submission_activity: bool = False) -> None:
     try:
         db.session.flush()
         if add_submission_activity:

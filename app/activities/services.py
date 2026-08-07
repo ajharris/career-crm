@@ -64,9 +64,7 @@ def list_activities(
 ) -> Pagination:
     """Return a searched, filtered, sorted page of activities."""
     statement = (
-        select(Activity)
-        .outerjoin(Activity.organization)
-        .outerjoin(Activity.contact)
+        select(Activity).outerjoin(Activity.organization).outerjoin(Activity.contact)
     )
     if search := search.strip():
         pattern = f"%{_escape_like(search)}%"
@@ -119,9 +117,7 @@ def create_activity(**values: Unpack[ActivityValues]) -> Activity:
     return activity
 
 
-def update_activity(
-    activity: Activity, **values: Unpack[ActivityValues]
-) -> Activity:
+def update_activity(activity: Activity, **values: Unpack[ActivityValues]) -> Activity:
     """Update and persist an activity."""
     _apply_values(activity, values)
     _prepare_activity(activity)
@@ -156,9 +152,9 @@ def recent_activities(
             statement = statement.where(column == value)
     return list(
         db.session.scalars(
-            statement.order_by(
-                Activity.occurred_at.desc(), Activity.id.desc()
-            ).limit(limit)
+            statement.order_by(Activity.occurred_at.desc(), Activity.id.desc()).limit(
+                limit
+            )
         )
     )
 
@@ -216,9 +212,7 @@ def entity_choices() -> dict[str, list[tuple[int, str]]]:
         "organizations": [(item.id, item.name) for item in organizations],
         "contacts": [(item.id, item.full_name) for item in contacts],
         "jobs": [(item.id, item.title) for item in jobs],
-        "applications": [
-            (item.id, item.job_posting.title) for item in applications
-        ],
+        "applications": [(item.id, item.job_posting.title) for item in applications],
     }
 
 

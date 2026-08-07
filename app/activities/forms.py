@@ -19,7 +19,9 @@ from app.utils.enums import ActivityDirection, ActivityType
 
 def optional_int(value: str | int | None) -> int | None:
     """Coerce an optional select value to an integer identifier."""
-    return int(value) if value not in {None, ""} else None
+    if value is None or value == "":
+        return None
+    return int(value)
 
 
 class ActivityForm(FlaskForm):
@@ -69,9 +71,7 @@ class ActivityForm(FlaskForm):
                 self.application_id.data,
             )
         ):
-            self.organization_id.errors.append(
-                "Select at least one related entity."
-            )
+            self.organization_id.errors.append("Select at least one related entity.")
             return False
         return valid
 

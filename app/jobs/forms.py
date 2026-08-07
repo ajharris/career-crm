@@ -1,5 +1,7 @@
 """Forms used by job posting management views."""
 
+from typing import Any
+
 from flask_wtf import FlaskForm
 from wtforms import (
     DateField,
@@ -12,20 +14,20 @@ from wtforms import (
     TextAreaField,
 )
 from wtforms.validators import (
+    URL,
     InputRequired,
     Length,
     NumberRange,
     Optional,
-    URL,
     ValidationError,
 )
 
 from app.utils.enums import EmploymentType, JobSource, JobStatus, WorkMode
 
 
-def _choices(enum_class: type, empty_label: str | None = None) -> list[tuple[str, str]]:
+def _choices(enum_class: Any, empty_label: str | None = None) -> list[tuple[str, str]]:
     choices = [(item.value, item.label) for item in enum_class]
-    return [('', empty_label)] + choices if empty_label else choices
+    return [("", empty_label)] + choices if empty_label else choices
 
 
 class JobPostingForm(FlaskForm):

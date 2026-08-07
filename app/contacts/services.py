@@ -104,14 +104,13 @@ def organization_choices() -> list[tuple[int, str]]:
 
 def title_choices() -> list[str]:
     """Return distinct non-empty contact titles for filtering."""
-    return list(
-        db.session.scalars(
-            select(Contact.title)
-            .where(Contact.title.is_not(None), Contact.title != "")
-            .distinct()
-            .order_by(Contact.title)
-        ).all()
-    )
+    titles = db.session.scalars(
+        select(Contact.title)
+        .where(Contact.title.is_not(None), Contact.title != "")
+        .distinct()
+        .order_by(Contact.title)
+    ).all()
+    return [title for title in titles if title is not None]
 
 
 def _apply_values(contact: Contact, values: ContactValues) -> None:

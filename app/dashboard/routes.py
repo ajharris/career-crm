@@ -3,7 +3,11 @@
 from flask import render_template
 
 from app.dashboard import bp
-from app.dashboard.services import dashboard_recent_activities, dashboard_statistics, dashboard_task_summary
+from app.dashboard.services import (
+    dashboard_recent_activities,
+    dashboard_statistics,
+    dashboard_task_summary,
+)
 
 
 @bp.get("/")

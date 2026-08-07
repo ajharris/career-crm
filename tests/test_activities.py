@@ -234,9 +234,7 @@ def test_delete_requires_confirmation_and_deletes(client: FlaskClient) -> None:
     activity_id = activity.id
 
     confirmation = client.get(f"/activities/{activity_id}/delete")
-    response = client.post(
-        f"/activities/{activity_id}/delete", follow_redirects=True
-    )
+    response = client.post(f"/activities/{activity_id}/delete", follow_redirects=True)
 
     assert b"Are you sure" in confirmation.data
     assert b"Activity deleted successfully." in response.data
@@ -303,9 +301,7 @@ def test_default_timeline_order_and_sorting(client: FlaskClient) -> None:
     create_activity(**newer)
 
     default_response = client.get("/activities")
-    ascending = client.get(
-        "/activities?sort=occurred_at&sort_direction=asc"
-    )
+    ascending = client.get("/activities?sort=occurred_at&sort_direction=asc")
 
     assert default_response.data.index(b"Newer") < default_response.data.index(b"Older")
     assert ascending.data.index(b"Older") < ascending.data.index(b"Newer")
@@ -319,12 +315,8 @@ def test_pagination_displays_25_activities(client: FlaskClient) -> None:
         create_activity(**values)
 
     pagination = list_activities(page=1)
-    second_pagination = list_activities(
-        page=2, sort="created_at", sort_direction="asc"
-    )
-    second_page = client.get(
-        "/activities?page=2&sort=created_at&sort_direction=asc"
-    )
+    second_pagination = list_activities(page=2, sort="created_at", sort_direction="asc")
+    second_page = client.get("/activities?page=2&sort=created_at&sort_direction=asc")
 
     assert len(pagination.items) == 25
     assert pagination.total == 27
@@ -346,9 +338,7 @@ def test_context_aware_creation(
 ) -> None:
     entity = entity_factory(make_organization())
 
-    response = client.get(
-        "/activities/new", query_string={query_name: entity.id}
-    )
+    response = client.get("/activities/new", query_string={query_name: entity.id})
 
     assert f'<option selected value="{entity.id}"'.encode() in response.data
 
@@ -377,9 +367,12 @@ def test_automatic_application_submitted_activity(app) -> None:
 def test_planned_application_does_not_create_activity(app) -> None:
     application = make_application(make_job(make_organization()))
 
-    assert db.session.scalar(
-        db.select(Activity).where(Activity.application_id == application.id)
-    ) is None
+    assert (
+        db.session.scalar(
+            db.select(Activity).where(Activity.application_id == application.id)
+        )
+        is None
+    )
 
 
 def test_activity_integrations(client: FlaskClient) -> None:
