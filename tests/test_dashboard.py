@@ -75,8 +75,8 @@ def test_upcoming_deadlines_merge_tasks_and_closing_dates(app):
     assert all(isinstance(item["parameters"], dict) for item in deadlines)
 
 
-def test_saved_widget_visibility(client, app):
-    response = client.post(
+def test_saved_widget_visibility(authenticated_client, app):
+    response = authenticated_client.post(
         "/dashboard/settings",
         data={"tasks": "y", "deadlines": "y", "submit": "Save dashboard"},
         follow_redirects=True,

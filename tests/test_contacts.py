@@ -118,17 +118,17 @@ def test_delete_contact_service(app) -> None:
     assert db.session.get(Contact, contact_id) is None
 
 
-def test_list_route(client: FlaskClient) -> None:
-    response = client.get("/contacts")
+def test_list_route(authenticated_client: FlaskClient) -> None:
+    response = authenticated_client.get("/contacts")
 
     assert response.status_code == 200
     assert b"New Contact" in response.data
 
 
-def test_create_and_detail_routes(client: FlaskClient) -> None:
+def test_create_and_detail_routes(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
 
-    response = client.post(
+    response = authenticated_client.post(
         "/contacts/new",
         data=contact_data(organization.id),
         follow_redirects=True,
@@ -142,12 +142,12 @@ def test_create_and_detail_routes(client: FlaskClient) -> None:
     assert b"Updated" in response.data
 
 
-def test_create_route_validates_fields(client: FlaskClient) -> None:
+def test_create_route_validates_fields(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     values = contact_data(organization.id)
     values.update(first_name="", email="invalid", linkedin_url="invalid")
 
-    response = client.post("/contacts/new", data=values)
+    response = authenticated_client.post("/contacts/new", data=values)
 
     assert response.status_code == 200
     assert b"This field is required." in response.data
@@ -155,22 +155,22 @@ def test_create_route_validates_fields(client: FlaskClient) -> None:
     assert b"Invalid URL." in response.data
 
 
-def test_new_contact_preselects_organization(client: FlaskClient) -> None:
+def test_new_contact_preselects_organization(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
 
-    response = client.get(f"/contacts/new?organization_id={organization.id}")
+    response = authenticated_client.get(f"/contacts/new?organization_id={organization.id}")
 
     selected = f'<option selected value="{organization.id}"'.encode()
     assert selected in response.data
 
 
-def test_edit_route(client: FlaskClient) -> None:
+def test_edit_route(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     contact = create_contact(**service_data(organization.id))
     values = contact_data(organization.id, "Jordan")
     values["last_name"] = "Lee"
 
-    response = client.post(
+    response = authenticated_client.post(
         f"/contacts/{contact.id}/edit", data=values, follow_redirects=True
     )
 
@@ -179,23 +179,23 @@ def test_edit_route(client: FlaskClient) -> None:
     assert contact.full_name == "Jordan Lee"
 
 
-def test_delete_requires_confirmation(client: FlaskClient) -> None:
+def test_delete_requires_confirmation(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     contact = create_contact(**service_data(organization.id))
 
-    response = client.get(f"/contacts/{contact.id}/delete")
+    response = authenticated_client.get(f"/contacts/{contact.id}/delete")
 
     assert response.status_code == 200
     assert b"Are you sure" in response.data
     assert db.session.get(Contact, contact.id) is contact
 
 
-def test_delete_route(client: FlaskClient) -> None:
+def test_delete_route(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     contact = create_contact(**service_data(organization.id))
     contact_id = contact.id
 
-    response = client.post(f"/contacts/{contact_id}/delete", follow_redirects=True)
+    response = authenticated_client.post(f"/contacts/{contact_id}/delete", follow_redirects=True)
 
     assert response.status_code == 200
     assert b"Contact deleted successfully." in response.data
@@ -205,16 +205,16 @@ def test_delete_route(client: FlaskClient) -> None:
 @pytest.mark.parametrize(
     "query", ["alex", "MORGAN", "toronto general", "hiring", "example.org"]
 )
-def test_search_is_case_insensitive(client: FlaskClient, query: str) -> None:
+def test_search_is_case_insensitive(authenticated_client: FlaskClient, query: str) -> None:
     organization = make_organization()
     create_contact(**service_data(organization.id))
 
-    response = client.get("/contacts", query_string={"q": query})
+    response = authenticated_client.get("/contacts", query_string={"q": query})
 
     assert b"Alex Morgan" in response.data
 
 
-def test_filters_by_organization_and_title(client: FlaskClient) -> None:
+def test_filters_by_organization_and_title(authenticated_client: FlaskClient) -> None:
     first = make_organization("First Organization")
     second = make_organization("Second Organization")
     create_contact(**service_data(first.id, "Alex"))
@@ -222,10 +222,10 @@ def test_filters_by_organization_and_title(client: FlaskClient) -> None:
     second_values["title"] = "Recruiter"
     create_contact(**second_values)
 
-    by_organization = client.get(
+    by_organization = authenticated_client.get(
         "/contacts", query_string={"organization_id": second.id}
     )
-    by_title = client.get("/contacts", query_string={"title": "Recruiter"})
+    by_title = authenticated_client.get("/contacts", query_string={"title": "Recruiter"})
 
     assert b"Bailey Morgan" in by_organization.data
     assert b"Alex Morgan" not in by_organization.data
@@ -233,13 +233,13 @@ def test_filters_by_organization_and_title(client: FlaskClient) -> None:
     assert b"Alex Morgan" not in by_title.data
 
 
-def test_search_and_filters_work_together(client: FlaskClient) -> None:
+def test_search_and_filters_work_together(authenticated_client: FlaskClient) -> None:
     first = make_organization("First Organization")
     second = make_organization("Second Organization")
     create_contact(**service_data(first.id, "Alex"))
     create_contact(**service_data(second.id, "Bailey"))
 
-    response = client.get(
+    response = authenticated_client.get(
         "/contacts",
         query_string={"q": "bailey", "organization_id": second.id},
     )
@@ -285,19 +285,19 @@ def test_contact_sorting_options(app) -> None:
     ] == [second.id, first.id]
 
 
-def test_sorting_route(client: FlaskClient) -> None:
+def test_sorting_route(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     first = create_contact(**service_data(organization.id, "First"))
     second = create_contact(**service_data(organization.id, "Second"))
     update_contact(first, last_name="Alpha")
     update_contact(second, last_name="Zulu")
 
-    response = client.get("/contacts?sort=last_name&direction=desc")
+    response = authenticated_client.get("/contacts?sort=last_name&direction=desc")
 
     assert response.data.index(b"Second Zulu") < response.data.index(b"First Alpha")
 
 
-def test_pagination_displays_25_contacts(client: FlaskClient) -> None:
+def test_pagination_displays_25_contacts(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     for number in range(27):
         values = service_data(organization.id, f"Person{number:02d}")
@@ -305,18 +305,18 @@ def test_pagination_displays_25_contacts(client: FlaskClient) -> None:
         create_contact(**values)
 
     pagination = list_contacts(page=1)
-    second_page = client.get("/contacts?page=2")
+    second_page = authenticated_client.get("/contacts?page=2")
 
     assert len(pagination.items) == 25
     assert pagination.total == 27
     assert b"Person25 Morgan" in second_page.data
 
 
-def test_organization_detail_lists_contacts(client: FlaskClient) -> None:
+def test_organization_detail_lists_contacts(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     create_contact(**service_data(organization.id))
 
-    response = client.get(f"/organizations/{organization.id}")
+    response = authenticated_client.get(f"/organizations/{organization.id}")
 
     assert b"Add Contact" in response.data
     assert b"Alex Morgan" in response.data

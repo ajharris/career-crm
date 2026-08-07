@@ -173,12 +173,12 @@ def test_create_update_delete_services(app) -> None:
     assert db.session.get(Activity, activity_id) is None
 
 
-def test_list_and_detail_routes(client: FlaskClient) -> None:
+def test_list_and_detail_routes(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     activity = create_activity(**service_data(organization.id))
 
-    listing = client.get("/activities")
-    detail = client.get(f"/activities/{activity.id}")
+    listing = authenticated_client.get("/activities")
+    detail = authenticated_client.get(f"/activities/{activity.id}")
 
     assert listing.status_code == 200
     assert b"Activity Timeline" in listing.data
@@ -187,10 +187,10 @@ def test_list_and_detail_routes(client: FlaskClient) -> None:
     assert b"Received a positive reply" in detail.data
 
 
-def test_create_route(client: FlaskClient) -> None:
+def test_create_route(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
 
-    response = client.post(
+    response = authenticated_client.post(
         "/activities/new",
         data=activity_data(organization.id),
         follow_redirects=True,
@@ -201,23 +201,23 @@ def test_create_route(client: FlaskClient) -> None:
     assert b"Hiring manager outreach" in response.data
 
 
-def test_create_route_requires_relationship(client: FlaskClient) -> None:
+def test_create_route_requires_relationship(authenticated_client: FlaskClient) -> None:
     values = activity_data(0)
     values["organization_id"] = ""
 
-    response = client.post("/activities/new", data=values)
+    response = authenticated_client.post("/activities/new", data=values)
 
     assert response.status_code == 200
     assert b"Select at least one related entity." in response.data
 
 
-def test_edit_route(client: FlaskClient) -> None:
+def test_edit_route(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     activity = create_activity(**service_data(organization.id))
     values = activity_data(organization.id)
     values["subject"] = "Edited subject"
 
-    response = client.post(
+    response = authenticated_client.post(
         f"/activities/{activity.id}/edit",
         data=values,
         follow_redirects=True,
@@ -228,13 +228,13 @@ def test_edit_route(client: FlaskClient) -> None:
     assert activity.subject == "Edited subject"
 
 
-def test_delete_requires_confirmation_and_deletes(client: FlaskClient) -> None:
+def test_delete_requires_confirmation_and_deletes(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     activity = create_activity(**service_data(organization.id))
     activity_id = activity.id
 
-    confirmation = client.get(f"/activities/{activity_id}/delete")
-    response = client.post(f"/activities/{activity_id}/delete", follow_redirects=True)
+    confirmation = authenticated_client.get(f"/activities/{activity_id}/delete")
+    response = authenticated_client.post(f"/activities/{activity_id}/delete", follow_redirects=True)
 
     assert b"Are you sure" in confirmation.data
     assert b"Activity deleted successfully." in response.data
@@ -245,19 +245,19 @@ def test_delete_requires_confirmation_and_deletes(client: FlaskClient) -> None:
     "query",
     ["hiring manager", "introduced", "positive reply", "follow up", "uhn", "alex"],
 )
-def test_search_is_case_insensitive(client: FlaskClient, query: str) -> None:
+def test_search_is_case_insensitive(authenticated_client: FlaskClient, query: str) -> None:
     organization = make_organization()
     contact = make_contact(organization)
     values = service_data(organization.id)
     values["contact_id"] = contact.id
     create_activity(**values)
 
-    response = client.get("/activities", query_string={"q": query.upper()})
+    response = authenticated_client.get("/activities", query_string={"q": query.upper()})
 
     assert b"Hiring manager outreach" in response.data
 
 
-def test_filters_combine_with_search(client: FlaskClient) -> None:
+def test_filters_combine_with_search(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     contact = make_contact(organization)
     job = make_job(organization)
@@ -273,7 +273,7 @@ def test_filters_combine_with_search(client: FlaskClient) -> None:
         subject="Technical discussion",
     )
 
-    response = client.get(
+    response = authenticated_client.get(
         "/activities",
         query_string={
             "q": "technical",
@@ -291,7 +291,7 @@ def test_filters_combine_with_search(client: FlaskClient) -> None:
     assert b"Technical discussion" in response.data
 
 
-def test_default_timeline_order_and_sorting(client: FlaskClient) -> None:
+def test_default_timeline_order_and_sorting(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     older = service_data(organization.id)
     older.update(subject="Older", occurred_at=datetime(2026, 1, 1))
@@ -300,14 +300,14 @@ def test_default_timeline_order_and_sorting(client: FlaskClient) -> None:
     create_activity(**older)
     create_activity(**newer)
 
-    default_response = client.get("/activities")
-    ascending = client.get("/activities?sort=occurred_at&sort_direction=asc")
+    default_response = authenticated_client.get("/activities")
+    ascending = authenticated_client.get("/activities?sort=occurred_at&sort_direction=asc")
 
     assert default_response.data.index(b"Newer") < default_response.data.index(b"Older")
     assert ascending.data.index(b"Older") < ascending.data.index(b"Newer")
 
 
-def test_pagination_displays_25_activities(client: FlaskClient) -> None:
+def test_pagination_displays_25_activities(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     for number in range(27):
         values = service_data(organization.id)
@@ -316,7 +316,7 @@ def test_pagination_displays_25_activities(client: FlaskClient) -> None:
 
     pagination = list_activities(page=1)
     second_pagination = list_activities(page=2, sort="created_at", sort_direction="asc")
-    second_page = client.get("/activities?page=2&sort=created_at&sort_direction=asc")
+    second_page = authenticated_client.get("/activities?page=2&sort=created_at&sort_direction=asc")
 
     assert len(pagination.items) == 25
     assert pagination.total == 27
@@ -334,11 +334,11 @@ def test_pagination_displays_25_activities(client: FlaskClient) -> None:
     ],
 )
 def test_context_aware_creation(
-    client: FlaskClient, query_name: str, entity_factory
+    authenticated_client: FlaskClient, query_name: str, entity_factory
 ) -> None:
     entity = entity_factory(make_organization())
 
-    response = client.get("/activities/new", query_string={query_name: entity.id})
+    response = authenticated_client.get("/activities/new", query_string={query_name: entity.id})
 
     assert f'<option selected value="{entity.id}"'.encode() in response.data
 
@@ -375,7 +375,7 @@ def test_planned_application_does_not_create_activity(app) -> None:
     )
 
 
-def test_activity_integrations(client: FlaskClient) -> None:
+def test_activity_integrations(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     contact = make_contact(organization)
     job = make_job(organization)
@@ -392,11 +392,11 @@ def test_activity_integrations(client: FlaskClient) -> None:
     )
 
     responses = (
-        client.get(f"/organizations/{organization.id}"),
-        client.get(f"/contacts/{contact.id}"),
-        client.get(f"/jobs/{job.id}"),
-        client.get(f"/applications/{application.id}"),
-        client.get("/"),
+        authenticated_client.get(f"/organizations/{organization.id}"),
+        authenticated_client.get(f"/contacts/{contact.id}"),
+        authenticated_client.get(f"/jobs/{job.id}"),
+        authenticated_client.get(f"/applications/{application.id}"),
+        authenticated_client.get("/"),
     )
 
     assert all(b"Integration activity" in response.data for response in responses)

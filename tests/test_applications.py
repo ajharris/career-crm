@@ -190,17 +190,17 @@ def test_delete_application_service(app) -> None:
     assert db.session.get(Application, application_id) is None
 
 
-def test_list_route(client: FlaskClient) -> None:
-    response = client.get("/applications")
+def test_list_route(authenticated_client: FlaskClient) -> None:
+    response = authenticated_client.get("/applications")
 
     assert response.status_code == 200
     assert b"New Application" in response.data
 
 
-def test_create_and_detail_routes(client: FlaskClient) -> None:
+def test_create_and_detail_routes(authenticated_client: FlaskClient) -> None:
     job = make_job(make_organization())
 
-    response = client.post(
+    response = authenticated_client.post(
         "/applications/new",
         data=application_data(job.id),
         follow_redirects=True,
@@ -212,7 +212,7 @@ def test_create_and_detail_routes(client: FlaskClient) -> None:
     assert b"Open r\xc3\xa9sum\xc3\xa9" in response.data
 
 
-def test_create_route_validates_fields(client: FlaskClient) -> None:
+def test_create_route_validates_fields(authenticated_client: FlaskClient) -> None:
     job = make_job(make_organization())
     values = application_data(job.id)
     values.update(
@@ -224,7 +224,7 @@ def test_create_route_validates_fields(client: FlaskClient) -> None:
         interview_date="2026-08-09T10:00",
     )
 
-    response = client.post("/applications/new", data=values)
+    response = authenticated_client.post("/applications/new", data=values)
 
     assert response.status_code == 200
     assert b"Invalid URL." in response.data
@@ -233,21 +233,21 @@ def test_create_route_validates_fields(client: FlaskClient) -> None:
     assert b"Interview date cannot precede" in response.data
 
 
-def test_new_application_preselects_job(client: FlaskClient) -> None:
+def test_new_application_preselects_job(authenticated_client: FlaskClient) -> None:
     job = make_job(make_organization())
 
-    response = client.get(f"/applications/new?job_posting_id={job.id}")
+    response = authenticated_client.get(f"/applications/new?job_posting_id={job.id}")
 
     assert f'<option selected value="{job.id}"'.encode() in response.data
 
 
-def test_edit_route(client: FlaskClient) -> None:
+def test_edit_route(authenticated_client: FlaskClient) -> None:
     job = make_job(make_organization())
     application = create_application(**service_data(job.id))
     values = application_data(job.id)
     values["status"] = ApplicationStatus.OFFER.value
 
-    response = client.post(
+    response = authenticated_client.post(
         f"/applications/{application.id}/edit",
         data=values,
         follow_redirects=True,
@@ -258,22 +258,22 @@ def test_edit_route(client: FlaskClient) -> None:
     assert application.status is ApplicationStatus.OFFER
 
 
-def test_delete_requires_confirmation(client: FlaskClient) -> None:
+def test_delete_requires_confirmation(authenticated_client: FlaskClient) -> None:
     job = make_job(make_organization())
     application = create_application(**service_data(job.id))
 
-    response = client.get(f"/applications/{application.id}/delete")
+    response = authenticated_client.get(f"/applications/{application.id}/delete")
 
     assert response.status_code == 200
     assert b"Are you sure" in response.data
 
 
-def test_delete_route(client: FlaskClient) -> None:
+def test_delete_route(authenticated_client: FlaskClient) -> None:
     job = make_job(make_organization())
     application = create_application(**service_data(job.id))
     application_id = application.id
 
-    response = client.post(
+    response = authenticated_client.post(
         f"/applications/{application_id}/delete", follow_redirects=True
     )
 
@@ -285,16 +285,16 @@ def test_delete_route(client: FlaskClient) -> None:
 @pytest.mark.parametrize(
     "query", ["uhn", "physicist", "jordan", "resume-uhn", "strong application"]
 )
-def test_search_is_case_insensitive(client: FlaskClient, query: str) -> None:
+def test_search_is_case_insensitive(authenticated_client: FlaskClient, query: str) -> None:
     job = make_job(make_organization())
     create_application(**service_data(job.id))
 
-    response = client.get("/applications", query_string={"q": query.upper()})
+    response = authenticated_client.get("/applications", query_string={"q": query.upper()})
 
     assert b"Medical Physicist" in response.data
 
 
-def test_filters_combine_with_search(client: FlaskClient) -> None:
+def test_filters_combine_with_search(authenticated_client: FlaskClient) -> None:
     first_org = make_organization("UHN")
     second_org = make_organization("PocketHealth")
     first_job = make_job(first_org, "Medical Physicist")
@@ -309,7 +309,7 @@ def test_filters_combine_with_search(client: FlaskClient) -> None:
     )
     create_application(**second_values)
 
-    response = client.get(
+    response = authenticated_client.get(
         "/applications",
         query_string={
             "q": "software",
@@ -325,38 +325,38 @@ def test_filters_combine_with_search(client: FlaskClient) -> None:
     assert b"Medical Physicist" not in response.data
 
 
-def test_sorting(client: FlaskClient) -> None:
+def test_sorting(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     alpha = make_job(organization, "Alpha Role")
     zulu = make_job(organization, "Zulu Role")
     create_application(**service_data(alpha.id))
     create_application(**service_data(zulu.id))
 
-    response = client.get("/applications?sort=job_title&direction=desc")
+    response = authenticated_client.get("/applications?sort=job_title&direction=desc")
 
     assert response.data.index(b"Zulu Role") < response.data.index(b"Alpha Role")
 
 
-def test_pagination_displays_25_applications(client: FlaskClient) -> None:
+def test_pagination_displays_25_applications(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     for number in range(27):
         job = make_job(organization, f"Role {number:02d}")
         create_application(**service_data(job.id))
 
     pagination = list_applications(page=1)
-    second_page = client.get("/applications?page=2&sort=job_title&direction=asc")
+    second_page = authenticated_client.get("/applications?page=2&sort=job_title&direction=asc")
 
     assert len(pagination.items) == 25
     assert pagination.total == 27
     assert b"Role 25" in second_page.data
 
 
-def test_job_detail_application_integration(client: FlaskClient) -> None:
+def test_job_detail_application_integration(authenticated_client: FlaskClient) -> None:
     job = make_job(make_organization())
-    without_application = client.get(f"/jobs/{job.id}")
+    without_application = authenticated_client.get(f"/jobs/{job.id}")
     application = create_application(**service_data(job.id))
 
-    with_application = client.get(f"/jobs/{job.id}")
+    with_application = authenticated_client.get(f"/jobs/{job.id}")
 
     assert b"Create Application" in without_application.data
     assert b"View Application" in with_application.data
@@ -364,11 +364,11 @@ def test_job_detail_application_integration(client: FlaskClient) -> None:
     assert str(application.id).encode() in with_application.data
 
 
-def test_dashboard_application_count(client: FlaskClient) -> None:
+def test_dashboard_application_count(authenticated_client: FlaskClient) -> None:
     job = make_job(make_organization())
     create_application(**service_data(job.id))
 
-    response = client.get("/")
+    response = authenticated_client.get("/")
 
     assert b"Applications" in response.data
     assert b'<p class="display-6 mb-0">1</p>' in response.data

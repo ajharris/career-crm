@@ -102,28 +102,28 @@ def test_pagination(app):
     assert page.total == 26 and len(page.items) == 1
 
 
-def test_crud_routes(client):
-    response = client.post("/tasks/new", data=form_data(), follow_redirects=True)
+def test_crud_routes(authenticated_client):
+    response = authenticated_client.post("/tasks/new", data=form_data(), follow_redirects=True)
     assert response.status_code == 200 and b"Task created successfully" in response.data
     task = db.session.scalar(db.select(Task))
-    assert client.get("/tasks").status_code == 200
-    assert client.get(f"/tasks/{task.id}").status_code == 200
-    response = client.post(
+    assert authenticated_client.get("/tasks").status_code == 200
+    assert authenticated_client.get(f"/tasks/{task.id}").status_code == 200
+    response = authenticated_client.post(
         f"/tasks/{task.id}/edit", data=form_data(title="Edited"), follow_redirects=True
     )
     assert b"Task updated successfully" in response.data
-    response = client.post(f"/tasks/{task.id}/complete", data={}, follow_redirects=True)
+    response = authenticated_client.post(f"/tasks/{task.id}/complete", data={}, follow_redirects=True)
     assert b"Task completed successfully" in response.data
-    response = client.post(f"/tasks/{task.id}/delete", data={}, follow_redirects=True)
+    response = authenticated_client.post(f"/tasks/{task.id}/delete", data={}, follow_redirects=True)
     assert b"Task deleted successfully" in response.data
 
 
-def test_due_time_requires_date(client):
-    response = client.post("/tasks/new", data=form_data(due_date="", due_time="09:00"))
+def test_due_time_requires_date(authenticated_client):
+    response = authenticated_client.post("/tasks/new", data=form_data(due_date="", due_time="09:00"))
     assert b"due date is required" in response.data
 
 
-def test_activity_followup_prefills_without_creating(client, app):
+def test_activity_followup_prefills_without_creating(authenticated_client, app):
     org = organization()
     activity = Activity(
         organization_id=org.id,
@@ -135,6 +135,6 @@ def test_activity_followup_prefills_without_creating(client, app):
     )
     db.session.add(activity)
     db.session.commit()
-    response = client.get(f"/tasks/new?activity_id={activity.id}")
+    response = authenticated_client.get(f"/tasks/new?activity_id={activity.id}")
     assert b"Follow up: Check in" in response.data
     assert db.session.scalar(db.select(db.func.count(Task.id))) == 0

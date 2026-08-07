@@ -86,25 +86,25 @@ def test_delete_organization_service(app) -> None:
     assert db.session.get(Organization, organization_id) is None
 
 
-def test_list_route(client: FlaskClient) -> None:
-    response = client.get("/organizations")
+def test_list_route(authenticated_client: FlaskClient) -> None:
+    response = authenticated_client.get("/organizations")
 
     assert response.status_code == 200
     assert b"New Organization" in response.data
 
 
-def test_detail_route(client: FlaskClient) -> None:
+def test_detail_route(authenticated_client: FlaskClient) -> None:
     organization = create_organization(**organization_data())
 
-    response = client.get(f"/organizations/{organization.id}")
+    response = authenticated_client.get(f"/organizations/{organization.id}")
 
     assert response.status_code == 200
     assert b"Toronto General" in response.data
     assert b"Hospital" in response.data
 
 
-def test_create_route(client: FlaskClient) -> None:
-    response = client.post(
+def test_create_route(authenticated_client: FlaskClient) -> None:
+    response = authenticated_client.post(
         "/organizations/new", data=organization_data(), follow_redirects=True
     )
 
@@ -113,11 +113,11 @@ def test_create_route(client: FlaskClient) -> None:
     assert db.session.scalar(db.select(Organization).filter_by(name="Toronto General"))
 
 
-def test_create_route_displays_validation_errors(client: FlaskClient) -> None:
+def test_create_route_displays_validation_errors(authenticated_client: FlaskClient) -> None:
     data = organization_data()
     data.update(name="", website="not-a-url", priority=8)
 
-    response = client.post("/organizations/new", data=data)
+    response = authenticated_client.post("/organizations/new", data=data)
 
     assert response.status_code == 200
     assert b"This field is required." in response.data
@@ -125,11 +125,11 @@ def test_create_route_displays_validation_errors(client: FlaskClient) -> None:
     assert b"Number must be between 1 and 5." in response.data
 
 
-def test_edit_route(client: FlaskClient) -> None:
+def test_edit_route(authenticated_client: FlaskClient) -> None:
     organization = create_organization(**organization_data())
     data = organization_data("New Organization Name")
 
-    response = client.post(
+    response = authenticated_client.post(
         f"/organizations/{organization.id}/edit",
         data=data,
         follow_redirects=True,
@@ -140,21 +140,21 @@ def test_edit_route(client: FlaskClient) -> None:
     assert organization.name == "New Organization Name"
 
 
-def test_delete_requires_confirmation(client: FlaskClient) -> None:
+def test_delete_requires_confirmation(authenticated_client: FlaskClient) -> None:
     organization = create_organization(**organization_data())
 
-    response = client.get(f"/organizations/{organization.id}/delete")
+    response = authenticated_client.get(f"/organizations/{organization.id}/delete")
 
     assert response.status_code == 200
     assert b"Are you sure" in response.data
     assert db.session.get(Organization, organization.id) is organization
 
 
-def test_delete_route(client: FlaskClient) -> None:
+def test_delete_route(authenticated_client: FlaskClient) -> None:
     organization = create_organization(**organization_data())
     organization_id = organization.id
 
-    response = client.post(
+    response = authenticated_client.post(
         f"/organizations/{organization_id}/delete", follow_redirects=True
     )
 
@@ -163,7 +163,7 @@ def test_delete_route(client: FlaskClient) -> None:
     assert db.session.get(Organization, organization_id) is None
 
 
-def test_search_is_case_insensitive(client: FlaskClient) -> None:
+def test_search_is_case_insensitive(authenticated_client: FlaskClient) -> None:
     create_organization(**organization_data("Alpha Hospital"))
     create_organization(
         **{
@@ -173,20 +173,20 @@ def test_search_is_case_insensitive(client: FlaskClient) -> None:
         }
     )
 
-    response = client.get("/organizations?q=montREAL")
+    response = authenticated_client.get("/organizations?q=montREAL")
 
     assert b"Beta Research" in response.data
     assert b"Alpha Hospital" not in response.data
 
-    type_response = client.get("/organizations?q=Research+Institute")
+    type_response = authenticated_client.get("/organizations?q=Research+Institute")
     assert b"Beta Research" in type_response.data
 
 
-def test_sorting_route(client: FlaskClient) -> None:
+def test_sorting_route(authenticated_client: FlaskClient) -> None:
     create_organization(**{**organization_data("Low"), "priority": 1})
     create_organization(**{**organization_data("High"), "priority": 5})
 
-    response = client.get("/organizations?sort=priority&direction=desc")
+    response = authenticated_client.get("/organizations?sort=priority&direction=desc")
 
     assert response.data.index(b"High") < response.data.index(b"Low")
 
@@ -200,12 +200,12 @@ def test_sorting_by_priority_descending(app) -> None:
     assert [item.name for item in pagination.items] == ["High", "Low"]
 
 
-def test_pagination_displays_25_organizations(client: FlaskClient) -> None:
+def test_pagination_displays_25_organizations(authenticated_client: FlaskClient) -> None:
     for number in range(27):
         create_organization(**organization_data(f"Organization {number:02d}"))
 
-    first_page = client.get("/organizations?page=1")
-    second_page = client.get("/organizations?page=2")
+    first_page = authenticated_client.get("/organizations?page=1")
+    second_page = authenticated_client.get("/organizations?page=2")
 
     assert first_page.data.count(b"<tr>") == 26
     assert b"Organization 00" in first_page.data

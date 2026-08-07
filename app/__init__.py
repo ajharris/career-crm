@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import Any
 
 import click
-from flask import Flask, render_template
+from flask import Flask, render_template, request
+from flask_login import current_user
 
 from app.config import CONFIGURATIONS, Config
 from app.extensions import csrf, db, login_manager, migrate
@@ -48,6 +49,7 @@ def initialize_extensions(app: Flask) -> None:
     migrate.init_app(app, db)
     login_manager.init_app(app)
     csrf.init_app(app)
+    login_manager.session_protection = "strong"
 
     from app.auth.models import User
     from app.models.activity import Activity  # noqa: F401
@@ -70,12 +72,14 @@ def register_blueprints(app: Flask) -> None:
     """Register blueprints implemented in this milestone."""
     from app.activities import bp as activities_bp
     from app.applications import bp as applications_bp
+    from app.auth import bp as auth_bp
     from app.contacts import bp as contacts_bp
     from app.dashboard import bp as dashboard_bp
     from app.jobs import bp as jobs_bp
     from app.organizations import bp as organizations_bp
     from app.tasks import bp as tasks_bp
 
+    app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(activities_bp)
     app.register_blueprint(applications_bp)
@@ -83,6 +87,16 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(contacts_bp)
     app.register_blueprint(jobs_bp)
     app.register_blueprint(tasks_bp)
+
+    @app.before_request
+    def require_authentication():
+        """Limit anonymous users to authentication pages and static assets."""
+        endpoint = request.endpoint or ""
+        if endpoint == "static" or endpoint.startswith("auth."):
+            return None
+        if not current_user.is_authenticated:
+            return login_manager.unauthorized()
+        return None
 
 
 def register_error_handlers(app: Flask) -> None:
