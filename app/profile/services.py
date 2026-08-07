@@ -1,6 +1,6 @@
-"""Career-profile persistence and onboarding operations."""
+"""Career-profile persistence, completeness, and reminder operations."""
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from flask import abort
 from sqlalchemy import select
@@ -11,6 +11,7 @@ from app.extensions import db
 from app.models.career_profile import (
     CareerPriority,
     CareerProfile,
+    Certification,
     Education,
     Industry,
     JobFamily,
@@ -18,9 +19,22 @@ from app.models.career_profile import (
     PreferredLocation,
     PreferredRole,
     Skill,
+    UserLanguage,
     UserSkill,
     WorkPreference,
 )
+
+COMPLETENESS_WEIGHTS = {
+    "education": 15,
+    "skills": 20,
+    "career_interests": 15,
+    "work_preferences": 15,
+    "priorities": 10,
+    "languages": 5,
+    "portfolio": 10,
+    "certifications": 5,
+    "job_search_strategy": 5,
+}
 
 
 def get_profile() -> CareerProfile:
@@ -231,3 +245,62 @@ def profile_summary() -> dict:
             )
         ),
     }
+
+
+def profile_completeness(profile: CareerProfile | None = None) -> dict:
+    """Return structured completion data; persisted percentage is only a cache."""
+    profile = profile or get_profile()
+    present = {
+        "education": bool(owned_records(Education)),
+        "skills": bool(owned_records(UserSkill)),
+        "career_interests": bool(
+            owned_records(PreferredRole) or profile.industries or profile.job_families
+        ),
+        "work_preferences": bool(
+            owned_records(WorkPreference) or owned_records(PreferredLocation)
+        ),
+        "priorities": bool(owned_records(CareerPriority)),
+        "languages": bool(owned_records(UserLanguage)),
+        "portfolio": bool(owned_records(PortfolioItem)),
+        "certifications": bool(owned_records(Certification)),
+        "job_search_strategy": profile.applications_per_week_target is not None,
+    }
+    percentage = sum(
+        weight for section, weight in COMPLETENESS_WEIGHTS.items() if present[section]
+    )
+    profile.profile_completeness = percentage
+    db.session.commit()
+    return {
+        "percentage": percentage,
+        "sections": present,
+        "next_sections": [
+            section for section in COMPLETENESS_WEIGHTS if not present[section]
+        ][:3],
+    }
+
+
+def set_reminder(interval: str) -> None:
+    """Snooze or permanently dismiss the dashboard-only profile prompt."""
+    delays = {
+        "tomorrow": timedelta(days=1),
+        "one_week": timedelta(weeks=1),
+        "two_weeks": timedelta(weeks=2),
+        "one_month": timedelta(days=30),
+    }
+    if interval not in {*delays, "never"}:
+        raise ValueError("Unsupported reminder interval.")
+    profile = get_profile()
+    profile.reminder_interval = interval
+    profile.reminder_dismissed_until = (
+        None if interval == "never" else datetime.now(UTC) + delays[interval]
+    )
+    db.session.commit()
+
+
+def should_show_profile_reminder(profile: CareerProfile) -> bool:
+    if profile.onboarding_completed or profile.reminder_interval == "never":
+        return False
+    until = profile.reminder_dismissed_until
+    if until is not None and until.tzinfo is None:
+        until = until.replace(tzinfo=UTC)
+    return until is None or until <= datetime.now(UTC)

@@ -113,6 +113,21 @@ class CareerProfile(db.Model):
     onboarding_completed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True)
     )
+    profile_completeness: Mapped[int] = mapped_column(default=0, nullable=False)
+    ai_assistance_enabled: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+    ai_suggestions_enabled: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+    preferred_ai_provider: Mapped[str | None] = mapped_column(String(50))
+    preferred_ai_model: Mapped[str | None] = mapped_column(String(100))
+    reminder_interval: Mapped[str] = mapped_column(
+        String(20), default="one_week", nullable=False
+    )
+    reminder_dismissed_until: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -125,6 +140,33 @@ class CareerProfile(db.Model):
     user = relationship("User", back_populates="career_profile")
     industries = relationship("Industry", secondary=profile_industries)
     job_families = relationship("JobFamily", secondary=profile_job_families)
+
+
+class UserAIProviderCredential(db.Model):
+    """Encrypted, per-user secret for one registered AI provider."""
+
+    __tablename__ = "user_ai_provider_credentials"
+    __table_args__ = (UniqueConstraint("user_id", "provider"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    provider: Mapped[str] = mapped_column(String(50), nullable=False)
+    encrypted_secret: Mapped[str] = mapped_column(Text, nullable=False)
+    key_fingerprint: Mapped[str] = mapped_column(String(16), nullable=False)
+    verification_status: Mapped[str] = mapped_column(
+        String(20), default="unverified", nullable=False
+    )
+    last_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
 
 
 class Education(db.Model):

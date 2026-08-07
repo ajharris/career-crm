@@ -1,6 +1,6 @@
 """Dashboard routes."""
 
-from flask import flash, redirect, render_template, url_for
+from flask import flash, redirect, render_template, request, url_for
 
 from app.dashboard import bp
 from app.dashboard.forms import DashboardSettingsForm
@@ -15,11 +15,33 @@ from app.dashboard.services import (
 @bp.get("/")
 def index() -> str:
     """Render the read-only job-search command center."""
-    from app.profile.services import profile_summary
+    from app.profile.services import (
+        get_profile,
+        profile_completeness,
+        profile_summary,
+        should_show_profile_reminder,
+    )
+
+    profile = get_profile()
 
     return render_template(
-        "dashboard/index.html", profile_summary=profile_summary(), **dashboard_data()
+        "dashboard/index.html",
+        profile_summary=profile_summary(),
+        profile_completion=profile_completeness(profile),
+        show_profile_reminder=should_show_profile_reminder(profile),
+        **dashboard_data(),
     )
+
+
+@bp.post("/dashboard/profile-reminder")
+def profile_reminder():
+    from app.profile.services import set_reminder
+
+    try:
+        set_reminder(request.form.get("interval", "one_week"))
+    except ValueError as exc:
+        flash(str(exc), "danger")
+    return redirect(url_for("dashboard.index"))
 
 
 @bp.route("/dashboard/settings", methods=["GET", "POST"])

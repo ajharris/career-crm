@@ -25,6 +25,7 @@ class Config:
     AI_API_URL = os.getenv("AI_API_URL")
     AI_API_KEY = os.getenv("AI_API_KEY")
     AI_MODEL = os.getenv("AI_MODEL", "gpt-4.1-mini")
+    CREDENTIAL_ENCRYPTION_KEY = os.getenv("CREDENTIAL_ENCRYPTION_KEY")
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_SAMESITE = "Lax"
 

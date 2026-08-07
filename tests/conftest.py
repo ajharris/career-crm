@@ -24,6 +24,7 @@ def app() -> Iterator[Flask]:
             "TESTING": True,
             "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
             "WTF_CSRF_ENABLED": False,
+            "CREDENTIAL_ENCRYPTION_KEY": "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=",
         }
     )
     with application.app_context():
@@ -36,6 +37,7 @@ def app() -> Iterator[Flask]:
         )
         profile = db.session.scalar(db.select(CareerProfile))
         profile.onboarding_completed = True
+        profile.ai_assistance_enabled = True
         db.session.commit()
         yield application
         db.session.remove()

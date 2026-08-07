@@ -36,6 +36,7 @@
                 <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
                 <li><a class="dropdown-item" href="{{ url_for('profile.index') }}">Career Profile</a></li>
                 <li><a class="dropdown-item" href="{{ url_for('ai.index') }}">AI Assistant</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('ai.settings') }}">AI Settings</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="dropdown-item" type="submit">Log Out</button></form></li>
               </ul>

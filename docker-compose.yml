@@ -4,6 +4,7 @@ services:
     environment:
       APP_ENV: development
       SECRET_KEY: ${SECRET_KEY:-local-compose-secret}
+      CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:-}
       DATABASE_URL: postgresql+psycopg://career_crm:career_crm@db:5432/career_crm
     ports: ["5000:8000"]
     volumes: [".:/app", "uploads:/app/instance/uploads"]

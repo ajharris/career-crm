@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}AI Settings · Career CRM{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-12 col-lg-8">
+  <div class="d-flex justify-content-between align-items-start mb-4">
+    <div><h1 class="h2">AI Settings</h1><p class="text-body-secondary">Choose an optional provider. Career CRM remains fully usable without AI.</p></div>
+    <a class="btn btn-outline-secondary" href="{{ url_for('ai.index') }}">AI Assistant</a>
+  </div>
+  <form method="post" class="card border-0 shadow-sm"><div class="card-body">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="form-label" for="provider">Provider</label>
+    <select class="form-select mb-3" id="provider" name="provider">
+      {% for key, label in provider_choices %}<option value="{{ key }}" {{ 'selected' if profile.preferred_ai_provider == key }}>{{ label }}</option>{% endfor %}
+    </select>
+    <label class="form-label" for="model">Model</label>
+    <input class="form-control mb-3" id="model" name="model" value="{{ profile.preferred_ai_model or '' }}" autocomplete="off" placeholder="Provider default">
+    <label class="form-label" for="api_key">API key</label>
+    <input class="form-control" id="api_key" name="api_key" type="password" autocomplete="new-password" placeholder="Leave blank to keep the stored key">
+    <div class="form-text mb-3">Keys are encrypted before storage and are never displayed again.
+      {% for key, credential in credentials.items() %}{% if key == profile.preferred_ai_provider %} Connected key ending {{ credential.key_fingerprint }} ({{ credential.verification_status }}).{% endif %}{% endfor %}
+    </div>
+    <div class="form-check"><input class="form-check-input" type="checkbox" value="y" id="enabled" name="enabled" {{ 'checked' if profile.ai_assistance_enabled }}><label class="form-check-label" for="enabled">Enable AI assistance</label></div>
+    <div class="form-check mb-4"><input class="form-check-input" type="checkbox" value="y" id="suggestions" name="suggestions" {{ 'checked' if profile.ai_suggestions_enabled }}><label class="form-check-label" for="suggestions">Enable profile suggestions</label></div>
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-primary" name="action" value="save">Save settings</button>
+      <button class="btn btn-outline-primary" name="action" value="test">Test connection</button>
+      <button class="btn btn-outline-danger" name="action" value="disconnect">Disconnect</button>
+    </div>
+  </div></form>
+</div></div>
+{% endblock %}

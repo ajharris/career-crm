@@ -22,6 +22,19 @@
       <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('dashboard.settings') }}">Customize</a>
     </div>
   </header>
+  {% if show_profile_reminder %}
+  <section class="card border-primary shadow-sm mb-4"><div class="card-body">
+    <div class="row align-items-center g-3"><div class="col-md">
+      <h2 class="h4">Complete Your Career Profile</h2>
+      <p class="mb-2">Improve Career CRM with your experience, goals, and preferences. Your profile is optional and currently {{ profile_completion.percentage }}% complete.</p>
+      {% if profile_completion.next_sections %}<p class="small text-body-secondary mb-0">Suggested next: {{ profile_completion.next_sections|join(', ')|replace('_', ' ')|title }}</p>{% endif %}
+    </div><div class="col-md-auto d-flex flex-wrap gap-2">
+      <a class="btn btn-primary" href="{{ url_for('profile.index') }}">Complete Profile</a>
+      <form method="post" action="{{ url_for('dashboard.profile_reminder') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="interval" value="one_week"><button class="btn btn-outline-secondary">Remind Me Later</button></form>
+      <form method="post" action="{{ url_for('dashboard.profile_reminder') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="interval" value="never"><button class="btn btn-link text-secondary">Dismiss</button></form>
+    </div></div>
+  </div></section>
+  {% endif %}
   {% if profile_summary.roles or profile_summary.skills or profile_summary.work_modes or profile_summary.priorities %}
     <section class="card border-0 shadow-sm mb-4"><div class="card-body"><div class="d-flex justify-content-between"><h2 class="h5">Career Profile</h2><a href="{{ url_for('profile.index') }}">View profile</a></div><div class="row g-3 small"><div class="col-6 col-lg-3"><strong>Preferred roles</strong><div>{{ profile_summary.roles|map(attribute='name')|join(', ') or 'Not set' }}</div></div><div class="col-6 col-lg-3"><strong>Top skills</strong><div>{{ profile_summary.skills|map(attribute='skill.name')|join(', ') or 'Not set' }}</div></div><div class="col-6 col-lg-3"><strong>Work modes</strong><div>{{ profile_summary.work_modes|map(attribute='value')|join(', ')|replace('_', ' ')|title or 'Not set' }}</div></div><div class="col-6 col-lg-3"><strong>Top priorities</strong><div>{{ profile_summary.priorities|map(attribute='factor')|join(', ') or 'Not set' }}</div></div></div></div></section>
   {% endif %}

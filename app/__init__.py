@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import click
-from flask import Flask, g, redirect, render_template, request, url_for
+from flask import Flask, g, render_template, request
 from flask_login import current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -143,14 +143,6 @@ def register_blueprints(app: Flask) -> None:
             return None
         if not current_user.is_authenticated:
             return login_manager.unauthorized()
-        if not endpoint.startswith("profile."):
-            from app.models.career_profile import CareerProfile
-
-            profile = db.session.scalar(
-                db.select(CareerProfile).where(CareerProfile.user_id == current_user.id)
-            )
-            if profile is None or not profile.onboarding_completed:
-                return redirect(url_for("profile.onboarding"))
         return None
 
 

@@ -30,7 +30,7 @@ def register(client, email="new@example.com"):
     )
 
 
-def test_registration_creates_one_incomplete_profile_and_redirects(client):
+def test_registration_creates_optional_profile_and_opens_dashboard(client):
     register(client)
     user = db.session.scalar(db.select(User).where(User.email == "new@example.com"))
     profile = db.session.scalar(
@@ -38,8 +38,8 @@ def test_registration_creates_one_incomplete_profile_and_redirects(client):
     )
     assert profile is not None and not profile.onboarding_completed
     response = client.get("/")
-    assert response.status_code == 302
-    assert response.location == "/profile/onboarding"
+    assert response.status_code == 200
+    assert b"Complete Your Career Profile" in response.data
 
 
 def test_progress_is_saved_and_resumed(client):
