@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import render_field %}
+{% block title %}Onboarding · {{ steps[step-1] }}{% endblock %}
+{% block content %}
+  <div class="row justify-content-center"><div class="col-12 col-lg-8">
+    <div class="mb-4"><div class="d-flex justify-content-between small mb-2"><span>Step {{ step }} of {{ steps|length }}</span><span>{{ ((step / steps|length) * 100)|round|int }}%</span></div><div class="progress" role="progressbar"><div class="progress-bar" style="width: {{ (step / steps|length) * 100 }}%"></div></div></div>
+    <div class="card border-0 shadow-sm"><div class="card-body p-4"><h1 class="h3 mb-3">{{ steps[step-1] }}</h1>
+      {% if step == 9 %}<p>Review your profile and complete onboarding. You can edit every section later.</p>{% endif %}
+      <form method="post">{{ form.hidden_tag() }}{% for field in form if field.name not in ['csrf_token', 'submit'] %}{% if field.type == 'BooleanField' %}<div class="form-check mb-3">{{ field(class='form-check-input') }} {{ field.label(class='form-check-label') }}</div>{% else %}{{ render_field(field) }}{% endif %}{% endfor %}
+        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-4">{% if step > 1 %}<a class="btn btn-outline-secondary btn-lg" href="{{ url_for('profile.step', step=step-1) }}">Back</a>{% else %}<span></span>{% endif %}<div class="d-flex flex-column flex-sm-row gap-2">{% if step in [2, 3, 6, 7] %}<button class="btn btn-outline-primary btn-lg" type="submit" formaction="{{ url_for('profile.skip_step', step=step) }}" formnovalidate>Skip for now</button>{% endif %}{{ form.submit(class='btn btn-primary btn-lg') }}</div></div>
+      </form>
+      {% if records %}<hr><h2 class="h5">Saved entries</h2><ul class="list-group list-group-flush">{% for record in records %}<li class="list-group-item px-0">{{ record.institution or record.skill.name or record.factor or record.title }}</li>{% endfor %}</ul>{% endif %}
+    </div></div>
+    <p class="text-center mt-3"><a href="{{ url_for('auth.logout') }}" onclick="event.preventDefault(); this.nextElementSibling.submit();">Continue later</a><form class="d-none" method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"></form></p>
+  </div></div>
+{% endblock %}

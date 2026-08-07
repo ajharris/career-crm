@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import click
-from flask import Flask, render_template, request
+from flask import Flask, g, redirect, render_template, request, url_for
 from flask_login import current_user
 
 from app.config import CONFIGURATIONS, Config
@@ -55,6 +55,7 @@ def initialize_extensions(app: Flask) -> None:
     from app.models.activity import Activity  # noqa: F401
     from app.models.application import Application  # noqa: F401
     from app.models.contact import Contact  # noqa: F401
+    from app.models.career_profile import CareerProfile  # noqa: F401
     from app.models.dashboard_widget import DashboardWidget  # noqa: F401
     from app.models.job_posting import JobPosting  # noqa: F401
     from app.models.organization import Organization  # noqa: F401
@@ -77,6 +78,7 @@ def register_blueprints(app: Flask) -> None:
     from app.dashboard import bp as dashboard_bp
     from app.jobs import bp as jobs_bp
     from app.organizations import bp as organizations_bp
+    from app.profile import bp as profile_bp
     from app.tasks import bp as tasks_bp
 
     app.register_blueprint(auth_bp)
@@ -87,15 +89,29 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(contacts_bp)
     app.register_blueprint(jobs_bp)
     app.register_blueprint(tasks_bp)
+    app.register_blueprint(profile_bp)
 
     @app.before_request
     def require_authentication():
         """Limit anonymous users to authentication pages and static assets."""
+        # Tests and CLI tooling may retain an application context across requests.
+        # Always reload Flask-Login's identity from the current request session.
+        g.pop("_login_user", None)
         endpoint = request.endpoint or ""
         if endpoint == "static" or endpoint.startswith("auth."):
             return None
         if not current_user.is_authenticated:
             return login_manager.unauthorized()
+        if not endpoint.startswith("profile."):
+            from app.models.career_profile import CareerProfile
+
+            profile = db.session.scalar(
+                db.select(CareerProfile).where(
+                    CareerProfile.user_id == current_user.id
+                )
+            )
+            if profile is None or not profile.onboarding_completed:
+                return redirect(url_for("profile.onboarding"))
         return None
 
 

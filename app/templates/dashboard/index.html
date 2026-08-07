@@ -22,6 +22,9 @@
       <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('dashboard.settings') }}">Customize</a>
     </div>
   </header>
+  {% if profile_summary.roles or profile_summary.skills or profile_summary.work_modes or profile_summary.priorities %}
+    <section class="card border-0 shadow-sm mb-4"><div class="card-body"><div class="d-flex justify-content-between"><h2 class="h5">Career Profile</h2><a href="{{ url_for('profile.index') }}">View profile</a></div><div class="row g-3 small"><div class="col-6 col-lg-3"><strong>Preferred roles</strong><div>{{ profile_summary.roles|map(attribute='name')|join(', ') or 'Not set' }}</div></div><div class="col-6 col-lg-3"><strong>Top skills</strong><div>{{ profile_summary.skills|map(attribute='skill.name')|join(', ') or 'Not set' }}</div></div><div class="col-6 col-lg-3"><strong>Work modes</strong><div>{{ profile_summary.work_modes|map(attribute='value')|join(', ')|replace('_', ' ')|title or 'Not set' }}</div></div><div class="col-6 col-lg-3"><strong>Top priorities</strong><div>{{ profile_summary.priorities|map(attribute='factor')|join(', ') or 'Not set' }}</div></div></div></div></section>
+  {% endif %}
 
   <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3 mb-4">
     {% for label, count, endpoint, icon in summary_cards %}

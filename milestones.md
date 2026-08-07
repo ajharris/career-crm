@@ -400,12 +400,11 @@ Accessibility review
 Release packaging
 A structural suggestion
 
-# Milestone 0.5
-
-# Ruff (linting)
-# Black (formatting)
-# MyPy (type checking)
-# pre-commit hooks
-# GitHub Actions for linting and tests
-# Coverage reporting with pytest-cov
-# Dependabot or Renovate for dependency updates
+/ Milestone 0.5
+/ Ruff (linting)
+/ Black (formatting)
+/ MyPy (type checking)
+/ pre-commit hooks
+/ GitHub Actions for linting and tests
+/ Coverage reporting with pytest-cov
+/ Dependabot or Renovate for dependency updates

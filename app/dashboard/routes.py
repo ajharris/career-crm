@@ -15,7 +15,11 @@ from app.dashboard.services import (
 @bp.get("/")
 def index() -> str:
     """Render the read-only job-search command center."""
-    return render_template("dashboard/index.html", **dashboard_data())
+    from app.profile.services import profile_summary
+
+    return render_template(
+        "dashboard/index.html", profile_summary=profile_summary(), **dashboard_data()
+    )
 
 
 @bp.route("/dashboard/settings", methods=["GET", "POST"])

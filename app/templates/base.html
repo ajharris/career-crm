@@ -28,6 +28,7 @@
               <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{ current_user.full_name }}</button>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('profile.index') }}">Career Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="dropdown-item" type="submit">Log Out</button></form></li>
               </ul>

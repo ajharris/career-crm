@@ -10,6 +10,7 @@ from app import create_app
 from app.auth.models import User
 from app.auth.services import create_user
 from app.extensions import db
+from app.models.career_profile import CareerProfile
 
 
 @pytest.fixture
@@ -30,6 +31,9 @@ def app() -> Iterator[Flask]:
             email="test@example.com",
             password="correct horse battery staple",
         )
+        profile = db.session.scalar(db.select(CareerProfile))
+        profile.onboarding_completed = True
+        db.session.commit()
         yield application
         db.session.remove()
         db.drop_all()

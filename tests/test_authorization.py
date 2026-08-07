@@ -35,12 +35,15 @@ PASSWORD = "correct horse battery staple"
 
 @pytest.fixture
 def second_user(app) -> User:
-    return create_user(
+    user = create_user(
         first_name="Second",
         last_name="User",
         email="second@example.com",
         password=PASSWORD,
     )
+    user.career_profile.onboarding_completed = True
+    db.session.commit()
+    return user
 
 
 @contextmanager

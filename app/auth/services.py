@@ -30,6 +30,10 @@ def create_user(*, first_name: str, last_name: str, email: str, password: str) -
     user = User(first_name=first_name, last_name=last_name, email=normalized)
     user.set_password(password)
     db.session.add(user)
+    db.session.flush()
+    from app.models.career_profile import CareerProfile
+
+    db.session.add(CareerProfile(user_id=user.id))
     _commit_unique()
     return user
 

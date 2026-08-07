@@ -35,6 +35,9 @@ class User(UserMixin, db.Model):
         onupdate=func.now(),
     )
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    career_profile: Mapped["CareerProfile | None"] = relationship(
+        back_populates="user", cascade="all, delete-orphan", uselist=False
+    )
 
     owned_contacts: Mapped[list["Contact"]] = relationship(back_populates="owner")
     owned_applications: Mapped[list["Application"]] = relationship(
