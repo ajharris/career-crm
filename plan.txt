@@ -36,8 +36,8 @@
 # Recently added jobs
 # Organizations without outreach
 
-Milestone 7: Automation
-Career page importers
-Job scoring
-Email templates
-Reminders
+# Milestone 7: Automation
+# Career page importers
+# Job scoring
+# Email templates
+# Reminders

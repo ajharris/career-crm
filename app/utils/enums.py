@@ -161,3 +161,51 @@ class ActivityDirection(StrEnum):
     def label(self) -> str:
         """Return a human-readable label."""
         return self.value.title()
+
+
+class TaskType(StrEnum):
+    """Supported categories of actionable work."""
+
+    FOLLOW_UP = "follow_up"
+    APPLICATION = "application"
+    INTERVIEW_PREPARATION = "interview_preparation"
+    RESEARCH = "research"
+    NETWORKING = "networking"
+    DOCUMENT_PREPARATION = "document_preparation"
+    THANK_YOU = "thank_you"
+    PORTAL_CHECK = "portal_check"
+    REMINDER = "reminder"
+    OTHER = "other"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        return self.value.replace("_", " ").title()
+
+
+class TaskPriority(StrEnum):
+    """Urgency level for a task."""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    URGENT = "urgent"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        return self.value.title()
+
+
+class TaskStatus(StrEnum):
+    """Workflow state for a task."""
+
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+    @property
+    def label(self) -> str:
+        """Return a human-readable label."""
+        return self.value.replace("_", " ").title()

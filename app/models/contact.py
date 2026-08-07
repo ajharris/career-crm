@@ -12,6 +12,7 @@ from app.utils.enums import RelationshipStatus
 if TYPE_CHECKING:
     from app.models.activity import Activity
     from app.models.organization import Organization
+    from app.models.task import Task
 
 
 class Contact(db.Model):
@@ -60,6 +61,9 @@ class Contact(db.Model):
         back_populates="contacts", lazy="joined"
     )
     activities: Mapped[list["Activity"]] = relationship(
+        back_populates="contact", lazy="selectin"
+    )
+    tasks: Mapped[list["Task"]] = relationship(
         back_populates="contact", lazy="selectin"
     )
 

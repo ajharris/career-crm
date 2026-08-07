@@ -39,12 +39,15 @@ def index() -> str:
 def detail(application_id: int) -> str:
     """Show one application."""
     from app.activities.services import recent_activities
+    from app.tasks.services import context_tasks
 
     application = get_application(application_id)
     return render_template(
         "applications/detail.html",
         application=application,
         recent_activities=recent_activities(application_id=application.id),
+        active_tasks=context_tasks(application_id=application.id),
+        completed_tasks=context_tasks(application_id=application.id, completed=True),
     )
 
 

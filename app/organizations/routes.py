@@ -42,6 +42,7 @@ def detail(organization_id: int) -> str:
     """Show one organization."""
     from app.activities.services import recent_activities
     from app.jobs.services import active_jobs_for_organization
+    from app.tasks.services import context_tasks
 
     organization = get_organization(organization_id)
     return render_template(
@@ -49,6 +50,7 @@ def detail(organization_id: int) -> str:
         organization=organization,
         active_jobs=active_jobs_for_organization(organization.id),
         recent_activities=recent_activities(organization_id=organization.id),
+        active_tasks=context_tasks(organization_id=organization.id),
     )
 
 

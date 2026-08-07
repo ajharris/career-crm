@@ -4,6 +4,11 @@
 {% block title %}Dashboard · Career CRM{% endblock %}
 
 {% block content %}
+  <div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card card-body border-0 shadow-sm"><span class="text-body-secondary">Open tasks</span><strong class="display-6">{{ task_summary.open }}</strong></div></div>
+    <div class="col-md-4"><div class="card card-body border-0 shadow-sm"><span class="text-body-secondary">Overdue</span><strong class="display-6 text-danger">{{ task_summary.overdue }}</strong></div></div>
+    <div class="col-md-4"><div class="card card-body border-0 shadow-sm"><span class="text-body-secondary">Due today</span><strong class="display-6">{{ task_summary.today }}</strong></div></div>
+  </div>
   <div class="mb-4">
     <h1 class="h2">Dashboard</h1>
     <p class="text-body-secondary mb-0">Your job search at a glance.</p>

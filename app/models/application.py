@@ -26,6 +26,7 @@ from app.utils.enums import ApplicationStatus
 if TYPE_CHECKING:
     from app.models.activity import Activity
     from app.models.job_posting import JobPosting
+    from app.models.task import Task
 
 
 class Application(db.Model):
@@ -95,6 +96,9 @@ class Application(db.Model):
         back_populates="application", lazy="joined"
     )
     activities: Mapped[list["Activity"]] = relationship(
+        back_populates="application", lazy="selectin"
+    )
+    tasks: Mapped[list["Task"]] = relationship(
         back_populates="application", lazy="selectin"
     )
 

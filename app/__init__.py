@@ -55,6 +55,7 @@ def initialize_extensions(app: Flask) -> None:
     from app.models.contact import Contact
     from app.models.job_posting import JobPosting
     from app.models.organization import Organization
+    from app.models.task import Task
 
     @login_manager.user_loader
     def load_user(user_id: str) -> User | None:
@@ -72,6 +73,7 @@ def register_blueprints(app: Flask) -> None:
     from app.contacts import bp as contacts_bp
     from app.jobs import bp as jobs_bp
     from app.organizations import bp as organizations_bp
+    from app.tasks import bp as tasks_bp
 
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(activities_bp)
@@ -79,6 +81,7 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(organizations_bp)
     app.register_blueprint(contacts_bp)
     app.register_blueprint(jobs_bp)
+    app.register_blueprint(tasks_bp)
 
 
 def register_error_handlers(app: Flask) -> None:

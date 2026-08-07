@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from app.models.activity import Activity
     from app.models.application import Application
     from app.models.organization import Organization
+    from app.models.task import Task
 
 
 def _enum_type(enum_class: type, name: str) -> Enum:
@@ -114,6 +115,9 @@ class JobPosting(db.Model):
         lazy="selectin",
     )
     activities: Mapped[list["Activity"]] = relationship(
+        back_populates="job_posting", lazy="selectin"
+    )
+    tasks: Mapped[list["Task"]] = relationship(
         back_populates="job_posting", lazy="selectin"
     )
 

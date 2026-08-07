@@ -37,12 +37,14 @@ def index() -> str:
 def detail(job_id: int) -> str:
     """Show one job posting."""
     from app.activities.services import recent_activities
+    from app.tasks.services import context_tasks
 
     job = get_job_posting(job_id)
     return render_template(
         "jobs/detail.html",
         job=job,
         recent_activities=recent_activities(job_posting_id=job.id),
+        active_tasks=context_tasks(job_posting_id=job.id),
     )
 
 

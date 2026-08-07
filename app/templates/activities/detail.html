@@ -3,6 +3,7 @@
 {% block title %}{{ activity.subject or activity.activity_type.label }} · Career CRM{% endblock %}
 
 {% block content %}
+  {% if activity.follow_up_needed %}<a class="btn btn-primary mb-3" href="{{ url_for('tasks.create', activity_id=activity.id) }}">Create Follow-Up Task</a>{% endif %}
   <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4"><div><a class="text-decoration-none" href="{{ url_for('activities.index') }}">← Activity Timeline</a><h1 class="h2 mt-2 mb-0">{{ activity.subject or activity.activity_type.label }}</h1></div><div class="d-flex gap-2"><a class="btn btn-outline-primary" href="{{ url_for('activities.edit', activity_id=activity.id) }}">Edit</a><a class="btn btn-outline-danger" href="{{ url_for('activities.delete', activity_id=activity.id) }}">Delete</a></div></div>
   <section class="card border-0 shadow-sm"><div class="card-body p-4"><dl class="row mb-0">
     <dt class="col-sm-3">Occurred at</dt><dd class="col-sm-9">{{ activity.occurred_at.strftime('%B %d, %Y at %H:%M') }}</dd><dt class="col-sm-3">Activity type</dt><dd class="col-sm-9">{{ activity.activity_type.label }}</dd><dt class="col-sm-3">Direction</dt><dd class="col-sm-9">{{ activity.direction.label }}</dd>

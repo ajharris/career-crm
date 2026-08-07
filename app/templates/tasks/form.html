@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import render_field %}
+{% block title %}{{ page_title }} · Career CRM{% endblock %}
+{% block content %}
+<h1 class="h2 mb-4">{{ page_title }}</h1><form method="post" class="card card-body border-0 shadow-sm">{{ form.hidden_tag() }}
+<div class="row g-3"><div class="col-12">{{ render_field(form.title) }}</div><div class="col-md-4">{{ render_field(form.task_type) }}</div><div class="col-md-4">{{ render_field(form.priority) }}</div><div class="col-md-4">{{ render_field(form.status) }}</div>
+<div class="col-md-6">{{ render_field(form.organization_id) }}</div><div class="col-md-6">{{ render_field(form.contact_id) }}</div><div class="col-md-6">{{ render_field(form.job_posting_id) }}</div><div class="col-md-6">{{ render_field(form.application_id) }}</div>
+<div class="col-md-6">{{ render_field(form.due_date) }}</div><div class="col-md-6">{{ render_field(form.due_time) }}</div><div class="col-12">{{ render_field(form.description) }}</div></div>
+<div class="mt-4"><button class="btn btn-primary">Save task</button> <a class="btn btn-outline-secondary" href="{{ url_for('tasks.index') }}">Cancel</a></div></form>
+{% endblock %}

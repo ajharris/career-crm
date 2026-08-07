@@ -22,7 +22,7 @@
             <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'jobs' }}" {% if request.blueprint == 'jobs' %}aria-current="page"{% endif %} href="{{ url_for('jobs.index') }}">Jobs</a></li>
             <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'applications' }}" {% if request.blueprint == 'applications' %}aria-current="page"{% endif %} href="{{ url_for('applications.index') }}">Applications</a></li>
             <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'activities' }}" {% if request.blueprint == 'activities' %}aria-current="page"{% endif %} href="{{ url_for('activities.index') }}">Activities</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Tasks</a></li>
+            <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'tasks' }}" {% if request.blueprint == 'tasks' %}aria-current="page"{% endif %} href="{{ url_for('tasks.index') }}">Tasks</a></li>
           </ul>
         </div>
       </div>
