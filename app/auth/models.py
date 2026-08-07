@@ -1,6 +1,7 @@
 """Authentication and account database model."""
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from flask_login import UserMixin
 from sqlalchemy import Boolean, DateTime, String, func
@@ -8,6 +9,15 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.extensions import db
+
+if TYPE_CHECKING:
+    from app.models.activity import Activity
+    from app.models.application import Application
+    from app.models.career_profile import CareerProfile
+    from app.models.contact import Contact
+    from app.models.job_posting import JobPosting
+    from app.models.organization import Organization
+    from app.models.task import Task
 
 
 class User(UserMixin, db.Model):
@@ -22,9 +32,7 @@ class User(UserMixin, db.Model):
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    email_verified: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
+    email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

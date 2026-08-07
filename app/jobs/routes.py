@@ -8,9 +8,9 @@ from app.jobs.forms import DeleteJobPostingForm, JobPostingForm
 from app.jobs.services import (
     SORT_COLUMNS,
     JobPostingValues,
+    application_for_job,
     create_job_posting,
     delete_job_posting,
-    application_for_job,
     get_job_posting,
     list_job_postings,
     organization_choices,
@@ -39,6 +39,7 @@ def index() -> str:
 def detail(job_id: int) -> str:
     """Show one job posting."""
     from app.activities.services import recent_activities
+    from app.skills.services import job_match
     from app.tasks.services import context_tasks
 
     job = get_job_posting(job_id)
@@ -48,6 +49,7 @@ def detail(job_id: int) -> str:
         application=application_for_job(job.id),
         recent_activities=recent_activities(job_posting_id=job.id),
         active_tasks=context_tasks(job_posting_id=job.id),
+        match=job_match(job),
     )
 
 

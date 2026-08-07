@@ -9,10 +9,11 @@
       <a class="text-decoration-none" href="{{ url_for('organizations.index') }}">← Organizations</a>
       <h1 class="h2 mt-2 mb-0">{{ organization.name }}</h1>
     </div>
-    {% if current_user.is_admin or current_user.id == organization.created_by_id %}<div class="d-flex gap-2">
+    <div class="d-flex gap-2"><a class="btn btn-outline-secondary" href="{{ url_for('collaboration.organization', organization_id=organization.id) }}">Community</a>
+    {% if current_user.is_admin or current_user.id == organization.created_by_id %}
       <a class="btn btn-outline-primary" href="{{ url_for('organizations.edit', organization_id=organization.id) }}">Edit</a>
       <a class="btn btn-outline-danger" href="{{ url_for('organizations.delete', organization_id=organization.id) }}">Delete</a>
-    </div>{% endif %}
+    {% endif %}</div>
   </div>
 
   <section class="card border-0 shadow-sm">

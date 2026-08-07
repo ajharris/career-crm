@@ -228,13 +228,17 @@ def test_edit_route(authenticated_client: FlaskClient) -> None:
     assert activity.subject == "Edited subject"
 
 
-def test_delete_requires_confirmation_and_deletes(authenticated_client: FlaskClient) -> None:
+def test_delete_requires_confirmation_and_deletes(
+    authenticated_client: FlaskClient,
+) -> None:
     organization = make_organization()
     activity = create_activity(**service_data(organization.id))
     activity_id = activity.id
 
     confirmation = authenticated_client.get(f"/activities/{activity_id}/delete")
-    response = authenticated_client.post(f"/activities/{activity_id}/delete", follow_redirects=True)
+    response = authenticated_client.post(
+        f"/activities/{activity_id}/delete", follow_redirects=True
+    )
 
     assert b"Are you sure" in confirmation.data
     assert b"Activity deleted successfully." in response.data
@@ -245,14 +249,18 @@ def test_delete_requires_confirmation_and_deletes(authenticated_client: FlaskCli
     "query",
     ["hiring manager", "introduced", "positive reply", "follow up", "uhn", "alex"],
 )
-def test_search_is_case_insensitive(authenticated_client: FlaskClient, query: str) -> None:
+def test_search_is_case_insensitive(
+    authenticated_client: FlaskClient, query: str
+) -> None:
     organization = make_organization()
     contact = make_contact(organization)
     values = service_data(organization.id)
     values["contact_id"] = contact.id
     create_activity(**values)
 
-    response = authenticated_client.get("/activities", query_string={"q": query.upper()})
+    response = authenticated_client.get(
+        "/activities", query_string={"q": query.upper()}
+    )
 
     assert b"Hiring manager outreach" in response.data
 
@@ -301,7 +309,9 @@ def test_default_timeline_order_and_sorting(authenticated_client: FlaskClient) -
     create_activity(**newer)
 
     default_response = authenticated_client.get("/activities")
-    ascending = authenticated_client.get("/activities?sort=occurred_at&sort_direction=asc")
+    ascending = authenticated_client.get(
+        "/activities?sort=occurred_at&sort_direction=asc"
+    )
 
     assert default_response.data.index(b"Newer") < default_response.data.index(b"Older")
     assert ascending.data.index(b"Older") < ascending.data.index(b"Newer")
@@ -316,7 +326,9 @@ def test_pagination_displays_25_activities(authenticated_client: FlaskClient) ->
 
     pagination = list_activities(page=1)
     second_pagination = list_activities(page=2, sort="created_at", sort_direction="asc")
-    second_page = authenticated_client.get("/activities?page=2&sort=created_at&sort_direction=asc")
+    second_page = authenticated_client.get(
+        "/activities?page=2&sort=created_at&sort_direction=asc"
+    )
 
     assert len(pagination.items) == 25
     assert pagination.total == 27
@@ -338,7 +350,9 @@ def test_context_aware_creation(
 ) -> None:
     entity = entity_factory(make_organization())
 
-    response = authenticated_client.get("/activities/new", query_string={query_name: entity.id})
+    response = authenticated_client.get(
+        "/activities/new", query_string={query_name: entity.id}
+    )
 
     assert f'<option selected value="{entity.id}"'.encode() in response.data
 

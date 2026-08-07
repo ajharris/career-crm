@@ -1,7 +1,7 @@
 """Business operations and timeline queries for activities."""
 
 from datetime import UTC, date, datetime, time
-from typing import TypedDict, Unpack
+from typing import Any, TypedDict, Unpack, cast
 
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import Select, asc, desc, inspect, or_, select
@@ -65,7 +65,9 @@ def list_activities(
 ) -> Pagination:
     """Return a searched, filtered, sorted page of activities."""
     statement = (
-        select(Activity).outerjoin(Activity.organization).outerjoin(Activity.contact)
+        select(Activity)
+        .outerjoin(Activity.organization)
+        .outerjoin(Activity.contact)
         .where(private_scope(Activity))
     )
     if search := search.strip():
@@ -253,7 +255,8 @@ def _prepare_activity(activity: Activity) -> None:
 
 
 def _require(model: type, entity_id: int):
-    statement = select(model).where(model.id == entity_id)
+    typed_model = cast(Any, model)
+    statement: Any = select(model).where(typed_model.id == entity_id)
     if model in {Contact, Application}:
         statement = statement.where(private_scope(model))
     entity = db.session.scalar(statement)

@@ -186,7 +186,9 @@ def test_create_and_detail_routes(authenticated_client: FlaskClient) -> None:
     assert b"Company Website" in response.data
 
 
-def test_create_route_validates_url_and_ranges(authenticated_client: FlaskClient) -> None:
+def test_create_route_validates_url_and_ranges(
+    authenticated_client: FlaskClient,
+) -> None:
     organization = make_organization()
     values = job_data(organization.id)
     values.update(
@@ -221,7 +223,9 @@ def test_edit_route(authenticated_client: FlaskClient) -> None:
     values = job_data(organization.id, "Senior Physicist")
     values["status"] = JobStatus.READY_TO_APPLY.value
 
-    response = authenticated_client.post(f"/jobs/{job.id}/edit", data=values, follow_redirects=True)
+    response = authenticated_client.post(
+        f"/jobs/{job.id}/edit", data=values, follow_redirects=True
+    )
 
     assert response.status_code == 200
     assert b"Job posting updated successfully." in response.data
@@ -244,7 +248,9 @@ def test_delete_route(authenticated_client: FlaskClient) -> None:
     job = create_job_posting(**service_data(organization.id))
     job_id = job.id
 
-    response = authenticated_client.post(f"/jobs/{job_id}/delete", follow_redirects=True)
+    response = authenticated_client.post(
+        f"/jobs/{job_id}/delete", follow_redirects=True
+    )
 
     assert response.status_code == 200
     assert b"Job posting deleted successfully." in response.data
@@ -254,7 +260,9 @@ def test_delete_route(authenticated_client: FlaskClient) -> None:
 @pytest.mark.parametrize(
     "query", ["physicist", "UHN", "radiation", "clinical", "strong fit"]
 )
-def test_search_is_case_insensitive(authenticated_client: FlaskClient, query: str) -> None:
+def test_search_is_case_insensitive(
+    authenticated_client: FlaskClient, query: str
+) -> None:
     organization = make_organization()
     create_job_posting(**service_data(organization.id))
 
@@ -315,7 +323,9 @@ def test_pagination_displays_25_jobs(authenticated_client: FlaskClient) -> None:
     assert b"Role 25" in second_page.data
 
 
-def test_organization_detail_lists_only_active_jobs(authenticated_client: FlaskClient) -> None:
+def test_organization_detail_lists_only_active_jobs(
+    authenticated_client: FlaskClient,
+) -> None:
     organization = make_organization()
     create_job_posting(**service_data(organization.id, "Active Role"))
     closed = service_data(organization.id, "Closed Role")

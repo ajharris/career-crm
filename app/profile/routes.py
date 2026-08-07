@@ -1,6 +1,8 @@
 """Thin routes for onboarding and career-profile editing."""
 
-from flask import flash, redirect, render_template, request, url_for
+from typing import Any, cast
+
+from flask import flash, redirect, render_template, url_for
 from flask_login import login_required
 
 from app.models.career_profile import (
@@ -43,7 +45,6 @@ from app.profile.services import (
     save_work_preferences,
     update_priority,
 )
-
 
 STEPS = (
     "Background",
@@ -179,7 +180,7 @@ def edit_record(kind: str, record_id: int | None = None):
     from app.profile.services import get_owned
 
     record = get_owned(model, record_id) if record_id else None
-    form = form_class(obj=record)
+    form = cast(Any, form_class(obj=record))
     if form.validate_on_submit():
         try:
             if kind == "skill":

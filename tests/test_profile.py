@@ -14,7 +14,6 @@ from app.models.career_profile import (
     UserSkill,
 )
 
-
 PASSWORD = "correct horse battery staple"
 
 
@@ -114,11 +113,19 @@ def test_priority_upsert_and_skill_duplicate_validation(client):
     assert len(priorities) == 1 and priorities[0].weight == 3
     first = client.post(
         "/profile/onboarding/3",
-        data={"name": "Python", "category": "programming_language", "proficiency": "advanced"},
+        data={
+            "name": "Python",
+            "category": "programming_language",
+            "proficiency": "advanced",
+        },
     )
     duplicate = client.post(
         "/profile/onboarding/3",
-        data={"name": "Python", "category": "programming_language", "proficiency": "expert"},
+        data={
+            "name": "Python",
+            "category": "programming_language",
+            "proficiency": "expert",
+        },
     )
     assert first.status_code == 302
     assert b"already on your profile" in duplicate.data
@@ -142,12 +149,8 @@ def test_all_private_child_edit_routes_reject_another_user(app, client):
         "language": UserLanguage(
             user_id=owner.id, language_name="Secret", proficiency="basic"
         ),
-        "skill": UserSkill(
-            user_id=owner.id, skill_id=skill.id, proficiency="basic"
-        ),
-        "priority": CareerPriority(
-            user_id=owner.id, factor="Stability", weight=4
-        ),
+        "skill": UserSkill(user_id=owner.id, skill_id=skill.id, proficiency="basic"),
+        "priority": CareerPriority(user_id=owner.id, factor="Stability", weight=4),
         "portfolio": PortfolioItem(
             user_id=owner.id, item_type="Other", title="Secret Work"
         ),

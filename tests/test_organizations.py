@@ -113,7 +113,9 @@ def test_create_route(authenticated_client: FlaskClient) -> None:
     assert db.session.scalar(db.select(Organization).filter_by(name="Toronto General"))
 
 
-def test_create_route_displays_validation_errors(authenticated_client: FlaskClient) -> None:
+def test_create_route_displays_validation_errors(
+    authenticated_client: FlaskClient,
+) -> None:
     data = organization_data()
     data.update(name="", website="not-a-url", priority=8)
 
@@ -200,7 +202,9 @@ def test_sorting_by_priority_descending(app) -> None:
     assert [item.name for item in pagination.items] == ["High", "Low"]
 
 
-def test_pagination_displays_25_organizations(authenticated_client: FlaskClient) -> None:
+def test_pagination_displays_25_organizations(
+    authenticated_client: FlaskClient,
+) -> None:
     for number in range(27):
         create_organization(**organization_data(f"Organization {number:02d}"))
 

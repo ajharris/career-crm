@@ -285,11 +285,15 @@ def test_delete_route(authenticated_client: FlaskClient) -> None:
 @pytest.mark.parametrize(
     "query", ["uhn", "physicist", "jordan", "resume-uhn", "strong application"]
 )
-def test_search_is_case_insensitive(authenticated_client: FlaskClient, query: str) -> None:
+def test_search_is_case_insensitive(
+    authenticated_client: FlaskClient, query: str
+) -> None:
     job = make_job(make_organization())
     create_application(**service_data(job.id))
 
-    response = authenticated_client.get("/applications", query_string={"q": query.upper()})
+    response = authenticated_client.get(
+        "/applications", query_string={"q": query.upper()}
+    )
 
     assert b"Medical Physicist" in response.data
 
@@ -344,7 +348,9 @@ def test_pagination_displays_25_applications(authenticated_client: FlaskClient) 
         create_application(**service_data(job.id))
 
     pagination = list_applications(page=1)
-    second_page = authenticated_client.get("/applications?page=2&sort=job_title&direction=asc")
+    second_page = authenticated_client.get(
+        "/applications?page=2&sort=job_title&direction=asc"
+    )
 
     assert len(pagination.items) == 25
     assert pagination.total == 27

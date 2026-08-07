@@ -41,7 +41,14 @@ omit = ["app/**/__pycache__/*"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
+fail_under = 90
 exclude_also = [
   "if TYPE_CHECKING:",
   "raise NotImplementedError",
 ]
+[project]
+name = "career-crm"
+version = "1.0.0"
+description = "A multi-user career relationship manager and job-search analytics platform"
+readme = "README.md"
+requires-python = ">=3.12"

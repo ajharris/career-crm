@@ -103,7 +103,9 @@ def test_pagination(app):
 
 
 def test_crud_routes(authenticated_client):
-    response = authenticated_client.post("/tasks/new", data=form_data(), follow_redirects=True)
+    response = authenticated_client.post(
+        "/tasks/new", data=form_data(), follow_redirects=True
+    )
     assert response.status_code == 200 and b"Task created successfully" in response.data
     task = db.session.scalar(db.select(Task))
     assert authenticated_client.get("/tasks").status_code == 200
@@ -112,14 +114,20 @@ def test_crud_routes(authenticated_client):
         f"/tasks/{task.id}/edit", data=form_data(title="Edited"), follow_redirects=True
     )
     assert b"Task updated successfully" in response.data
-    response = authenticated_client.post(f"/tasks/{task.id}/complete", data={}, follow_redirects=True)
+    response = authenticated_client.post(
+        f"/tasks/{task.id}/complete", data={}, follow_redirects=True
+    )
     assert b"Task completed successfully" in response.data
-    response = authenticated_client.post(f"/tasks/{task.id}/delete", data={}, follow_redirects=True)
+    response = authenticated_client.post(
+        f"/tasks/{task.id}/delete", data={}, follow_redirects=True
+    )
     assert b"Task deleted successfully" in response.data
 
 
 def test_due_time_requires_date(authenticated_client):
-    response = authenticated_client.post("/tasks/new", data=form_data(due_date="", due_time="09:00"))
+    response = authenticated_client.post(
+        "/tasks/new", data=form_data(due_date="", due_time="09:00")
+    )
     assert b"due date is required" in response.data
 
 

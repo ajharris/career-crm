@@ -112,9 +112,7 @@ def title_choices() -> list[str]:
     """Return distinct non-empty contact titles for filtering."""
     titles = db.session.scalars(
         select(Contact.title)
-        .where(
-            private_scope(Contact), Contact.title.is_not(None), Contact.title != ""
-        )
+        .where(private_scope(Contact), Contact.title.is_not(None), Contact.title != "")
         .distinct()
         .order_by(Contact.title)
     ).all()
@@ -126,9 +124,7 @@ def contacts_for_organization(organization_id: int) -> list[Contact]:
     return list(
         db.session.scalars(
             select(Contact)
-            .where(
-                Contact.organization_id == organization_id, private_scope(Contact)
-            )
+            .where(Contact.organization_id == organization_id, private_scope(Contact))
             .order_by(Contact.last_name, Contact.first_name)
         )
     )

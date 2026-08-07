@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Job Skills · Career CRM{% endblock %}
+{% block content %}
+<a href="{{ url_for('jobs.detail', job_id=job.id) }}" class="text-decoration-none">← Back to {{ job.title }}</a>
+<h1 class="h2 my-3">Skill requirements</h1>
+<div class="row g-4"><div class="col-lg-5"><form method="post" class="card border-0 shadow-sm"><div class="card-body">{{ form.hidden_tag() }}
+{% for field in [form.skill_id, form.importance, form.notes] %}<div class="mb-3">{{ field.label(class='form-label') }}{{ field(class='form-control' if field.type != 'SelectField' else 'form-select') }}{% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}</div>{% endfor %}
+<div class="form-check mb-3">{{ form.required(class='form-check-input') }}{{ form.required.label(class='form-check-label') }}</div>{{ form.submit(class='btn btn-primary') }}</div></form></div>
+<div class="col-lg-7"><div class="card border-0 shadow-sm"><div class="card-body">{% if job.skill_requirements %}<ul class="list-group list-group-flush">{% for item in job.skill_requirements %}<li class="list-group-item d-flex justify-content-between"><span><strong>{{ item.skill.name }}</strong> · importance {{ item.importance }}{% if item.required %} · required{% endif %}{% if item.notes %}<br><span class="text-body-secondary">{{ item.notes }}</span>{% endif %}</span><form method="post" action="{{ url_for('skills.delete_requirement', job_id=job.id, record_id=item.id) }}">{{ form.csrf_token }}<button class="btn btn-sm btn-outline-danger">Remove</button></form></li>{% endfor %}</ul>{% else %}<p class="text-body-secondary mb-0">No requirements yet.</p>{% endif %}</div></div></div></div>
+{% endblock %}

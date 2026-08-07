@@ -127,9 +127,7 @@ def list_tasks(
 
 
 def get_task(task_id: int) -> Task:
-    return db.first_or_404(
-        select(Task).where(Task.id == task_id, private_scope(Task))
-    )
+    return db.first_or_404(select(Task).where(Task.id == task_id, private_scope(Task)))
 
 
 def create_task(**values: Unpack[TaskValues]) -> Task:

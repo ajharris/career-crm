@@ -1,0 +1,8 @@
+{
+  "name": "Career CRM",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "web",
+  "workspaceFolder": "/app",
+  "forwardPorts": [5000],
+  "postCreateCommand": "pip install -r requirements-dev.txt && flask db upgrade"
+}

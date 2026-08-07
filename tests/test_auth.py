@@ -9,7 +9,6 @@ from app.auth.models import User
 from app.auth.services import create_user
 from app.extensions import db
 
-
 PASSWORD = "correct horse battery staple"
 
 
@@ -71,9 +70,7 @@ def test_registration_page_and_success(client):
 
 
 def test_registration_validation(client, user):
-    duplicate = client.post(
-        "/auth/register", data=registration_data(email=user.email)
-    )
+    duplicate = client.post("/auth/register", data=registration_data(email=user.email))
     mismatch = client.post(
         "/auth/register", data=registration_data(confirm_password="different")
     )

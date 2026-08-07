@@ -1,7 +1,7 @@
 """Central ownership and shared-record authorization helpers."""
 
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 
 from flask import abort, has_request_context
 from flask_login import current_user
@@ -25,15 +25,14 @@ def private_scope(model: type, user: Any = None):
     user = user or _actor()
     if not user.is_authenticated:
         raise RuntimeError("An authenticated user is required.")
-    return True if user.is_admin else model.owner_id == user.id
+    scoped_model = cast(Any, model)
+    return True if user.is_admin else scoped_model.owner_id == user.id
 
 
 def can_view_private_record(record: Any, user: Any = None) -> bool:
     """Return whether a user may access a private record."""
     user = user or _actor()
-    return bool(
-        user.is_authenticated and (user.is_admin or record.owner_id == user.id)
-    )
+    return bool(user.is_authenticated and (user.is_admin or record.owner_id == user.id))
 
 
 def require_private_record(record: Any, user: Any = None) -> None:
@@ -46,8 +45,7 @@ def can_edit_shared(record: Any, user: Any = None) -> bool:
     """Return whether a user may mutate a shared record."""
     user = user or _actor()
     return bool(
-        user.is_authenticated
-        and (user.is_admin or record.created_by_id == user.id)
+        user.is_authenticated and (user.is_admin or record.created_by_id == user.id)
     )
 
 

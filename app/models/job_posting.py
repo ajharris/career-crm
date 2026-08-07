@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from app.auth.models import User
     from app.models.activity import Activity
     from app.models.application import Application
+    from app.models.career_profile import JobSkill
     from app.models.organization import Organization
     from app.models.task import Task
 
@@ -137,6 +138,11 @@ class JobPosting(db.Model):
     )
     tasks: Mapped[list["Task"]] = relationship(
         back_populates="job_posting", lazy="selectin"
+    )
+    skill_requirements: Mapped[list["JobSkill"]] = relationship(
+        back_populates="job_posting",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
     @validates("title")

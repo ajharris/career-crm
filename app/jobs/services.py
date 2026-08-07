@@ -9,8 +9,8 @@ from sqlalchemy import Select, asc, desc, func, inspect, or_, select
 
 from app.auth.permissions import actor_id, private_scope, require_shared_editor
 from app.extensions import db
-from app.models.job_posting import JobPosting
 from app.models.application import Application
+from app.models.job_posting import JobPosting
 from app.models.organization import Organization
 from app.utils.enums import JobStatus
 

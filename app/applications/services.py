@@ -64,7 +64,9 @@ def list_applications(
 ) -> Pagination:
     """Return a searched, filtered, sorted page of applications."""
     statement = (
-        select(Application).join(Application.job_posting).join(JobPosting.organization)
+        select(Application)
+        .join(Application.job_posting)
+        .join(JobPosting.organization)
         .where(private_scope(Application))
     )
     if search := search.strip():
@@ -168,9 +170,7 @@ def applied_year_choices() -> list[int]:
     """Return distinct application years in descending order."""
     years = db.session.scalars(
         select(extract("year", Application.application_date))
-        .where(
-            private_scope(Application), Application.application_date.is_not(None)
-        )
+        .where(private_scope(Application), Application.application_date.is_not(None))
         .distinct()
         .order_by(extract("year", Application.application_date).desc())
     ).all()

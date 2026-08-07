@@ -158,7 +158,9 @@ def test_create_route_validates_fields(authenticated_client: FlaskClient) -> Non
 def test_new_contact_preselects_organization(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
 
-    response = authenticated_client.get(f"/contacts/new?organization_id={organization.id}")
+    response = authenticated_client.get(
+        f"/contacts/new?organization_id={organization.id}"
+    )
 
     selected = f'<option selected value="{organization.id}"'.encode()
     assert selected in response.data
@@ -195,7 +197,9 @@ def test_delete_route(authenticated_client: FlaskClient) -> None:
     contact = create_contact(**service_data(organization.id))
     contact_id = contact.id
 
-    response = authenticated_client.post(f"/contacts/{contact_id}/delete", follow_redirects=True)
+    response = authenticated_client.post(
+        f"/contacts/{contact_id}/delete", follow_redirects=True
+    )
 
     assert response.status_code == 200
     assert b"Contact deleted successfully." in response.data
@@ -205,7 +209,9 @@ def test_delete_route(authenticated_client: FlaskClient) -> None:
 @pytest.mark.parametrize(
     "query", ["alex", "MORGAN", "toronto general", "hiring", "example.org"]
 )
-def test_search_is_case_insensitive(authenticated_client: FlaskClient, query: str) -> None:
+def test_search_is_case_insensitive(
+    authenticated_client: FlaskClient, query: str
+) -> None:
     organization = make_organization()
     create_contact(**service_data(organization.id))
 
@@ -225,7 +231,9 @@ def test_filters_by_organization_and_title(authenticated_client: FlaskClient) ->
     by_organization = authenticated_client.get(
         "/contacts", query_string={"organization_id": second.id}
     )
-    by_title = authenticated_client.get("/contacts", query_string={"title": "Recruiter"})
+    by_title = authenticated_client.get(
+        "/contacts", query_string={"title": "Recruiter"}
+    )
 
     assert b"Bailey Morgan" in by_organization.data
     assert b"Alex Morgan" not in by_organization.data

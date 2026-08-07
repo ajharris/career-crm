@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Reports · Career CRM{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between mb-4"><h1 class="h2">Reports</h1><div>{% for format in ['csv','xlsx','pdf'] %}<a class="btn btn-outline-primary" href="{{ url_for('reports.export',format=format) }}">{{ format|upper }}</a>{% endfor %}</div></div>
+<div class="row g-3 mb-4"><div class="col-md-4"><div class="card card-body border-0 shadow-sm"><span>Interviews</span><strong class="display-6">{{ data.interview_count }}</strong></div></div><div class="col-md-4"><div class="card card-body border-0 shadow-sm"><span>Interview rate</span><strong class="display-6">{{ data.interview_rate }}%</strong></div></div><div class="col-md-4"><div class="card card-body border-0 shadow-sm"><span>Response rate</span><strong class="display-6">{{ data.response_rate }}%</strong></div></div></div>
+<div class="row g-4">
+{% for title, rows, metric, empty in [('Applications by month',data.applications_by_month,'count','No application data.'),('Organization history',data.organization_history,'activities','No activity history.'),('Recruiter activity',data.recruiter_activity,'applications','No recruiter data.')] %}
+<section class="col-lg-4"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white"><h2 class="h5 mb-0">{{ title }}</h2></div><ul class="list-group list-group-flush">{% for row in rows %}<li class="list-group-item d-flex justify-content-between"><span>{{ row.month if row.month is defined else row.name }}</span><strong>{{ row[metric] }}</strong></li>{% else %}<li class="list-group-item">{{ empty }}</li>{% endfor %}</ul></div></section>
+{% endfor %}
+</div>
+{% endblock %}

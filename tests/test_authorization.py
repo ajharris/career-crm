@@ -29,7 +29,6 @@ from app.utils.enums import (
     TaskType,
 )
 
-
 PASSWORD = "correct horse battery staple"
 
 
@@ -175,8 +174,7 @@ def test_shared_visibility_creator_permissions_and_admin_override(
     assert other_client.get(f"/jobs/{job.id}").status_code == 200
     assert other_client.get(f"/organizations/{organization.id}/edit").status_code == 403
     assert (
-        other_client.get(f"/organizations/{organization.id}/delete").status_code
-        == 403
+        other_client.get(f"/organizations/{organization.id}/delete").status_code == 403
     )
     assert other_client.get(f"/jobs/{job.id}/edit").status_code == 403
     assert other_client.get(f"/jobs/{job.id}/delete").status_code == 403

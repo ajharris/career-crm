@@ -27,6 +27,7 @@ from app.utils.enums import ApplicationStatus
 if TYPE_CHECKING:
     from app.auth.models import User
     from app.models.activity import Activity
+    from app.models.document import ApplicationDocument
     from app.models.job_posting import JobPosting
     from app.models.task import Task
 
@@ -109,6 +110,9 @@ class Application(db.Model):
     )
     tasks: Mapped[list["Task"]] = relationship(
         back_populates="application", lazy="selectin"
+    )
+    document_links: Mapped[list["ApplicationDocument"]] = relationship(
+        back_populates="application", cascade="all, delete-orphan", lazy="selectin"
     )
 
     @validates("status")

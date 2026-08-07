@@ -3,7 +3,6 @@
 from datetime import UTC, datetime
 
 from flask import abort
-from flask_login import current_user
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
@@ -12,7 +11,6 @@ from app.extensions import db
 from app.models.career_profile import (
     CareerPriority,
     CareerProfile,
-    Certification,
     Education,
     Industry,
     JobFamily,
@@ -21,13 +19,14 @@ from app.models.career_profile import (
     PreferredRole,
     Skill,
     UserSkill,
-    UserLanguage,
     WorkPreference,
 )
 
 
 def get_profile() -> CareerProfile:
-    profile = db.session.scalar(select(CareerProfile).where(CareerProfile.user_id == actor_id()))
+    profile = db.session.scalar(
+        select(CareerProfile).where(CareerProfile.user_id == actor_id())
+    )
     if profile is None:
         profile = CareerProfile(user_id=actor_id())
         db.session.add(profile)
@@ -55,11 +54,17 @@ def complete_onboarding(profile: CareerProfile) -> None:
 
 
 def owned_records(model):
-    return list(db.session.scalars(select(model).where(model.user_id == actor_id()).order_by(model.id)))
+    return list(
+        db.session.scalars(
+            select(model).where(model.user_id == actor_id()).order_by(model.id)
+        )
+    )
 
 
 def get_owned(model, record_id: int):
-    record = db.session.scalar(select(model).where(model.id == record_id, model.user_id == actor_id()))
+    record = db.session.scalar(
+        select(model).where(model.id == record_id, model.user_id == actor_id())
+    )
     if record is None:
         abort(404)
     return record
@@ -91,10 +96,17 @@ def save_skill(values: dict, record_id: int | None = None) -> UserSkill:
     category = values.pop("category")
     skill = db.session.scalar(select(Skill).where(Skill.name.ilike(name)))
     if skill is None:
-        skill = Skill(name=name, category=category, created_by_id=actor_id(), updated_by_id=actor_id())
+        skill = Skill(
+            name=name,
+            category=category,
+            created_by_id=actor_id(),
+            updated_by_id=actor_id(),
+        )
         db.session.add(skill)
         db.session.flush()
-    record = get_owned(UserSkill, record_id) if record_id else UserSkill(user_id=actor_id())
+    record = (
+        get_owned(UserSkill, record_id) if record_id else UserSkill(user_id=actor_id())
+    )
     record.skill_id = skill.id
     for key, value in values.items():
         setattr(record, key, value)
@@ -135,10 +147,20 @@ def save_work_preferences(values: dict) -> None:
     profile.willing_to_travel = values.pop("willing_to_travel")
     location = {key: values.pop(key) for key in ("city", "region", "country")}
     db.session.query(WorkPreference).filter_by(user_id=actor_id()).delete()
-    for kind, options in (("work_mode", ("remote", "hybrid", "on_site")), ("employment_type", ("full_time", "part_time", "contract", "temporary", "internship"))):
+    for kind, options in (
+        ("work_mode", ("remote", "hybrid", "on_site")),
+        (
+            "employment_type",
+            ("full_time", "part_time", "contract", "temporary", "internship"),
+        ),
+    ):
         for option in options:
             if values.get(option):
-                db.session.add(WorkPreference(user_id=actor_id(), preference_type=kind, value=option))
+                db.session.add(
+                    WorkPreference(
+                        user_id=actor_id(), preference_type=kind, value=option
+                    )
+                )
     if location["country"]:
         db.session.add(PreferredLocation(user_id=actor_id(), **location))
     profile.onboarding_step = max(profile.onboarding_step, 6)
@@ -146,7 +168,12 @@ def save_work_preferences(values: dict) -> None:
 
 
 def save_priority(values: dict) -> CareerPriority:
-    record = db.session.scalar(select(CareerPriority).where(CareerPriority.user_id == actor_id(), CareerPriority.factor == values["factor"]))
+    record = db.session.scalar(
+        select(CareerPriority).where(
+            CareerPriority.user_id == actor_id(),
+            CareerPriority.factor == values["factor"],
+        )
+    )
     if record is None:
         record = CareerPriority(user_id=actor_id(), factor=values["factor"])
         db.session.add(record)
@@ -187,6 +214,20 @@ def profile_summary() -> dict:
     return {
         "roles": owned_records(PreferredRole)[:3],
         "skills": owned_records(UserSkill)[:5],
-        "work_modes": list(db.session.scalars(select(WorkPreference).where(WorkPreference.user_id == actor_id(), WorkPreference.preference_type == "work_mode"))),
-        "priorities": list(db.session.scalars(select(CareerPriority).where(CareerPriority.user_id == actor_id()).order_by(CareerPriority.weight.desc()).limit(3))),
+        "work_modes": list(
+            db.session.scalars(
+                select(WorkPreference).where(
+                    WorkPreference.user_id == actor_id(),
+                    WorkPreference.preference_type == "work_mode",
+                )
+            )
+        ),
+        "priorities": list(
+            db.session.scalars(
+                select(CareerPriority)
+                .where(CareerPriority.user_id == actor_id())
+                .order_by(CareerPriority.weight.desc())
+                .limit(3)
+            )
+        ),
     }

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Skill Matrix · Career CRM{% endblock %}
+{% block content %}
+<h1 class="h2 mb-4">Skill Matrix</h1>
+<div class="row g-4">
+  <section class="col-lg-6"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white"><h2 class="h5 mb-0">Your skills</h2></div><div class="card-body">
+    {% if owned %}<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Skill</th><th>Proficiency</th><th>Experience</th></tr></thead><tbody>{% for item in owned %}<tr><td>{{ item.skill.name }}</td><td>{{ item.proficiency|title }}</td><td>{{ item.years_experience or '—' }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="text-body-secondary mb-0">Add skills from your Career Profile to calculate matches.</p>{% endif %}
+  </div></div></section>
+  <section class="col-lg-6"><div class="card border-0 shadow-sm h-100"><div class="card-header bg-white"><h2 class="h5 mb-0">Learning recommendations</h2></div><div class="card-body">
+    {% if recommendations %}<ol class="mb-0">{% for item in recommendations %}<li class="mb-2"><strong>{{ item.skill.name }}</strong> — requested by {{ item.frequency }} active job{{ '' if item.frequency == 1 else 's' }}</li>{% endfor %}</ol>{% else %}<p class="text-body-secondary mb-0">No skill gaps found in active jobs.</p>{% endif %}
+  </div></div></section>
+</div>
+<section class="card border-0 shadow-sm mt-4"><div class="card-header bg-white"><h2 class="h5 mb-0">Demand across active jobs</h2></div><div class="card-body">
+  {% if frequency %}<div class="table-responsive"><table class="table"><thead><tr><th>Skill</th><th>Category</th><th>Jobs</th></tr></thead><tbody>{% for skill, count in frequency %}<tr><td>{{ skill.name }}</td><td>{{ skill.category|replace('_', ' ')|title }}</td><td>{{ count }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="text-body-secondary mb-0">Add skill requirements to jobs to see demand.</p>{% endif %}
+</div></section>
+{% endblock %}

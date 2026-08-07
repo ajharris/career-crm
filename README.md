@@ -120,9 +120,9 @@ Current planned stack:
 * Bootstrap 5
 * Jinja2
 
-Development begins with SQLite for rapid iteration, with a planned migration to PostgreSQL before production deployment.
+SQLite is supported for rapid local iteration and tests. PostgreSQL is the production database, with connection health checks and pooling configured through SQLAlchemy.
 
-Future deployment is expected to use:
+The supplied production deployment uses:
 
 * Docker
 * Docker Compose
@@ -146,25 +146,11 @@ Each milestone introduces a single major feature while ensuring:
 
 ---
 
-# Planned Milestones
+# Version 1.0 Features
 
-1. Foundation
-2. Organizations
-3. Contacts
-4. Job Postings
-5. Applications
-6. Activities
-7. Tasks and Follow-Ups
-8. Dashboard and Analytics
-9. Authentication and Multi-User Support
-10. Skills and Matching
-11. Document Management
-12. Job Importers
-13. AI-Assisted Resume and Cover Letter Generation
-14. Reporting and Analytics
-15. Docker and Production Deployment
+Version 1.0 includes authentication and onboarding, shared organizations and jobs, private contacts/applications/activities/tasks, dashboard analytics, weighted skill matching, private versioned documents, global and saved search, CSV/XLSX/PDF reports, local notifications, PostgreSQL and Docker deployment, responsive views, importer adapters, optional AI assistance, moderated collaboration, and a bearer-authenticated REST API.
 
-Future milestones may be added as the project evolves.
+See [Installation](docs/INSTALLATION.md), [Deployment](docs/DEPLOYMENT.md), [API](docs/API.md), [Security](SECURITY.md), and the [Changelog](CHANGELOG.md).
 
 ---
 
@@ -214,7 +200,7 @@ Potential future enhancements include:
 * Mobile application
 * Browser extension for saving job postings
 
-These features are intentionally outside the scope of the initial milestones but are supported by the planned architecture.
+The versioned importer, AI-provider, background-job, and API boundaries are intended to support these integrations without redesigning core business logic.
 
 ---
 

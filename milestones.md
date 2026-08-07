@@ -187,6 +187,8 @@
 / 
 / One feature that would make this particularly powerful is a weighted preference system. / Instead of simply asking whether salary or remote work matters, ask users to rank or assign / importance (e.g., 1–5) to factors like compensation, stability, mission, flexibility, / technical challenge, and advancement. Later, the job-matching engine can score / opportunities based on those priorities rather than treating every preference as equally / important.
 
+Status: Milestones 11–25 completed for Version 1.0 on 2026-08-07.
+
 Milestone 11 – Skills & Job Matching
 
 New models:

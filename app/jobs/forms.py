@@ -4,6 +4,7 @@ from typing import Any
 
 from flask_wtf import FlaskForm
 from wtforms import (
+    BooleanField,
     DateField,
     DateTimeLocalField,
     DecimalField,
@@ -106,3 +107,15 @@ class DeleteJobPostingForm(FlaskForm):
     """CSRF-protected job deletion confirmation."""
 
     submit = SubmitField("Delete job posting")
+
+
+class JobSkillForm(FlaskForm):
+    """Attach a weighted shared skill requirement to a job."""
+
+    skill_id = SelectField("Skill", coerce=int, validators=[InputRequired()])
+    required = BooleanField("Required", default=True)
+    importance = IntegerField(
+        "Importance", validators=[InputRequired(), NumberRange(min=1, max=5)], default=3
+    )
+    notes = TextAreaField("Notes", validators=[Optional()])
+    submit = SubmitField("Add skill")

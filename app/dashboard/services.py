@@ -21,7 +21,6 @@ from app.utils.enums import (
     TaskStatus,
 )
 
-
 ACTIVE_TASK_STATUSES = (TaskStatus.OPEN, TaskStatus.IN_PROGRESS)
 ACTIVE_JOB_STATUSES = (
     JobStatus.DISCOVERED,
@@ -77,9 +76,7 @@ def dashboard_data(today: date | None = None) -> dict:
         db.session.scalars(
             select(Application)
             .options(
-                joinedload(Application.job_posting).joinedload(
-                    JobPosting.organization
-                )
+                joinedload(Application.job_posting).joinedload(JobPosting.organization)
             )
             .where(private_scope(Application))
             .order_by(Application.created_at.desc(), Application.id.desc())
@@ -90,9 +87,7 @@ def dashboard_data(today: date | None = None) -> dict:
         db.session.scalars(
             select(Application)
             .options(
-                joinedload(Application.job_posting).joinedload(
-                    JobPosting.organization
-                )
+                joinedload(Application.job_posting).joinedload(JobPosting.organization)
             )
             .where(private_scope(Application), Application.interview_date >= now)
             .order_by(Application.interview_date, Application.id)
@@ -100,14 +95,15 @@ def dashboard_data(today: date | None = None) -> dict:
         ).unique()
     )
 
-    activities_by_type = dict(
-        db.session.execute(
+    activities_by_type: dict[ActivityType, int] = {
+        kind: count
+        for kind, count in db.session.execute(
             select(Activity.activity_type, func.count(Activity.id))
             .where(private_scope(Activity))
             .group_by(Activity.activity_type)
             .order_by(func.count(Activity.id).desc(), Activity.activity_type)
         ).all()
-    )
+    }
     top_organizations = db.session.execute(
         select(Organization, func.count(Activity.id).label("activity_count"))
         .join(Activity, Activity.organization_id == Organization.id)
@@ -195,9 +191,7 @@ def dashboard_data(today: date | None = None) -> dict:
         "upcoming_interviews": upcoming_interviews,
         "top_organizations": top_organizations,
         "job_summary": {
-            "active": _count(
-                JobPosting.id, JobPosting.status.in_(ACTIVE_JOB_STATUSES)
-            ),
+            "active": _count(JobPosting.id, JobPosting.status.in_(ACTIVE_JOB_STATUSES)),
             "closed": _count(JobPosting.id, JobPosting.status == JobStatus.CLOSED),
             "applied": _count(JobPosting.id, JobPosting.status == JobStatus.APPLIED),
         },
@@ -260,20 +254,29 @@ def _task_groups(today: date, week_end: date) -> dict[str, list[Task]]:
         )
     )
     return {
-        "overdue": [task for task in tasks if task.due_date < today],
+        "overdue": [
+            task
+            for task in tasks
+            if task.due_date is not None and task.due_date < today
+        ],
         "today": [task for task in tasks if task.due_date == today],
-        "week": [task for task in tasks if today < task.due_date <= week_end],
+        "week": [
+            task
+            for task in tasks
+            if task.due_date is not None and today < task.due_date <= week_end
+        ],
     }
 
 
 def _pipeline() -> list[tuple[ApplicationStatus, int]]:
-    counts = dict(
-        db.session.execute(
-            select(Application.status, func.count(Application.id)).group_by(
-                Application.status
-            ).where(private_scope(Application))
+    counts: dict[ApplicationStatus, int] = {
+        status: count
+        for status, count in db.session.execute(
+            select(Application.status, func.count(Application.id))
+            .group_by(Application.status)
+            .where(private_scope(Application))
         ).all()
-    )
+    }
     return [(status, counts.get(status, 0)) for status in ApplicationStatus]
 
 
@@ -284,7 +287,7 @@ def _application_rates() -> dict[str, float | int]:
                 private_scope(Application),
                 Application.status.not_in(
                     (ApplicationStatus.PLANNED, ApplicationStatus.PREPARING)
-                )
+                ),
             )
         )
     )
@@ -411,9 +414,7 @@ def save_widget_preferences(enabled_keys: set[str]) -> None:
         )
     }
     for position, (key, _) in enumerate(WIDGETS):
-        widget = saved.get(key) or DashboardWidget(
-            owner_id=actor_id(), widget_key=key
-        )
+        widget = saved.get(key) or DashboardWidget(owner_id=actor_id(), widget_key=key)
         widget.position = position
         widget.enabled = key in enabled_keys
         db.session.add(widget)

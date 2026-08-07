@@ -2,6 +2,19 @@ body {
   min-width: 320px;
 }
 
+button, .btn, .nav-link, input, select, textarea { min-height: 44px; }
+.table-responsive { -webkit-overflow-scrolling: touch; }
+@media (max-width: 767.98px) {
+  main.container { padding-left: 1rem; padding-right: 1rem; }
+  .card-body { padding: 1rem; }
+  .table-responsive table { min-width: 680px; }
+  .btn { white-space: normal; }
+  h1, .h1 { font-size: 1.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+}
+
 .card {
   transition: transform 150ms ease, box-shadow 150ms ease;
 }

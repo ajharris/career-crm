@@ -48,9 +48,7 @@ def authenticate_user(email: str, password: str) -> User | None:
     return user
 
 
-def update_profile(
-    user: User, *, first_name: str, last_name: str, email: str
-) -> User:
+def update_profile(user: User, *, first_name: str, last_name: str, email: str) -> User:
     """Update editable profile fields and invalidate a changed email."""
     normalized = normalize_email(email)
     existing = find_user_by_email(normalized)

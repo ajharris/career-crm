@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
   </head>
   <body class="d-flex flex-column min-vh-100 bg-body-tertiary">
+    <a class="visually-hidden-focusable position-absolute top-0 start-0 bg-white p-2" href="#main-content">Skip to main content</a>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary" aria-label="Main navigation">
       <div class="container">
         <a class="navbar-brand fw-semibold" href="{{ url_for('dashboard.index') if current_user.is_authenticated else url_for('auth.login') }}">Career CRM</a>
@@ -24,11 +25,17 @@
             <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'applications' }}" {% if request.blueprint == 'applications' %}aria-current="page"{% endif %} href="{{ url_for('applications.index') }}">Applications</a></li>
             <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'activities' }}" {% if request.blueprint == 'activities' %}aria-current="page"{% endif %} href="{{ url_for('activities.index') }}">Activities</a></li>
             <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'tasks' }}" {% if request.blueprint == 'tasks' %}aria-current="page"{% endif %} href="{{ url_for('tasks.index') }}">Tasks</a></li>
+            <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'skills' }}" {% if request.blueprint == 'skills' %}aria-current="page"{% endif %} href="{{ url_for('skills.index') }}">Skills</a></li>
+            <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'documents' }}" {% if request.blueprint == 'documents' %}aria-current="page"{% endif %} href="{{ url_for('documents.index') }}">Documents</a></li>
+            <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'search' }}" {% if request.blueprint == 'search' %}aria-current="page"{% endif %} href="{{ url_for('search.index') }}">Search</a></li>
+            <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'reports' }}" {% if request.blueprint == 'reports' %}aria-current="page"{% endif %} href="{{ url_for('reports.index') }}">Reports</a></li>
+            <li class="nav-item"><a class="nav-link {{ 'active' if request.blueprint == 'notifications' }}" {% if request.blueprint == 'notifications' %}aria-current="page"{% endif %} href="{{ url_for('notifications.index') }}">Notifications</a></li>
             <li class="nav-item dropdown">
               <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">{{ current_user.full_name }}</button>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
                 <li><a class="dropdown-item" href="{{ url_for('profile.index') }}">Career Profile</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('ai.index') }}">AI Assistant</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="dropdown-item" type="submit">Log Out</button></form></li>
               </ul>
@@ -42,7 +49,7 @@
       </div>
     </nav>
 
-    <main class="container py-4 flex-grow-1">
+    <main id="main-content" class="container py-4 flex-grow-1" tabindex="-1">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
           <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">

@@ -3,6 +3,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
+    DateField,
     DecimalField,
     IntegerField,
     SelectField,
@@ -10,14 +11,26 @@ from wtforms import (
     StringField,
     SubmitField,
     TextAreaField,
-    DateField,
 )
-from wtforms.validators import DataRequired, NumberRange, Optional, URL
+from wtforms.validators import URL, DataRequired, NumberRange, Optional
 
 
 class BackgroundForm(FlaskForm):
-    highest_education_level = SelectField("Highest education", choices=[("", "Select"), ("high_school", "High School"), ("college", "College"), ("bachelors", "Bachelor's"), ("masters", "Master's"), ("doctorate", "Doctorate")], validators=[Optional()])
-    years_of_experience = IntegerField("Years of experience", validators=[Optional(), NumberRange(min=0, max=80)])
+    highest_education_level = SelectField(
+        "Highest education",
+        choices=[
+            ("", "Select"),
+            ("high_school", "High School"),
+            ("college", "College"),
+            ("bachelors", "Bachelor's"),
+            ("masters", "Master's"),
+            ("doctorate", "Doctorate"),
+        ],
+        validators=[Optional()],
+    )
+    years_of_experience = IntegerField(
+        "Years of experience", validators=[Optional(), NumberRange(min=0, max=80)]
+    )
     management_interest = BooleanField("Interested in management")
     technical_leadership_preference = BooleanField("Interested in technical leadership")
     submit = SubmitField("Save and Continue")
@@ -28,8 +41,12 @@ class EducationForm(FlaskForm):
     degree_type = StringField("Degree type")
     degree_name = StringField("Degree name")
     field_of_study = StringField("Field of study")
-    start_year = IntegerField("Start year", validators=[Optional(), NumberRange(1900, 2200)])
-    graduation_year = IntegerField("Graduation year", validators=[Optional(), NumberRange(1900, 2200)])
+    start_year = IntegerField(
+        "Start year", validators=[Optional(), NumberRange(1900, 2200)]
+    )
+    graduation_year = IntegerField(
+        "Graduation year", validators=[Optional(), NumberRange(1900, 2200)]
+    )
     completed = BooleanField("Completed")
     notes = TextAreaField("Notes")
     submit = SubmitField("Save")
@@ -37,10 +54,35 @@ class EducationForm(FlaskForm):
 
 class SkillForm(FlaskForm):
     name = StringField("Skill", validators=[DataRequired()])
-    category = SelectField("Category", choices=[("programming_language", "Programming Language"), ("framework", "Framework"), ("database", "Database"), ("cloud_platform", "Cloud Platform"), ("ai_ml", "AI/ML"), ("medical_imaging", "Medical Imaging"), ("domain_expertise", "Domain Expertise"), ("soft_skill", "Soft Skill"), ("other", "Other")])
-    proficiency = SelectField("Proficiency", choices=[("basic", "Basic"), ("intermediate", "Intermediate"), ("advanced", "Advanced"), ("expert", "Expert")])
-    years_experience = DecimalField("Years of experience", validators=[Optional(), NumberRange(min=0)])
-    interest_level = IntegerField("Interest level", validators=[Optional(), NumberRange(1, 5)])
+    category = SelectField(
+        "Category",
+        choices=[
+            ("programming_language", "Programming Language"),
+            ("framework", "Framework"),
+            ("database", "Database"),
+            ("cloud_platform", "Cloud Platform"),
+            ("ai_ml", "AI/ML"),
+            ("medical_imaging", "Medical Imaging"),
+            ("domain_expertise", "Domain Expertise"),
+            ("soft_skill", "Soft Skill"),
+            ("other", "Other"),
+        ],
+    )
+    proficiency = SelectField(
+        "Proficiency",
+        choices=[
+            ("basic", "Basic"),
+            ("intermediate", "Intermediate"),
+            ("advanced", "Advanced"),
+            ("expert", "Expert"),
+        ],
+    )
+    years_experience = DecimalField(
+        "Years of experience", validators=[Optional(), NumberRange(min=0)]
+    )
+    interest_level = IntegerField(
+        "Interest level", validators=[Optional(), NumberRange(1, 5)]
+    )
     notes = TextAreaField("Notes")
     submit = SubmitField("Save")
 
@@ -58,7 +100,16 @@ class CertificationForm(FlaskForm):
 
 class LanguageForm(FlaskForm):
     language_name = StringField("Language", validators=[DataRequired()])
-    proficiency = SelectField("Proficiency", choices=[("basic", "Basic"), ("conversational", "Conversational"), ("professional", "Professional"), ("fluent", "Fluent"), ("native_bilingual", "Native / Bilingual")])
+    proficiency = SelectField(
+        "Proficiency",
+        choices=[
+            ("basic", "Basic"),
+            ("conversational", "Conversational"),
+            ("professional", "Professional"),
+            ("fluent", "Fluent"),
+            ("native_bilingual", "Native / Bilingual"),
+        ],
+    )
     submit = SubmitField("Save")
 
 
@@ -72,13 +123,38 @@ class LocationForm(FlaskForm):
 class InterestsForm(FlaskForm):
     industries = SelectMultipleField(
         "Industries of interest",
-        choices=[(x, x) for x in ("Healthcare", "Medical Imaging", "Biotechnology", "Software", "AI/ML", "Government", "Aerospace", "Research")],
+        choices=[
+            (x, x)
+            for x in (
+                "Healthcare",
+                "Medical Imaging",
+                "Biotechnology",
+                "Software",
+                "AI/ML",
+                "Government",
+                "Aerospace",
+                "Research",
+            )
+        ],
     )
     job_families = SelectMultipleField(
         "Job families",
-        choices=[(x, x) for x in ("Software Engineering", "Data Science", "Research", "Scientific Computing", "Medical Physics", "Imaging Informatics", "Technical Operations")],
+        choices=[
+            (x, x)
+            for x in (
+                "Software Engineering",
+                "Data Science",
+                "Research",
+                "Scientific Computing",
+                "Medical Physics",
+                "Imaging Informatics",
+                "Technical Operations",
+            )
+        ],
     )
-    preferred_roles = StringField("Preferred roles", description="Separate roles with commas.")
+    preferred_roles = StringField(
+        "Preferred roles", description="Separate roles with commas."
+    )
     submit = SubmitField("Save and Continue")
 
 
@@ -100,14 +176,48 @@ class WorkPreferencesForm(FlaskForm):
 
 
 class PriorityForm(FlaskForm):
-    factor = SelectField("Factor", choices=[(x, x) for x in ("Compensation", "Stability", "Interesting Work", "Career Growth", "Work-Life Balance", "Mission / Social Impact", "Prestige", "Flexible Schedule", "Technical Challenge", "Advancement", "Location", "Remote Flexibility")])
+    factor = SelectField(
+        "Factor",
+        choices=[
+            (x, x)
+            for x in (
+                "Compensation",
+                "Stability",
+                "Interesting Work",
+                "Career Growth",
+                "Work-Life Balance",
+                "Mission / Social Impact",
+                "Prestige",
+                "Flexible Schedule",
+                "Technical Challenge",
+                "Advancement",
+                "Location",
+                "Remote Flexibility",
+            )
+        ],
+    )
     weight = IntegerField("Weight", validators=[DataRequired(), NumberRange(1, 5)])
     notes = TextAreaField("Notes")
     submit = SubmitField("Save")
 
 
 class PortfolioForm(FlaskForm):
-    item_type = SelectField("Type", choices=[(x, x) for x in ("GitHub", "LinkedIn", "Personal Website", "Publication", "Patent", "Open Source", "Portfolio Project", "Other")])
+    item_type = SelectField(
+        "Type",
+        choices=[
+            (x, x)
+            for x in (
+                "GitHub",
+                "LinkedIn",
+                "Personal Website",
+                "Publication",
+                "Patent",
+                "Open Source",
+                "Portfolio Project",
+                "Other",
+            )
+        ],
+    )
     title = StringField("Title", validators=[DataRequired()])
     url = StringField("URL", validators=[Optional(), URL()])
     description = TextAreaField("Description")
@@ -115,7 +225,9 @@ class PortfolioForm(FlaskForm):
 
 
 class StrategyForm(FlaskForm):
-    applications_per_week_target = IntegerField("Applications per week", validators=[Optional(), NumberRange(min=0, max=100)])
+    applications_per_week_target = IntegerField(
+        "Applications per week", validators=[Optional(), NumberRange(min=0, max=100)]
+    )
     interested_in_networking = BooleanField("Networking")
     interested_in_cold_outreach = BooleanField("Cold outreach")
     interested_in_recruiter_outreach = BooleanField("Recruiter outreach")
