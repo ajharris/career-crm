@@ -20,7 +20,8 @@ from app.search import bp
 
 
 def _contains(column, query):
-    return column.ilike(f"%{query}%")
+    escaped = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return column.ilike(f"%{escaped}%", escape="\\")
 
 
 def search_data(query: str, kind: str = "all") -> dict:
@@ -124,11 +125,16 @@ def index():
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         if name and query:
-            db.session.add(
-                SavedSearch(
-                    name=name, query=query, filters_json=json.dumps({"type": kind})
+            saved_search = db.session.scalar(
+                select(SavedSearch).where(
+                    SavedSearch.owner_id == actor_id(), SavedSearch.name == name
                 )
             )
+            if saved_search is None:
+                saved_search = SavedSearch(name=name)
+                db.session.add(saved_search)
+            saved_search.query = query
+            saved_search.filters_json = json.dumps({"type": kind})
             db.session.commit()
             flash("Search saved.", "success")
         return redirect(url_for("search.index", q=query, type=kind))

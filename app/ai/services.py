@@ -1,6 +1,7 @@
 """Provider-neutral prompts; user data is sent only after an explicit request."""
 
 import json
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from flask import current_app
@@ -47,6 +48,17 @@ def generate(task, context):
         data=body,
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
     )
-    with urlopen(req, timeout=30) as response:
-        payload = json.load(response)
-    return payload["choices"][0]["message"]["content"]
+    try:
+        with urlopen(req, timeout=30) as response:
+            payload = json.load(response)
+    except (HTTPError, URLError, TimeoutError) as exc:
+        raise RuntimeError("AI provider is temporarily unavailable.") from exc
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("AI provider returned an invalid response.") from exc
+    try:
+        content = payload["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise RuntimeError("AI provider returned an invalid response.") from exc
+    if not isinstance(content, str):
+        raise RuntimeError("AI provider returned an invalid response.")
+    return content

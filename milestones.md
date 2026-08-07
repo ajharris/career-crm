@@ -187,220 +187,220 @@
 / 
 / One feature that would make this particularly powerful is a weighted preference system. / Instead of simply asking whether salary or remote work matters, ask users to rank or assign / importance (e.g., 1–5) to factors like compensation, stability, mission, flexibility, / technical challenge, and advancement. Later, the job-matching engine can score / opportunities based on those priorities rather than treating every preference as equally / important.
 
-Status: Milestones 11–25 completed for Version 1.0 on 2026-08-07.
-
-Milestone 11 – Skills & Job Matching
-
-New models:
-
-Skill
-UserSkill
-JobSkill
-
-Features:
-
-Skill matrix
-Match percentage
-Missing skills
-Skill frequency
-Learning recommendations
-Milestone 12 – Document Management
-
-Manage:
-
-Résumés
-Cover letters
-Certificates
-Portfolio links
-
-Versioning:
-
-Resume v1
-
-Resume v2
-
-Resume v3
-
-Associate documents with applications.
-
-Milestone 13 – Search
-
-Global search across:
-
-Organizations
-Contacts
-Jobs
-Applications
-Activities
-Tasks
-
-Saved searches
-
-Advanced filtering
-
-Milestone 14 – Reporting
-
-Generate:
-
-CSV
-Excel
-PDF
-
-Reports:
-
-Applications by month
-
-Interviews
-
-Response rate
-
-Organization history
-
-Recruiter activity
-
-Milestone 15 – Notifications
-
-Local notifications.
-
-Examples:
-
-Follow-up due tomorrow
-Interview today
-Application deadline approaching
-
-No external email yet.
-
-Milestone 16 – PostgreSQL Migration
-
-Replace SQLite.
-
-Implement:
-
-PostgreSQL
-Environment configs
-Production migrations
-Connection pooling
-Milestone 17 – Docker
-
-Dockerize:
-
-Flask
-PostgreSQL
-
-Docker Compose
-
-Development containers
-
-Milestone 18 – Production
-
-Deploy with:
-
-Gunicorn
-Nginx
-HTTPS
-Cloudflare Tunnel (optional)
-Environment variables
-Logging
-Backup strategy
-Milestone 19 – Mobile Optimization
-
-Responsive UI.
-
-Improve:
-
-Navigation
-Forms
-Tables
-Cards
-Touch interaction
-
-Test on iPhone.
-
-Milestone 20 – Job Import Framework
-
-Create importer infrastructure.
-
-Initially manual.
-
-Future adapters:
-
-Company career pages
-RSS
-ATS exports
-
-Importers should plug into a common interface.
-
-Milestone 21 – AI Assistance
-
-Optional AI features:
-
-Cover letter drafts
-Resume tailoring
-Job summaries
-Match explanations
-Company summaries
-Interview preparation
-Milestone 22 – Collaboration
-
-Community features.
-
-Examples:
-
-Shared organizations
-
-Shared job postings
-
-Organization notes
-
-Moderation
-
-Company reputation
-
-Milestone 23 – REST API
-
-Build a documented API.
-
-Endpoints for:
-
-Organizations
-
-Jobs
-
-Applications
-
-Activities
-
-Tasks
-
-JWT authentication
-
-OpenAPI documentation
-
-Milestone 24 – Performance
-
-Improve:
-
-Query optimization
-Pagination
-Indexing
-Caching
-Background jobs
-Profiling
-Milestone 25 – Version 1.0
-
-Production readiness.
-
-Checklist:
-
-Security audit
-UI polish
-Documentation
-Installation guide
-Backup/restore
-Test coverage target (e.g. >90%)
-Accessibility review
-Release packaging
-A structural suggestion
+/ Status: Milestones 11–25 completed for Version 1.0 on 2026-08-07.
+/ 
+/ Milestone 11 – Skills & Job Matching
+/ 
+/ New models:
+/ 
+/ Skill
+/ UserSkill
+/ JobSkill
+/ 
+/ Features:
+/ 
+/ Skill matrix
+/ Match percentage
+/ Missing skills
+/ Skill frequency
+/ Learning recommendations
+/ Milestone 12 – Document Management
+/ 
+/ Manage:
+/ 
+/ Résumés
+/ Cover letters
+/ Certificates
+/ Portfolio links
+/ 
+/ Versioning:
+/ 
+/ Resume v1
+/ 
+/ Resume v2
+/ 
+/ Resume v3
+/ 
+/ Associate documents with applications.
+/ 
+/ Milestone 13 – Search
+/ 
+/ Global search across:
+/ 
+/ Organizations
+/ Contacts
+/ Jobs
+/ Applications
+/ Activities
+/ Tasks
+/ 
+/ Saved searches
+/ 
+/ Advanced filtering
+/ 
+/ Milestone 14 – Reporting
+/ 
+/ Generate:
+/ 
+/ CSV
+/ Excel
+/ PDF
+/ 
+/ Reports:
+/ 
+/ Applications by month
+/ 
+/ Interviews
+/ 
+/ Response rate
+/ 
+/ Organization history
+/ 
+/ Recruiter activity
+/ 
+/ Milestone 15 – Notifications
+/ 
+/ Local notifications.
+/ 
+/ Examples:
+/ 
+/ Follow-up due tomorrow
+/ Interview today
+/ Application deadline approaching
+/ 
+/ No external email yet.
+/ 
+/ Milestone 16 – PostgreSQL Migration
+/ 
+/ Replace SQLite.
+/ 
+/ Implement:
+/ 
+/ PostgreSQL
+/ Environment configs
+/ Production migrations
+/ Connection pooling
+/ Milestone 17 – Docker
+/ 
+/ Dockerize:
+/ 
+/ Flask
+/ PostgreSQL
+/ 
+/ Docker Compose
+/ 
+/ Development containers
+/ 
+/ Milestone 18 – Production
+/ 
+/ Deploy with:
+/ 
+/ Gunicorn
+/ Nginx
+/ HTTPS
+/ Cloudflare Tunnel (optional)
+/ Environment variables
+/ Logging
+/ Backup strategy
+/ Milestone 19 – Mobile Optimization
+/ 
+/ Responsive UI.
+/ 
+/ Improve:
+/ 
+/ Navigation
+/ Forms
+/ Tables
+/ Cards
+/ Touch interaction
+/ 
+/ Test on iPhone.
+/ 
+/ Milestone 20 – Job Import Framework
+/ 
+/ Create importer infrastructure.
+/ 
+/ Initially manual.
+/ 
+/ Future adapters:
+/ 
+/ Company career pages
+/ RSS
+/ ATS exports
+/ 
+/ Importers should plug into a common interface.
+/ 
+/ Milestone 21 – AI Assistance
+/ 
+/ Optional AI features:
+/ 
+/ Cover letter drafts
+/ Resume tailoring
+/ Job summaries
+/ Match explanations
+/ Company summaries
+/ Interview preparation
+/ Milestone 22 – Collaboration
+/ 
+/ Community features.
+/ 
+/ Examples:
+/ 
+/ Shared organizations
+/ 
+/ Shared job postings
+/ 
+/ Organization notes
+/ 
+/ Moderation
+/ 
+/ Company reputation
+/ 
+/ Milestone 23 – REST API
+/ 
+/ Build a documented API.
+/ 
+/ Endpoints for:
+/ 
+/ Organizations
+/ 
+/ Jobs
+/ 
+/ Applications
+/ 
+/ Activities
+/ 
+/ Tasks
+/ 
+/ JWT authentication
+/ 
+/ OpenAPI documentation
+/ 
+/ Milestone 24 – Performance
+/ 
+/ Improve:
+/ 
+/ Query optimization
+/ Pagination
+/ Indexing
+/ Caching
+/ Background jobs
+/ Profiling
+/ Milestone 25 – Version 1.0
+/ 
+/ Production readiness.
+/ 
+/ Checklist:
+/ 
+/ Security audit
+/ UI polish
+/ Documentation
+/ Installation guide
+/ Backup/restore
+/ Test coverage target (e.g. >90%)
+/ Accessibility review
+/ Release packaging
+/ A structural suggestion
 
 / Milestone 0.5
 / Ruff (linting)

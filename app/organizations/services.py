@@ -2,13 +2,19 @@
 
 from typing import TypedDict, Unpack
 
+from flask import abort
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import Select, asc, desc, or_, select
 from sqlalchemy.exc import IntegrityError
 
 from app.auth.permissions import actor_id, require_shared_editor
 from app.extensions import db
+from app.models.activity import Activity
+from app.models.application import Application
+from app.models.contact import Contact
+from app.models.job_posting import JobPosting
 from app.models.organization import Organization
+from app.models.task import Task
 
 
 class DuplicateOrganizationError(ValueError):
@@ -82,6 +88,52 @@ def update_organization(
 def delete_organization(organization: Organization) -> None:
     """Delete an organization."""
     require_shared_editor(organization)
+    owner_id = actor_id()
+    private_records = (
+        select(Contact.id).where(
+            Contact.organization_id == organization.id, Contact.owner_id != owner_id
+        ),
+        select(Application.id)
+        .join(JobPosting)
+        .where(
+            JobPosting.organization_id == organization.id,
+            Application.owner_id != owner_id,
+        ),
+        select(Activity.id).where(
+            Activity.owner_id != owner_id,
+            or_(
+                Activity.organization_id == organization.id,
+                Activity.contact.has(Contact.organization_id == organization.id),
+                Activity.job_posting.has(JobPosting.organization_id == organization.id),
+                Activity.application.has(
+                    Application.job_posting.has(
+                        JobPosting.organization_id == organization.id
+                    )
+                ),
+            ),
+        ),
+        select(Task.id).where(
+            Task.owner_id != owner_id,
+            or_(
+                Task.organization_id == organization.id,
+                Task.contact.has(Contact.organization_id == organization.id),
+                Task.job_posting.has(JobPosting.organization_id == organization.id),
+                Task.application.has(
+                    Application.job_posting.has(
+                        JobPosting.organization_id == organization.id
+                    )
+                ),
+            ),
+        ),
+    )
+    if any(db.session.scalar(statement.limit(1)) for statement in private_records):
+        abort(
+            409,
+            description=(
+                "This organization contains another user's private history and "
+                "cannot be deleted."
+            ),
+        )
     db.session.delete(organization)
     db.session.commit()
 

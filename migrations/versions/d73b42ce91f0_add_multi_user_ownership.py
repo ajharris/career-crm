@@ -20,6 +20,19 @@ SHARED_TABLES = ("organizations", "job_postings")
 def upgrade() -> None:
     """Add ownership columns and safely attribute single-user legacy data."""
     connection = op.get_bind()
+    widget_unique_name = (
+        next(
+            (
+                constraint["name"]
+                for constraint in sa.inspect(connection).get_unique_constraints(
+                    "dashboard_widgets"
+                )
+                if constraint.get("column_names") == ["widget_key"]
+            ),
+            None,
+        )
+        or "uq_dashboard_widgets_widget_key"
+    )
     user_ids = list(
         connection.execute(sa.text("SELECT id FROM users ORDER BY id")).scalars()
     )
@@ -98,7 +111,7 @@ def upgrade() -> None:
             "uq_applications_owner_job_posting", ["owner_id", "job_posting_id"]
         )
     with op.batch_alter_table("dashboard_widgets") as batch_op:
-        batch_op.drop_constraint("uq_dashboard_widgets_widget_key", type_="unique")
+        batch_op.drop_constraint(widget_unique_name, type_="unique")
         batch_op.create_unique_constraint(
             "uq_dashboard_widget_owner_key", ["owner_id", "widget_key"]
         )

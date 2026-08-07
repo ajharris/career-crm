@@ -4,14 +4,17 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import TypedDict, Unpack
 
+from flask import abort
 from flask_sqlalchemy.pagination import Pagination
 from sqlalchemy import Select, asc, desc, func, inspect, or_, select
 
 from app.auth.permissions import actor_id, private_scope, require_shared_editor
 from app.extensions import db
+from app.models.activity import Activity
 from app.models.application import Application
 from app.models.job_posting import JobPosting
 from app.models.organization import Organization
+from app.models.task import Task
 from app.utils.enums import JobStatus
 
 
@@ -141,6 +144,34 @@ def update_job_posting(
 def delete_job_posting(job: JobPosting) -> None:
     """Delete a job posting."""
     require_shared_editor(job)
+    owner_id = actor_id()
+    private_records = (
+        select(Application.id).where(
+            Application.job_posting_id == job.id, Application.owner_id != owner_id
+        ),
+        select(Activity.id).where(
+            Activity.owner_id != owner_id,
+            or_(
+                Activity.job_posting_id == job.id,
+                Activity.application.has(Application.job_posting_id == job.id),
+            ),
+        ),
+        select(Task.id).where(
+            Task.owner_id != owner_id,
+            or_(
+                Task.job_posting_id == job.id,
+                Task.application.has(Application.job_posting_id == job.id),
+            ),
+        ),
+    )
+    if any(db.session.scalar(statement.limit(1)) for statement in private_records):
+        abort(
+            409,
+            description=(
+                "This job posting contains another user's private history and "
+                "cannot be deleted."
+            ),
+        )
     db.session.delete(job)
     db.session.commit()
 
