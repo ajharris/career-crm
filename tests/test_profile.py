@@ -76,6 +76,8 @@ def test_education_can_save_multiple_entries_before_continuing(client):
     assert first.location == "/profile/onboarding/2"
     page = client.get(first.location)
     assert b"Education saved" in page.data
+    assert b"Previously saved entries" in page.data
+    assert b">1</span>" in page.data
     assert b"First University" in page.data
     assert b"Save &amp; Add Another" in page.data
 

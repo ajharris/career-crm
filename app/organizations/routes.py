@@ -63,14 +63,12 @@ def create() -> str:
     form = OrganizationForm()
     if form.validate_on_submit():
         try:
-            organization = create_organization(**_form_values(form))
+            create_organization(**_form_values(form))
         except DuplicateOrganizationError as error:
             form.name.errors.append(str(error))
         else:
             flash("Organization created successfully.", "success")
-            return redirect(
-                url_for("organizations.detail", organization_id=organization.id)
-            )
+            return redirect(url_for("organizations.index"))
     return render_template(
         "organizations/form.html", form=form, page_title="New organization"
     )

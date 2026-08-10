@@ -111,12 +111,16 @@ def test_detail_route(authenticated_client: FlaskClient) -> None:
 
 
 def test_create_route(authenticated_client: FlaskClient) -> None:
-    response = authenticated_client.post(
-        "/organizations/new", data=organization_data(), follow_redirects=True
-    )
+    response = authenticated_client.post("/organizations/new", data=organization_data())
+
+    assert response.status_code == 302
+    assert response.location == "/organizations"
+
+    response = authenticated_client.get(response.location)
 
     assert response.status_code == 200
     assert b"Organization created successfully." in response.data
+    assert b"New Organization" in response.data
     assert db.session.scalar(db.select(Organization).filter_by(name="Toronto General"))
 
 
