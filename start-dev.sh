@@ -39,6 +39,9 @@ fi
 
 echo "PostgreSQL reachable."
 
+echo "Applying database migrations..."
+"$PYTHON" -m flask --app wsgi:app db upgrade
+
 echo
 echo "======================================"
 echo " Career CRM"
