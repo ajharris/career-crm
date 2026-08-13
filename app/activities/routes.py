@@ -14,6 +14,7 @@ from app.activities.services import (
     list_activities,
     update_activity,
 )
+from app.contacts.services import get_contact
 from app.utils.enums import ActivityDirection, ActivityType
 
 
@@ -116,6 +117,9 @@ def _apply_context_defaults(form: ActivityForm) -> None:
         valid_ids = {choice[0] for choice in field.choices if choice[0] != ""}
         if requested_id in valid_ids:
             field.data = requested_id
+    if form.contact_id.data is not None:
+        contact = get_contact(form.contact_id.data)
+        form.organization_id.data = contact.organization_id
 
 
 def _query_options(form: ActivityFilterForm) -> dict:

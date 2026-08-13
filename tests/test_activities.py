@@ -357,6 +357,20 @@ def test_context_aware_creation(
     assert f'<option selected value="{entity.id}"'.encode() in response.data
 
 
+def test_contact_context_also_prefills_its_organization(
+    authenticated_client: FlaskClient,
+) -> None:
+    organization = make_organization()
+    contact = make_contact(organization)
+
+    response = authenticated_client.get(
+        "/activities/new", query_string={"contact_id": contact.id}
+    )
+
+    assert f'<option selected value="{contact.id}"'.encode() in response.data
+    assert f'<option selected value="{organization.id}"'.encode() in response.data
+
+
 def test_automatic_application_submitted_activity(app) -> None:
     job = make_job(make_organization())
 

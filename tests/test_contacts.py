@@ -142,6 +142,11 @@ def test_create_and_detail_routes(authenticated_client: FlaskClient) -> None:
     assert b"Created" in response.data
     assert b"Updated" in response.data
     assert b'href="https://example.org/team/alex-morgan"' in response.data
+    contact = db.session.scalar(db.select(Contact))
+    assert (
+        f'/activities/new?contact_id={contact.id}&amp;organization_id={organization.id}'.encode()
+        in response.data
+    )
 
 
 def test_create_and_add_another_returns_to_preselected_form(
