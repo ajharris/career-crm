@@ -46,13 +46,17 @@ def test_empty_database_upgrades_to_single_head_with_expected_tables(tmp_path):
     database = tmp_path / "fresh.db"
     result = _upgrade(database)
     assert result.returncode == 0, result.stderr
-    tables = set(inspect(create_engine(f"sqlite:///{database}")).get_table_names())
+    inspector = inspect(create_engine(f"sqlite:///{database}"))
+    tables = set(inspector.get_table_names())
     assert EXPECTED_LATE_TABLES.issubset(tables)
+    assert "profile_url" in {
+        column["name"] for column in inspector.get_columns("contacts")
+    }
     with sqlite3.connect(database) as connection:
         revision = connection.execute(
             "SELECT version_num FROM alembic_version"
         ).fetchone()[0]
-    assert revision == "a31c4e7f9b02"
+    assert revision == "b42e91d3f6a8"
 
 
 def test_upgrade_from_onboarding_revision_preserves_reference_data(tmp_path):

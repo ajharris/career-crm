@@ -7,6 +7,7 @@ from flask import (
     flash,
     redirect,
     render_template,
+    request,
     send_from_directory,
     url_for,
 )
@@ -43,6 +44,8 @@ def create():
             form.notes.data,
         )
         flash("Document uploaded.", "success")
+        if request.form.get("action") == "save_and_new":
+            return redirect(url_for("documents.create"))
         return redirect(url_for("documents.detail", document_id=document.id))
     return render_template("documents/form.html", form=form, title="Upload document")
 

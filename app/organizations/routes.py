@@ -68,6 +68,8 @@ def create() -> str:
             form.name.errors.append(str(error))
         else:
             flash("Organization created successfully.", "success")
+            if request.form.get("action") == "save_and_new":
+                return redirect(url_for("organizations.create"))
             return redirect(url_for("organizations.index"))
     return render_template(
         "organizations/form.html", form=form, page_title="New organization"

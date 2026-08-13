@@ -28,6 +28,7 @@
         {{ render_field(form.notes) }}
         <div class="d-flex justify-content-end gap-2">
           <a class="btn btn-outline-secondary" href="{{ url_for('organizations.detail', organization_id=organization.id) if organization else url_for('organizations.index') }}">Cancel</a>
+          {% if not organization %}<button class="btn btn-outline-primary" type="submit" name="action" value="save_and_new">Save and add another</button>{% endif %}
           {{ form.submit(class='btn btn-primary') }}
         </div>
       </form>

@@ -12,6 +12,6 @@
     {{ render_field(form.subject) }}{{ render_field(form.summary) }}{{ render_field(form.outcome) }}
     <div class="form-check mb-3">{{ form.follow_up_needed(class='form-check-input') }}{{ form.follow_up_needed.label(class='form-check-label') }}</div>
     {{ render_field(form.notes) }}
-    <div class="d-flex justify-content-end gap-2"><a class="btn btn-outline-secondary" href="{{ url_for('activities.detail', activity_id=activity.id) if activity else url_for('activities.index') }}">Cancel</a>{{ form.submit(class='btn btn-primary') }}</div>
+    <div class="d-flex justify-content-end gap-2"><a class="btn btn-outline-secondary" href="{{ url_for('activities.detail', activity_id=activity.id) if activity else url_for('activities.index') }}">Cancel</a>{% if not activity %}<button class="btn btn-outline-primary" type="submit" name="action" value="save_and_new">Save and add another</button>{% endif %}{{ form.submit(class='btn btn-primary') }}</div>
   </form></div></div>
 {% endblock %}

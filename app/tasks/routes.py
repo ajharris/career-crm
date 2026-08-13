@@ -68,6 +68,18 @@ def create():
     if form.validate_on_submit():
         task = create_task(**_values(form))
         flash("Task created successfully.", "success")
+        if request.form.get("action") == "save_and_new":
+            context = {
+                name: getattr(task, name)
+                for name in (
+                    "organization_id",
+                    "contact_id",
+                    "job_posting_id",
+                    "application_id",
+                )
+                if getattr(task, name)
+            }
+            return redirect(url_for("tasks.create", **context))
         return redirect(url_for("tasks.detail", task_id=task.id))
     return render_template("tasks/form.html", form=form, page_title="New task")
 

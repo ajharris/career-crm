@@ -4,6 +4,25 @@ from sqlalchemy import inspect
 
 from app import create_app
 from app.extensions import db
+from app.utils.text import linkify_text
+
+
+def test_linkify_text_safely_links_urls_and_email_addresses() -> None:
+    rendered = str(
+        linkify_text(
+            "Visit https://example.com/path?x=1&y=2 or email person@example.com. "
+            "<script>alert('x')</script>"
+        )
+    )
+
+    assert (
+        'href="https://example.com/path?x=1&amp;y=2" rel="noopener noreferrer"'
+        in rendered
+    )
+    assert 'href="mailto:person@example.com"' in rendered
+    assert "person@example.com</a>." in rendered
+    assert "<script>" not in rendered
+    assert "&lt;script&gt;" in rendered
 
 
 def test_dashboard_renders_placeholder_statistics(authenticated_client) -> None:

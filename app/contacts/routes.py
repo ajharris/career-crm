@@ -76,6 +76,12 @@ def create() -> str:
     if form.validate_on_submit():
         contact = create_contact(**_form_values(form))
         flash("Contact created successfully.", "success")
+        if request.form.get("action") == "save_and_new":
+            return redirect(
+                url_for(
+                    "contacts.create", organization_id=contact.organization_id
+                )
+            )
         return redirect(url_for("contacts.detail", contact_id=contact.id))
     return render_template("contacts/form.html", form=form, page_title="New contact")
 
@@ -125,6 +131,7 @@ def _form_values(form: ContactForm) -> ContactValues:
         "email": form.email.data,
         "phone": form.phone.data,
         "linkedin_url": form.linkedin_url.data,
+        "profile_url": form.profile_url.data,
         "notes": form.notes.data,
         "relationship_status": form.relationship_status.data,
         "last_contacted_at": form.last_contacted_at.data,

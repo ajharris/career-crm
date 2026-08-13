@@ -4,7 +4,10 @@ from datetime import date, datetime, timedelta
 
 import pytest
 
+from app.applications.services import create_application
+from app.contacts.services import create_contact
 from app.extensions import db
+from app.jobs.services import create_job_posting
 from app.models.activity import Activity
 from app.models.task import Task
 from app.organizations.services import create_organization
@@ -16,7 +19,14 @@ from app.tasks.services import (
     reopen_task,
     update_task,
 )
-from app.utils.enums import OrganizationType, TaskPriority, TaskStatus, TaskType
+from app.utils.enums import (
+    ApplicationStatus,
+    JobStatus,
+    OrganizationType,
+    TaskPriority,
+    TaskStatus,
+    TaskType,
+)
 
 
 def organization():
@@ -124,6 +134,58 @@ def test_crud_routes(authenticated_client):
         f"/tasks/{task.id}/delete", data={}, follow_redirects=True
     )
     assert b"Task deleted successfully" in response.data
+
+
+def test_related_entities_are_linked_from_task_views(authenticated_client, app):
+    org = organization()
+    contact = create_contact(
+        organization_id=org.id, first_name="Alex", last_name="Morgan"
+    )
+    job = create_job_posting(
+        organization_id=org.id,
+        title="Medical Physicist",
+        priority=4,
+        status=JobStatus.DISCOVERED.value,
+    )
+    application = create_application(
+        job_posting_id=job.id,
+        status=ApplicationStatus.PLANNED.value,
+        accepted=False,
+        withdrawn=False,
+    )
+    task = create_task(
+        **values(
+            organization_id=org.id,
+            contact_id=contact.id,
+            job_posting_id=job.id,
+            application_id=application.id,
+        )
+    )
+
+    detail = authenticated_client.get(f"/tasks/{task.id}")
+    assert f'href="/organizations/{org.id}"'.encode() in detail.data
+    assert f'href="/contacts/{contact.id}"'.encode() in detail.data
+    assert f'href="/jobs/{job.id}"'.encode() in detail.data
+    assert f'href="/applications/{application.id}"'.encode() in detail.data
+
+    index = authenticated_client.get("/tasks")
+    assert f'href="/organizations/{org.id}"'.encode() in index.data
+
+
+def test_create_and_add_another_keeps_task_context(authenticated_client):
+    org = organization()
+    data = form_data(organization_id=str(org.id), action="save_and_new")
+
+    response = authenticated_client.post("/tasks/new", data=data)
+
+    assert response.status_code == 302
+    assert response.location.endswith(f"/tasks/new?organization_id={org.id}")
+    assert db.session.scalar(db.select(db.func.count(Task.id))) == 1
+
+    next_form = authenticated_client.get(response.location)
+    assert b"Task created successfully." in next_form.data
+    assert b"Save and add another" in next_form.data
+    assert f'<option selected value="{org.id}"'.encode() in next_form.data
 
 
 def test_due_time_requires_date(authenticated_client):

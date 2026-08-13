@@ -23,6 +23,7 @@ class ContactValues(TypedDict, total=False):
     email: str | None
     phone: str | None
     linkedin_url: str | None
+    profile_url: str | None
     notes: str | None
     relationship_status: str | None
     last_contacted_at: datetime | None
@@ -56,6 +57,7 @@ def list_contacts(
                 Organization.name.ilike(pattern, escape="\\"),
                 Contact.title.ilike(pattern, escape="\\"),
                 Contact.email.ilike(pattern, escape="\\"),
+                Contact.profile_url.ilike(pattern, escape="\\"),
             )
         )
     if organization_id is not None:
@@ -140,6 +142,7 @@ def _apply_values(contact: Contact, values: ContactValues) -> None:
         "email",
         "phone",
         "linkedin_url",
+        "profile_url",
         "notes",
         "relationship_status",
         "last_contacted_at",

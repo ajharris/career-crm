@@ -41,8 +41,8 @@
     <dt class="col-sm-3">Created Date</dt><dd class="col-sm-9">{{ job.created_at.strftime('%B %d, %Y at %H:%M') }}</dd>
     <dt class="col-sm-3">Last Updated By</dt><dd class="col-sm-9">{{ job.updated_by.full_name }}</dd>
     <dt class="col-sm-3">Updated Date</dt><dd class="col-sm-9">{{ job.updated_at.strftime('%B %d, %Y at %H:%M') }}</dd>
-    <dt class="col-sm-3">Description</dt><dd class="col-sm-9 text-pre-wrap">{{ job.description or '—' }}</dd>
-    <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ job.notes or '—' }}</dd>
+    <dt class="col-sm-3">Description</dt><dd class="col-sm-9 text-pre-wrap">{{ job.description|linkify if job.description else '—' }}</dd>
+    <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ job.notes|linkify if job.notes else '—' }}</dd>
   </dl></div></section>
 
   <section class="card border-0 shadow-sm mt-4">

@@ -21,11 +21,12 @@
     <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{% if contact.email %}<a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% else %}—{% endif %}</dd>
     <dt class="col-sm-3">Phone</dt><dd class="col-sm-9">{% if contact.phone %}<a href="tel:{{ contact.phone }}">{{ contact.phone }}</a>{% else %}—{% endif %}</dd>
     <dt class="col-sm-3">LinkedIn</dt><dd class="col-sm-9">{% if contact.linkedin_url %}<a href="{{ contact.linkedin_url }}" rel="noopener noreferrer">View profile</a>{% else %}—{% endif %}</dd>
+    <dt class="col-sm-3">Profile page</dt><dd class="col-sm-9">{% if contact.profile_url %}<a href="{{ contact.profile_url }}" rel="noopener noreferrer">Open profile page</a>{% else %}—{% endif %}</dd>
     <dt class="col-sm-3">Relationship status</dt><dd class="col-sm-9">{{ contact.relationship_status.label if contact.relationship_status else '—' }}</dd>
     <dt class="col-sm-3">Last contacted</dt><dd class="col-sm-9">{{ contact.last_contacted_at.strftime('%B %d, %Y at %H:%M') if contact.last_contacted_at else '—' }}</dd>
     <dt class="col-sm-3">Created</dt><dd class="col-sm-9">{{ contact.created_at.strftime('%B %d, %Y at %H:%M') }}</dd>
     <dt class="col-sm-3">Updated</dt><dd class="col-sm-9">{{ contact.updated_at.strftime('%B %d, %Y at %H:%M') }}</dd>
-    <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ contact.notes or '—' }}</dd>
+    <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ contact.notes|linkify if contact.notes else '—' }}</dd>
   </dl></div></section>
   <section class="card border-0 shadow-sm mt-4"><div class="card-header bg-white d-flex justify-content-between align-items-center py-3"><h2 class="h5 mb-0">Open Tasks</h2><a class="btn btn-sm btn-primary" href="{{ url_for('tasks.create', contact_id=contact.id) }}">Add Task</a></div><div class="card-body py-0">{% from "macros/tasks.html" import task_list %}{{ task_list(active_tasks) }}</div></section>
   <section class="card border-0 shadow-sm mt-4"><div class="card-header bg-white d-flex justify-content-between align-items-center py-3"><h2 class="h5 mb-0">Recent Activity</h2><a class="btn btn-sm btn-primary" href="{{ url_for('activities.create', contact_id=contact.id) }}">Add Activity</a></div><div class="card-body py-0">{{ activity_timeline(recent_activities) }}</div></section>

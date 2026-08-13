@@ -34,10 +34,16 @@ class ContactForm(FlaskForm):
         validators=[Optional(), URL(), Length(max=500)],
         description="Include https://",
     )
+    profile_url = StringField(
+        "Profile page URL",
+        validators=[Optional(), URL(), Length(max=500)],
+        description="An external staff page, biography, or other profile. Include https://",
+    )
     relationship_status = SelectField(
         "Relationship status",
         choices=[("", "Select a status")]
         + [(item.value, item.label) for item in RelationshipStatus],
+        default=RelationshipStatus.NEW.value,
         validators=[Optional()],
     )
     last_contacted_at = DateTimeLocalField(

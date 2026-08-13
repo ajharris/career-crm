@@ -13,6 +13,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.config import CONFIGURATIONS, Config
 from app.extensions import csrf, db, login_manager, migrate
+from app.utils.text import linkify_text
 
 
 def create_app(config: str | type[Config] | dict[str, Any] | None = None) -> Flask:
@@ -34,6 +35,7 @@ def create_app(config: str | type[Config] | dict[str, Any] | None = None) -> Fla
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
     initialize_extensions(app)
+    app.jinja_env.filters["linkify"] = linkify_text
     from app.performance import init_performance
 
     init_performance(app)

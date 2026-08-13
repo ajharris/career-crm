@@ -17,7 +17,7 @@
       {{ render_field(form.rejection_reason) }}
       <div class="d-flex gap-4 mb-3"><div class="form-check">{{ form.accepted(class='form-check-input') }}{{ form.accepted.label(class='form-check-label') }}</div><div class="form-check">{{ form.withdrawn(class='form-check-input') }}{{ form.withdrawn.label(class='form-check-label') }}</div></div>
       {{ render_field(form.notes) }}
-      <div class="d-flex justify-content-end gap-2"><a class="btn btn-outline-secondary" href="{{ url_for('applications.detail', application_id=application.id) if application else url_for('applications.index') }}">Cancel</a>{{ form.submit(class='btn btn-primary') }}</div>
+      <div class="d-flex justify-content-end gap-2"><a class="btn btn-outline-secondary" href="{{ url_for('applications.detail', application_id=application.id) if application else url_for('applications.index') }}">Cancel</a>{% if not application %}<button class="btn btn-outline-primary" type="submit" name="action" value="save_and_new">Save and add another</button>{% endif %}{{ form.submit(class='btn btn-primary') }}</div>
     </form>
   </div></div>
 {% endblock %}

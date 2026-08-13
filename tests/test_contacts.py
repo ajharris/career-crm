@@ -39,6 +39,7 @@ def contact_data(organization_id: int, first_name: str = "Alex") -> dict:
         "email": f"{first_name.lower()}@example.org",
         "phone": "+1 416 555 0100",
         "linkedin_url": "https://www.linkedin.com/in/example",
+        "profile_url": "https://example.org/team/alex-morgan",
         "relationship_status": RelationshipStatus.CONTACTED.value,
         "last_contacted_at": "2026-08-01T09:30",
         "notes": "Met at a conference",
@@ -140,12 +141,50 @@ def test_create_and_detail_routes(authenticated_client: FlaskClient) -> None:
     assert b"Contacted" in response.data
     assert b"Created" in response.data
     assert b"Updated" in response.data
+    assert b'href="https://example.org/team/alex-morgan"' in response.data
+
+
+def test_create_and_add_another_returns_to_preselected_form(
+    authenticated_client: FlaskClient,
+) -> None:
+    organization = make_organization()
+    values = contact_data(organization.id)
+    values["action"] = "save_and_new"
+
+    response = authenticated_client.post("/contacts/new", data=values)
+
+    assert response.status_code == 302
+    assert response.location.endswith(
+        f"/contacts/new?organization_id={organization.id}"
+    )
+    assert db.session.scalar(db.select(db.func.count(Contact.id))) == 1
+
+    next_form = authenticated_client.get(response.location)
+    assert b"Contact created successfully." in next_form.data
+    assert b"Save and add another" in next_form.data
+    assert f'<option selected value="{organization.id}"'.encode() in next_form.data
+    assert b'value="Alex"' not in next_form.data
+
+
+def test_add_another_action_is_only_shown_when_creating(
+    authenticated_client: FlaskClient,
+) -> None:
+    organization = make_organization()
+    contact = create_contact(**service_data(organization.id))
+
+    create_response = authenticated_client.get("/contacts/new")
+    edit_response = authenticated_client.get(f"/contacts/{contact.id}/edit")
+
+    assert b"Save and add another" in create_response.data
+    assert b"Save and add another" not in edit_response.data
 
 
 def test_create_route_validates_fields(authenticated_client: FlaskClient) -> None:
     organization = make_organization()
     values = contact_data(organization.id)
-    values.update(first_name="", email="invalid", linkedin_url="invalid")
+    values.update(
+        first_name="", email="invalid", linkedin_url="invalid", profile_url="invalid"
+    )
 
     response = authenticated_client.post("/contacts/new", data=values)
 
@@ -153,6 +192,7 @@ def test_create_route_validates_fields(authenticated_client: FlaskClient) -> Non
     assert b"This field is required." in response.data
     assert b"Invalid email address." in response.data
     assert b"Invalid URL." in response.data
+    assert response.data.count(b"Invalid URL.") == 2
 
 
 def test_new_contact_preselects_organization(authenticated_client: FlaskClient) -> None:
@@ -164,6 +204,14 @@ def test_new_contact_preselects_organization(authenticated_client: FlaskClient) 
 
     selected = f'<option selected value="{organization.id}"'.encode()
     assert selected in response.data
+
+
+def test_new_contact_defaults_relationship_status_to_new(
+    authenticated_client: FlaskClient,
+) -> None:
+    response = authenticated_client.get("/contacts/new")
+
+    assert b'<option selected value="new">New</option>' in response.data
 
 
 def test_edit_route(authenticated_client: FlaskClient) -> None:

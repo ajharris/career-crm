@@ -27,7 +27,7 @@
         <dt class="col-sm-3">Created Date</dt><dd class="col-sm-9">{{ organization.created_at.strftime('%B %d, %Y') }}</dd>
         <dt class="col-sm-3">Last Updated By</dt><dd class="col-sm-9">{{ organization.updated_by.full_name }}</dd>
         <dt class="col-sm-3">Updated Date</dt><dd class="col-sm-9">{{ organization.updated_at.strftime('%B %d, %Y') }}</dd>
-        <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ organization.notes or '—' }}</dd>
+        <dt class="col-sm-3">Notes</dt><dd class="col-sm-9 text-pre-wrap">{{ organization.notes|linkify if organization.notes else '—' }}</dd>
       </dl>
     </div>
   </section>

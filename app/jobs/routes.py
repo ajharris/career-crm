@@ -65,6 +65,10 @@ def create() -> str:
     if form.validate_on_submit():
         job = create_job_posting(**_form_values(form))
         flash("Job posting created successfully.", "success")
+        if request.form.get("action") == "save_and_new":
+            return redirect(
+                url_for("jobs.create", organization_id=job.organization_id)
+            )
         return redirect(url_for("jobs.detail", job_id=job.id))
     return render_template("jobs/form.html", form=form, page_title="New job posting")
 

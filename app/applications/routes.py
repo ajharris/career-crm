@@ -67,6 +67,8 @@ def create() -> str:
             form.job_posting_id.errors.append(str(error))
         else:
             flash("Application created successfully.", "success")
+            if request.form.get("action") == "save_and_new":
+                return redirect(url_for("applications.create"))
             return redirect(
                 url_for("applications.detail", application_id=application.id)
             )

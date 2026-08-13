@@ -49,6 +49,18 @@ def create() -> str:
     if form.validate_on_submit():
         activity = create_activity(**_form_values(form))
         flash("Activity created successfully.", "success")
+        if request.form.get("action") == "save_and_new":
+            context = {
+                name: getattr(activity, name)
+                for name in (
+                    "organization_id",
+                    "contact_id",
+                    "job_posting_id",
+                    "application_id",
+                )
+                if getattr(activity, name)
+            }
+            return redirect(url_for("activities.create", **context))
         return redirect(url_for("activities.detail", activity_id=activity.id))
     return render_template("activities/form.html", form=form, page_title="New activity")
 

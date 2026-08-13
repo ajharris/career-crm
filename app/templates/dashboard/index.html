@@ -83,10 +83,10 @@
               <h3 class="h6{% if not loop.first %} mt-4{% endif %}">{{ heading }} <span class="badge rounded-pill text-bg-light">{{ task_groups[key]|length }}</span></h3>
               <div class="list-group list-group-flush">
                 {% for task in task_groups[key] %}
-                  <a class="list-group-item list-group-item-action px-0" href="{{ url_for('tasks.detail', task_id=task.id) }}">
-                    <div class="d-flex justify-content-between gap-2"><span class="fw-semibold">{{ task.title }}</span>{{ priority_badge(task.priority) }}</div>
-                    <div class="small text-body-secondary"><time>{{ task.due_date.strftime('%b %d, %Y') }}</time>{% if task.organization %} · {{ task.organization.name }}{% endif %}</div>
-                  </a>
+                  <div class="list-group-item px-0">
+                    <div class="d-flex justify-content-between gap-2"><a class="fw-semibold" href="{{ url_for('tasks.detail', task_id=task.id) }}">{{ task.title }}</a>{{ priority_badge(task.priority) }}</div>
+                    <div class="small text-body-secondary"><time>{{ task.due_date.strftime('%b %d, %Y') }}</time>{% if task.organization %} · <a href="{{ url_for('organizations.detail', organization_id=task.organization_id) }}">{{ task.organization.name }}</a>{% endif %}{% if task.contact %} · <a href="{{ url_for('contacts.detail', contact_id=task.contact_id) }}">{{ task.contact.full_name }}</a>{% endif %}</div>
+                  </div>
                 {% else %}<div class="small text-body-secondary py-2">No {{ heading|lower }}.</div>{% endfor %}
               </div>
             {% endfor %}
@@ -104,7 +104,7 @@
     <div class="col-12 col-lg-6"><section class="card border-0 shadow-sm h-100">
       {{ card_header('Recent Activity', 'activities.index', 'View timeline') }}
       <div class="card-body table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Date</th><th>Type</th><th>Organization</th><th>Subject</th></tr></thead><tbody>
-        {% for activity in recent_activities %}<tr><td class="text-nowrap"><a href="{{ url_for('activities.detail', activity_id=activity.id) }}">{{ activity.occurred_at.strftime('%b %d, %Y') }}</a></td><td>{{ activity.activity_type.label }}</td><td>{{ activity.organization.name if activity.organization else '—' }}</td><td>{{ activity.subject or '—' }}</td></tr>
+        {% for activity in recent_activities %}<tr><td class="text-nowrap"><a href="{{ url_for('activities.detail', activity_id=activity.id) }}">{{ activity.occurred_at.strftime('%b %d, %Y') }}</a></td><td>{{ activity.activity_type.label }}</td><td>{% if activity.organization %}<a href="{{ url_for('organizations.detail', organization_id=activity.organization_id) }}">{{ activity.organization.name }}</a>{% else %}—{% endif %}</td><td><a href="{{ url_for('activities.detail', activity_id=activity.id) }}">{{ activity.subject or '—' }}</a></td></tr>
         {% else %}<tr><td colspan="4">{{ empty('No activities have been recorded yet.') }}</td></tr>{% endfor %}
       </tbody></table></div>
     </section></div>
@@ -113,7 +113,7 @@
     <div class="col-12 col-lg-6"><section class="card border-0 shadow-sm h-100">
       {{ card_header('Recent Applications', 'applications.index') }}
       <div class="card-body table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Organization</th><th>Position</th><th>Status</th><th>Applied</th></tr></thead><tbody>
-        {% for application in recent_applications %}<tr><td>{{ application.job_posting.organization.name }}</td><td><a href="{{ url_for('applications.detail', application_id=application.id) }}">{{ application.job_posting.title }}</a></td><td><span class="badge text-bg-primary">{{ application.status.label }}</span></td><td class="text-nowrap">{{ application.application_date.strftime('%b %d, %Y') if application.application_date else '—' }}</td></tr>
+        {% for application in recent_applications %}<tr><td><a href="{{ url_for('organizations.detail', organization_id=application.job_posting.organization_id) }}">{{ application.job_posting.organization.name }}</a></td><td><a href="{{ url_for('applications.detail', application_id=application.id) }}">{{ application.job_posting.title }}</a></td><td><span class="badge text-bg-primary">{{ application.status.label }}</span></td><td class="text-nowrap">{{ application.application_date.strftime('%b %d, %Y') if application.application_date else '—' }}</td></tr>
         {% else %}<tr><td colspan="4">{{ empty('No applications have been created yet.') }}</td></tr>{% endfor %}
       </tbody></table></div>
     </section></div>
@@ -138,7 +138,7 @@
     <div class="col-12 col-lg-6"><section class="card border-0 shadow-sm h-100">
       {{ card_header('Upcoming Interviews', 'applications.index', 'View applications') }}
       <div class="list-group list-group-flush">
-        {% for application in upcoming_interviews %}<a class="list-group-item list-group-item-action p-3" href="{{ url_for('applications.detail', application_id=application.id) }}"><div class="fw-semibold">{{ application.job_posting.title }}</div><div class="small text-body-secondary">{{ application.job_posting.organization.name }} · {{ application.interview_date.strftime('%b %d, %Y at %H:%M') }}</div></a>
+        {% for application in upcoming_interviews %}<div class="list-group-item p-3"><div><a class="fw-semibold" href="{{ url_for('applications.detail', application_id=application.id) }}">{{ application.job_posting.title }}</a></div><div class="small text-body-secondary"><a href="{{ url_for('organizations.detail', organization_id=application.job_posting.organization_id) }}">{{ application.job_posting.organization.name }}</a> · {{ application.interview_date.strftime('%b %d, %Y at %H:%M') }}</div></div>
         {% else %}<div class="card-body">{{ empty('No upcoming interviews scheduled. Keep building momentum!') }}</div>{% endfor %}
       </div>
     </section></div>
