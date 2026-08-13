@@ -132,6 +132,7 @@ def _form_values(form: ContactForm) -> ContactValues:
         "phone": form.phone.data,
         "linkedin_url": form.linkedin_url.data,
         "profile_url": form.profile_url.data,
+        "resume_url": form.resume_url.data,
         "notes": form.notes.data,
         "relationship_status": form.relationship_status.data,
         "last_contacted_at": form.last_contacted_at.data,

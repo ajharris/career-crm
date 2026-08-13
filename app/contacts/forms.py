@@ -39,6 +39,11 @@ class ContactForm(FlaskForm):
         validators=[Optional(), URL(), Length(max=500)],
         description="An external staff page, biography, or other profile. Include https://",
     )
+    resume_url = StringField(
+        "Résumé link",
+        validators=[Optional(), URL(), Length(max=1000)],
+        description="Link to the résumé in Google Drive used with this contact.",
+    )
     relationship_status = SelectField(
         "Relationship status",
         choices=[("", "Select a status")]

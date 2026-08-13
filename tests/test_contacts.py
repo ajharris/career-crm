@@ -40,6 +40,7 @@ def contact_data(organization_id: int, first_name: str = "Alex") -> dict:
         "phone": "+1 416 555 0100",
         "linkedin_url": "https://www.linkedin.com/in/example",
         "profile_url": "https://example.org/team/alex-morgan",
+        "resume_url": "https://docs.google.com/document/d/contact-resume",
         "relationship_status": RelationshipStatus.CONTACTED.value,
         "last_contacted_at": "2026-08-01T09:30",
         "notes": "Met at a conference",
@@ -142,6 +143,8 @@ def test_create_and_detail_routes(authenticated_client: FlaskClient) -> None:
     assert b"Created" in response.data
     assert b"Updated" in response.data
     assert b'href="https://example.org/team/alex-morgan"' in response.data
+    assert b'href="https://docs.google.com/document/d/contact-resume"' in response.data
+    assert b"Open r\xc3\xa9sum\xc3\xa9 in Google Drive" in response.data
 
 
 def test_create_and_add_another_returns_to_preselected_form(
@@ -183,7 +186,11 @@ def test_create_route_validates_fields(authenticated_client: FlaskClient) -> Non
     organization = make_organization()
     values = contact_data(organization.id)
     values.update(
-        first_name="", email="invalid", linkedin_url="invalid", profile_url="invalid"
+        first_name="",
+        email="invalid",
+        linkedin_url="invalid",
+        profile_url="invalid",
+        resume_url="invalid",
     )
 
     response = authenticated_client.post("/contacts/new", data=values)
@@ -192,7 +199,7 @@ def test_create_route_validates_fields(authenticated_client: FlaskClient) -> Non
     assert b"This field is required." in response.data
     assert b"Invalid email address." in response.data
     assert b"Invalid URL." in response.data
-    assert response.data.count(b"Invalid URL.") == 2
+    assert response.data.count(b"Invalid URL.") == 3
 
 
 def test_new_contact_preselects_organization(authenticated_client: FlaskClient) -> None:
