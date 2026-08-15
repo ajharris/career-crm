@@ -23,6 +23,7 @@ from app.models.collaboration import CompanyReview, OrganizationNote
 from app.models.contact import Contact
 from app.models.dashboard_widget import DashboardWidget
 from app.models.document import ApplicationDocument, Document, DocumentVersion
+from app.models.integration import GoogleAccountConnection
 from app.models.job_posting import JobPosting
 from app.models.notification import NotificationDismissal
 from app.models.organization import Organization
@@ -54,6 +55,7 @@ __all__ = [
     "DocumentVersion",
     "ApplicationDocument",
     "JobPosting",
+    "GoogleAccountConnection",
     "Organization",
     "SavedSearch",
     "NotificationDismissal",

@@ -98,13 +98,22 @@ def set_folder(folder_id: str | None) -> None:
 
 
 def upload(filename: str, mime_type: str, content: bytes) -> StoredFile | None:
-    record = configuration()
-    if record.provider != "google_drive":
-        return None
-    token = _access_token(record)
+    from app.auth.permissions import actor_id
+    from app.integrations.services import DRIVE_SCOPE, access_token, connection_for
+
+    user_connection = connection_for(actor_id(), "drive")
+    if user_connection is not None and user_connection.has_scope(DRIVE_SCOPE):
+        token = access_token(user_connection)
+        folder_id = user_connection.drive_folder_id
+    else:
+        record = configuration()
+        if record.provider != "google_drive":
+            return None
+        token = _access_token(record)
+        folder_id = record.folder_id
     metadata: dict[str, object] = {"name": filename}
-    if record.folder_id:
-        metadata["parents"] = [record.folder_id]
+    if folder_id:
+        metadata["parents"] = [folder_id]
     boundary = f"career-crm-{secrets.token_hex(12)}"
     body = (
         f"--{boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"

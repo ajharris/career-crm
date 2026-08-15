@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Connected Accounts · Career CRM{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-12 col-lg-8">
+  <div class="mb-4"><h1 class="h2">Connected Accounts</h1><p class="text-body-secondary">Connect services independently. You may use different Google accounts for Drive and Gmail, and this does not change your Career CRM login.</p></div>
+  <section class="card border-0 shadow-sm mb-4"><div class="card-body p-4">
+    <h2 class="h5">Google Drive</h2>
+    {% if drive_connection %}
+      <p>Connected as <strong>{{ drive_connection.account_email }}</strong>. Career CRM can access only files used with the app.</p>
+      <form method="post" action="{{ url_for('integrations.google_folder') }}" class="mb-4"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="form-label" for="folder_id">Drive folder ID <span class="text-body-secondary">(optional)</span></label><input class="form-control mb-2" id="folder_id" name="folder_id" value="{{ drive_connection.drive_folder_id or '' }}" autocomplete="off"><div class="form-text mb-3">Leave blank to store files in My Drive.</div><button class="btn btn-primary">Save folder</button></form>
+      <div class="d-flex gap-2"><form method="post" action="{{ url_for('integrations.google_connect', service='drive') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="form-label" for="drive_google_email">Use a different Google account</label><div class="input-group"><input class="form-control" id="drive_google_email" name="google_email" type="email" placeholder="personal@gmail.com" required><button class="btn btn-outline-primary">Change Drive account</button></div></form><form method="post" action="{{ url_for('integrations.google_disconnect', service='drive') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-danger mt-4">Disconnect Drive</button></form></div>
+    {% else %}
+      <p>Store Career CRM documents in a Google Drive account. Enter the exact account you want Google to authorize; it may differ from your Career CRM login.</p><form method="post" action="{{ url_for('integrations.google_connect', service='drive') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="form-label" for="drive_google_email">Google account email</label><div class="input-group"><input class="form-control" id="drive_google_email" name="google_email" type="email" placeholder="personal@gmail.com" required><button class="btn btn-primary">Connect Google Drive</button></div></form>
+    {% endif %}
+  </div></section>
+  <section class="card border-0 shadow-sm"><div class="card-body p-4">
+    <h2 class="h5">Gmail <span class="badge text-bg-light">Optional</span></h2>
+    {% if gmail_connection %}
+      <p>Connected as <strong>{{ gmail_connection.account_email }}</strong>. Career CRM may send messages but cannot read the mailbox.</p>
+      <div class="d-flex gap-2"><form method="post" action="{{ url_for('integrations.google_connect', service='gmail') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="form-label" for="gmail_google_email">Use a different Google account</label><div class="input-group"><input class="form-control" id="gmail_google_email" name="google_email" type="email" placeholder="personal@gmail.com" required><button class="btn btn-outline-primary">Change Gmail account</button></div></form><form method="post" action="{{ url_for('integrations.google_disconnect', service='gmail') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-danger mt-4">Disconnect Gmail</button></form></div>
+    {% else %}
+      <p>Connect Gmail separately to send messages. If a managed university account blocks access, you can leave Gmail disconnected or use a different Google account.</p><form method="post" action="{{ url_for('integrations.google_connect', service='gmail') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="form-label" for="gmail_google_email">Google account email</label><div class="input-group"><input class="form-control" id="gmail_google_email" name="google_email" type="email" placeholder="personal@gmail.com" required><button class="btn btn-primary">Connect Gmail</button></div></form>
+    {% endif %}
+  </div></section>
+</div></div>
+{% endblock %}

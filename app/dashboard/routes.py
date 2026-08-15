@@ -23,12 +23,16 @@ def index() -> str:
     )
 
     profile = get_profile()
+    from app.auth.permissions import actor_id
+    from app.integrations.services import connection_for
 
     return render_template(
         "dashboard/index.html",
         profile_summary=profile_summary(),
         profile_completion=profile_completeness(profile),
         show_profile_reminder=should_show_profile_reminder(profile),
+        google_drive_connection=connection_for(actor_id(), "drive"),
+        google_gmail_connection=connection_for(actor_id(), "gmail"),
         **dashboard_data(),
     )
 
