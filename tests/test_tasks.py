@@ -185,7 +185,38 @@ def test_create_and_add_another_keeps_task_context(authenticated_client):
     next_form = authenticated_client.get(response.location)
     assert b"Task created successfully." in next_form.data
     assert b"Save and add another" in next_form.data
-    assert f'<option selected value="{org.id}"'.encode() in next_form.data
+    assert f'name="organization_id" value="{org.id}"'.encode() in next_form.data
+
+
+def test_create_from_contact_uses_all_known_context(authenticated_client):
+    org = organization()
+    contact = create_contact(
+        organization_id=org.id,
+        first_name="Alex",
+        last_name="Morgan",
+        title="Hiring Manager",
+        department="Medical Physics",
+    )
+
+    form = authenticated_client.get(f"/tasks/new?contact_id={contact.id}")
+
+    assert b"Alex Morgan" in form.data
+    assert b"Hiring Manager" in form.data
+    assert b"Medical Physics" in form.data
+    assert b"UHN" in form.data
+    assert b'id="organization_id"' not in form.data
+    assert b'id="contact_id"' not in form.data
+
+    response = authenticated_client.post(
+        f"/tasks/new?contact_id={contact.id}",
+        data=form_data(contact_id=contact.id, organization_id=org.id),
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    task = db.session.scalar(db.select(Task))
+    assert task.contact_id == contact.id
+    assert task.organization_id == org.id
 
 
 def test_due_time_requires_date(authenticated_client):

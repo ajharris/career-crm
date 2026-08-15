@@ -42,6 +42,10 @@ class DocumentVersion(db.Model):
     version_number: Mapped[int] = mapped_column(nullable=False)
     original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
     storage_name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    storage_provider: Mapped[str] = mapped_column(
+        String(30), nullable=False, default="local", server_default="local"
+    )
+    external_url: Mapped[str | None] = mapped_column(String(1000))
     mime_type: Mapped[str] = mapped_column(String(120), nullable=False)
     size_bytes: Mapped[int] = mapped_column(nullable=False)
     notes: Mapped[str | None] = mapped_column(Text)

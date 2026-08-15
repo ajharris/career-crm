@@ -19,6 +19,7 @@ EXPECTED_LATE_TABLES = {
     "organization_notes",
     "company_reviews",
     "user_ai_provider_credentials",
+    "instance_storage_configuration",
 }
 
 
@@ -57,7 +58,7 @@ def test_empty_database_upgrades_to_single_head_with_expected_tables(tmp_path):
         revision = connection.execute(
             "SELECT version_num FROM alembic_version"
         ).fetchone()[0]
-    assert revision == "c53f02a4d7b1"
+    assert revision == "d64a13b5e8c2"
 
 
 def test_upgrade_from_onboarding_revision_preserves_reference_data(tmp_path):

@@ -17,4 +17,12 @@ flask db upgrade
 flask run --debug
 ```
 
+To use instance-wide Google Drive document storage, enable the Google Drive API
+in Google Cloud, create an OAuth 2.0 Web application, and set
+`GOOGLE_DRIVE_CLIENT_ID`, `GOOGLE_DRIVE_CLIENT_SECRET`, and
+`CREDENTIAL_ENCRYPTION_KEY`. Register
+`https://<your-host>/settings/storage/callback/google-drive` as an authorized
+redirect URI. An administrator can then connect the account from **Storage
+Settings** in the account menu.
+
 SQLite remains supported for tests and quick local evaluation. PostgreSQL is the production target.

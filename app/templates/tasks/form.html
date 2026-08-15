@@ -3,8 +3,17 @@
 {% block title %}{{ page_title }} · Career CRM{% endblock %}
 {% block content %}
 <h1 class="h2 mb-4">{{ page_title }}</h1><form method="post" class="card card-body border-0 shadow-sm">{{ form.hidden_tag() }}
+{% if context %}
+{% if context.organization %}<input type="hidden" name="organization_id" value="{{ context.organization.id }}">{% endif %}
+{% if context.contact %}<input type="hidden" name="contact_id" value="{{ context.contact.id }}">{% endif %}
+{% if context.job %}<input type="hidden" name="job_posting_id" value="{{ context.job.id }}">{% endif %}
+{% if context.application %}<input type="hidden" name="application_id" value="{{ context.application.id }}">{% endif %}
+<section class="rounded border bg-body-tertiary p-3 mb-3" aria-label="Task context"><div class="text-body-secondary small">{{ context.label }}</div><div class="fw-semibold">{{ context.title }}</div>{% if context.organization and context.label != 'Organization' %}<div>{{ context.organization.name }}</div>{% endif %}{% if context.contact and (context.contact.title or context.contact.department) %}<div class="text-body-secondary">{{ context.contact.title or '' }}{% if context.contact.title and context.contact.department %} · {% endif %}{{ context.contact.department or '' }}</div>{% endif %}</section>
+{% endif %}
 <div class="row g-3"><div class="col-12">{{ render_field(form.title) }}</div><div class="col-md-4">{{ render_field(form.task_type) }}</div><div class="col-md-4">{{ render_field(form.priority) }}</div><div class="col-md-4">{{ render_field(form.status) }}</div>
+{% if not context %}
 <div class="col-md-6">{{ render_field(form.organization_id) }}</div><div class="col-md-6">{{ render_field(form.contact_id) }}</div><div class="col-md-6">{{ render_field(form.job_posting_id) }}</div><div class="col-md-6">{{ render_field(form.application_id) }}</div>
+{% endif %}
 <div class="col-md-6">{{ render_field(form.due_date) }}</div><div class="col-md-6">{{ render_field(form.due_time) }}</div><div class="col-12">{{ render_field(form.description) }}</div></div>
 <div class="mt-4 d-flex gap-2"><button class="btn btn-primary" type="submit">Save task</button>{% if not task %}<button class="btn btn-outline-primary" type="submit" name="action" value="save_and_new">Save and add another</button>{% endif %}<a class="btn btn-outline-secondary" href="{{ url_for('tasks.detail', task_id=task.id) if task else url_for('tasks.index') }}">Cancel</a></div></form>
 {% endblock %}

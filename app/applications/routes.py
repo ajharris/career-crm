@@ -56,6 +56,7 @@ def create() -> str:
     """Create an application from validated form data."""
     form = ApplicationForm()
     _set_job_choices(form)
+    context_job = _context_job()
     if request.method == "GET":
         requested_job = request.args.get("job_posting_id", type=int)
         if requested_job in dict(form.job_posting_id.choices):
@@ -73,7 +74,10 @@ def create() -> str:
                 url_for("applications.detail", application_id=application.id)
             )
     return render_template(
-        "applications/form.html", form=form, page_title="New application"
+        "applications/form.html",
+        form=form,
+        page_title="New application",
+        context_job=context_job,
     )
 
 
@@ -120,6 +124,15 @@ def _set_job_choices(
     form: ApplicationForm, application: Application | None = None
 ) -> None:
     form.job_posting_id.choices = available_job_choices(application)
+
+
+def _context_job():
+    job_id = request.args.get("job_posting_id", type=int)
+    if job_id is None:
+        return None
+    from app.jobs.services import get_job_posting
+
+    return get_job_posting(job_id)
 
 
 def _query_options() -> dict:

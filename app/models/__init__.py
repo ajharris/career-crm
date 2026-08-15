@@ -27,6 +27,7 @@ from app.models.job_posting import JobPosting
 from app.models.notification import NotificationDismissal
 from app.models.organization import Organization
 from app.models.saved_search import SavedSearch
+from app.models.storage import InstanceStorageConfiguration
 from app.models.task import Task
 
 __all__ = [
@@ -59,4 +60,5 @@ __all__ = [
     "OrganizationNote",
     "CompanyReview",
     "Task",
+    "InstanceStorageConfiguration",
 ]

@@ -201,6 +201,50 @@ def test_create_route(authenticated_client: FlaskClient) -> None:
     assert b"Hiring manager outreach" in response.data
 
 
+def test_create_from_contact_uses_known_contact_context(
+    authenticated_client: FlaskClient,
+) -> None:
+    organization = make_organization()
+    contact = create_contact(
+        organization_id=organization.id,
+        first_name="Alex",
+        last_name="Morgan",
+        title="Hiring Manager",
+        department="Medical Physics",
+        email="alex@example.org",
+        phone="416-555-0100",
+    )
+
+    form = authenticated_client.get(
+        "/activities/new", query_string={"contact_id": contact.id}
+    )
+
+    assert form.status_code == 200
+    assert b"Alex Morgan" in form.data
+    assert b"Hiring Manager" in form.data
+    assert b"Medical Physics" in form.data
+    assert b"alex@example.org" in form.data
+    assert b"416-555-0100" in form.data
+    assert b"UHN" in form.data
+    assert b'name="contact_id"' in form.data
+    assert b'id="organization_id"' not in form.data
+    assert b'id="contact_id"' not in form.data
+
+    values = activity_data(organization.id)
+    values.pop("organization_id")
+    values["contact_id"] = contact.id
+    response = authenticated_client.post(
+        f"/activities/new?contact_id={contact.id}",
+        data=values,
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    activity = db.session.scalar(db.select(Activity))
+    assert activity.contact_id == contact.id
+    assert activity.organization_id == organization.id
+
+
 def test_create_route_requires_relationship(authenticated_client: FlaskClient) -> None:
     values = activity_data(0)
     values["organization_id"] = ""
@@ -354,7 +398,11 @@ def test_context_aware_creation(
         "/activities/new", query_string={query_name: entity.id}
     )
 
-    assert f'<option selected value="{entity.id}"'.encode() in response.data
+    if query_name == "contact_id":
+        assert f'name="contact_id" value="{entity.id}"'.encode() in response.data
+    else:
+        field_name = query_name
+        assert f'name="{field_name}" value="{entity.id}"'.encode() in response.data
 
 
 def test_automatic_application_submitted_activity(app) -> None:

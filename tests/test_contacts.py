@@ -165,7 +165,7 @@ def test_create_and_add_another_returns_to_preselected_form(
     next_form = authenticated_client.get(response.location)
     assert b"Contact created successfully." in next_form.data
     assert b"Save and add another" in next_form.data
-    assert f'<option selected value="{organization.id}"'.encode() in next_form.data
+    assert f'name="organization_id" value="{organization.id}"'.encode() in next_form.data
     assert b'value="Alex"' not in next_form.data
 
 
@@ -209,8 +209,8 @@ def test_new_contact_preselects_organization(authenticated_client: FlaskClient) 
         f"/contacts/new?organization_id={organization.id}"
     )
 
-    selected = f'<option selected value="{organization.id}"'.encode()
-    assert selected in response.data
+    assert f'name="organization_id" value="{organization.id}"'.encode() in response.data
+    assert b'id="organization_id"' not in response.data
 
 
 def test_new_contact_defaults_relationship_status_to_new(
