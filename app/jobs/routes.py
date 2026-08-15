@@ -58,6 +58,7 @@ def create() -> str:
     """Create a job posting from validated form data."""
     form = JobPostingForm()
     _set_organization_choices(form)
+    context_organization = _context_organization()
     if request.method == "GET":
         requested_organization = request.args.get("organization_id", type=int)
         if requested_organization in dict(form.organization_id.choices):
@@ -70,7 +71,12 @@ def create() -> str:
                 url_for("jobs.create", organization_id=job.organization_id)
             )
         return redirect(url_for("jobs.detail", job_id=job.id))
-    return render_template("jobs/form.html", form=form, page_title="New job posting")
+    return render_template(
+        "jobs/form.html",
+        form=form,
+        page_title="New job posting",
+        context_organization=context_organization,
+    )
 
 
 @bp.route("/<int:job_id>/edit", methods=["GET", "POST"])
@@ -107,6 +113,15 @@ def delete(job_id: int) -> str:
 
 def _set_organization_choices(form: JobPostingForm) -> None:
     form.organization_id.choices = organization_choices()
+
+
+def _context_organization():
+    organization_id = request.args.get("organization_id", type=int)
+    if organization_id is None:
+        return None
+    from app.organizations.services import get_organization
+
+    return get_organization(organization_id)
 
 
 def _query_options() -> dict:

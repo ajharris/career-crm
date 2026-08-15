@@ -239,7 +239,8 @@ def test_new_application_preselects_job(authenticated_client: FlaskClient) -> No
 
     response = authenticated_client.get(f"/applications/new?job_posting_id={job.id}")
 
-    assert f'<option selected value="{job.id}"'.encode() in response.data
+    assert f'name="job_posting_id" value="{job.id}"'.encode() in response.data
+    assert b'id="job_posting_id"' not in response.data
 
 
 def test_edit_route(authenticated_client: FlaskClient) -> None:

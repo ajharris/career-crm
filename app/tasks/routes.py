@@ -65,6 +65,7 @@ def create():
     _choices(form)
     if request.method == "GET":
         _defaults(form)
+    context = _creation_context()
     if form.validate_on_submit():
         task = create_task(**_values(form))
         flash("Task created successfully.", "success")
@@ -81,7 +82,9 @@ def create():
             }
             return redirect(url_for("tasks.create", **context))
         return redirect(url_for("tasks.detail", task_id=task.id))
-    return render_template("tasks/form.html", form=form, page_title="New task")
+    return render_template(
+        "tasks/form.html", form=form, page_title="New task", context=context
+    )
 
 
 @bp.route("/<int:task_id>/edit", methods=["GET", "POST"])
@@ -159,6 +162,69 @@ def _defaults(form):
             f"Follow up: {activity.subject or activity.activity_type.label}"
         )
         form.description.data = activity.summary or activity.outcome
+
+
+def _creation_context():
+    """Resolve the entity whose page initiated task creation."""
+    if activity_id := request.args.get("activity_id", type=int):
+        activity = get_activity(activity_id)
+        return {
+            "label": "Follow-up to activity",
+            "title": activity.subject or activity.activity_type.label,
+            "organization": activity.organization,
+            "contact": activity.contact,
+            "job": activity.job_posting,
+            "application": activity.application,
+        }
+    if application_id := request.args.get("application_id", type=int):
+        from app.applications.services import get_application
+
+        application = get_application(application_id)
+        return {
+            "label": "Application",
+            "title": application.job_posting.title,
+            "organization": application.job_posting.organization,
+            "contact": None,
+            "job": application.job_posting,
+            "application": application,
+        }
+    if contact_id := request.args.get("contact_id", type=int):
+        from app.contacts.services import get_contact
+
+        contact = get_contact(contact_id)
+        return {
+            "label": "Contact",
+            "title": contact.full_name,
+            "organization": contact.organization,
+            "contact": contact,
+            "job": None,
+            "application": None,
+        }
+    if job_id := request.args.get("job_posting_id", type=int):
+        from app.jobs.services import get_job_posting
+
+        job = get_job_posting(job_id)
+        return {
+            "label": "Job posting",
+            "title": job.title,
+            "organization": job.organization,
+            "contact": None,
+            "job": job,
+            "application": None,
+        }
+    if organization_id := request.args.get("organization_id", type=int):
+        from app.organizations.services import get_organization
+
+        organization = get_organization(organization_id)
+        return {
+            "label": "Organization",
+            "title": organization.name,
+            "organization": organization,
+            "contact": None,
+            "job": None,
+            "application": None,
+        }
+    return None
 
 
 def _values(form) -> TaskValues:

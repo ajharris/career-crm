@@ -72,8 +72,10 @@ def initialize_extensions(app: Flask) -> None:
     from app.models.career_profile import CareerProfile  # noqa: F401
     from app.models.contact import Contact  # noqa: F401
     from app.models.dashboard_widget import DashboardWidget  # noqa: F401
+    from app.models.integration import GoogleAccountConnection  # noqa: F401
     from app.models.job_posting import JobPosting  # noqa: F401
     from app.models.organization import Organization  # noqa: F401
+    from app.models.storage import InstanceStorageConfiguration  # noqa: F401
     from app.models.task import Task  # noqa: F401
 
     @login_manager.user_loader
@@ -95,6 +97,7 @@ def register_blueprints(app: Flask) -> None:
     from app.contacts import bp as contacts_bp
     from app.dashboard import bp as dashboard_bp
     from app.documents import bp as documents_bp
+    from app.integrations import bp as integrations_bp
     from app.jobs import bp as jobs_bp
     from app.notifications import bp as notifications_bp
     from app.organizations import bp as organizations_bp
@@ -102,6 +105,7 @@ def register_blueprints(app: Flask) -> None:
     from app.reports import bp as reports_bp
     from app.search import bp as search_bp
     from app.skills import bp as skills_bp
+    from app.storage import bp as storage_bp
     from app.tasks import bp as tasks_bp
 
     app.register_blueprint(auth_bp)
@@ -120,6 +124,8 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(notifications_bp)
     app.register_blueprint(ai_bp)
     app.register_blueprint(collaboration_bp)
+    app.register_blueprint(storage_bp)
+    app.register_blueprint(integrations_bp)
     csrf.exempt(api_bp)
     app.register_blueprint(api_bp)
 

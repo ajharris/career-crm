@@ -19,6 +19,8 @@ EXPECTED_LATE_TABLES = {
     "organization_notes",
     "company_reviews",
     "user_ai_provider_credentials",
+    "instance_storage_configuration",
+    "google_account_connections",
 }
 
 
@@ -49,14 +51,15 @@ def test_empty_database_upgrades_to_single_head_with_expected_tables(tmp_path):
     inspector = inspect(create_engine(f"sqlite:///{database}"))
     tables = set(inspector.get_table_names())
     assert EXPECTED_LATE_TABLES.issubset(tables)
-    assert "profile_url" in {
+    contact_columns = {
         column["name"] for column in inspector.get_columns("contacts")
     }
+    assert {"profile_url", "resume_url"}.issubset(contact_columns)
     with sqlite3.connect(database) as connection:
         revision = connection.execute(
             "SELECT version_num FROM alembic_version"
         ).fetchone()[0]
-    assert revision == "b42e91d3f6a8"
+    assert revision == "f86c35d7a0e4"
 
 
 def test_upgrade_from_onboarding_revision_preserves_reference_data(tmp_path):

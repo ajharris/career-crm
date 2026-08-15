@@ -5,8 +5,23 @@
 
 {% block content %}
   <div class="row justify-content-center"><div class="col-xl-9"><a class="text-decoration-none" href="{{ url_for('activities.detail', activity_id=activity.id) if activity else url_for('activities.index') }}">← Cancel</a><h1 class="h2 mt-2 mb-4">{{ page_title }}</h1><form class="card card-body border-0 shadow-sm p-4" method="post" novalidate>{{ form.hidden_tag() }}
-    <p class="text-body-secondary">Select at least one related entity. Related Organization and Job context is filled automatically where possible.</p>
-    <div class="row"><div class="col-md-6">{{ render_field(form.organization_id, 'form-select') }}</div><div class="col-md-6">{{ render_field(form.contact_id, 'form-select') }}</div></div>
+    {% if context %}
+      {% if context.organization %}<input type="hidden" name="organization_id" value="{{ context.organization.id }}">{% endif %}
+      {% if context.contact %}<input type="hidden" name="contact_id" value="{{ context.contact.id }}">{% endif %}
+      {% if context.job %}<input type="hidden" name="job_posting_id" value="{{ context.job.id }}">{% endif %}
+      {% if context.application %}<input type="hidden" name="application_id" value="{{ context.application.id }}">{% endif %}
+      <section class="rounded border bg-body-tertiary p-3 mb-3" aria-label="Contact context">
+        <div class="text-body-secondary small">{{ context.label }}</div>
+        <div class="fw-semibold">{{ context.title }}</div>
+        {% if context.organization and context.label != 'Organization' %}<div>{{ context.organization.name }}</div>{% endif %}
+        {% if context.contact and (context.contact.title or context.contact.department) %}<div class="text-body-secondary">{{ context.contact.title or '' }}{% if context.contact.title and context.contact.department %} · {% endif %}{{ context.contact.department or '' }}</div>{% endif %}
+        {% if context.contact and (context.contact.email or context.contact.phone) %}<div class="text-body-secondary">{{ context.contact.email or '' }}{% if context.contact.email and context.contact.phone %} · {% endif %}{{ context.contact.phone or '' }}</div>{% endif %}
+      </section>
+      <p class="text-body-secondary">Known relationship context will be linked automatically.</p>
+    {% else %}
+      <p class="text-body-secondary">Select at least one related entity. Related Organization and Job context is filled automatically where possible.</p>
+      <div class="row"><div class="col-md-6">{{ render_field(form.organization_id, 'form-select') }}</div><div class="col-md-6">{{ render_field(form.contact_id, 'form-select') }}</div></div>
+    {% endif %}
     <div class="row"><div class="col-md-6">{{ render_field(form.job_posting_id, 'form-select') }}</div><div class="col-md-6">{{ render_field(form.application_id, 'form-select') }}</div></div>
     <div class="row"><div class="col-md-4">{{ render_field(form.activity_type, 'form-select') }}</div><div class="col-md-4">{{ render_field(form.direction, 'form-select') }}</div><div class="col-md-4">{{ render_field(form.occurred_at) }}</div></div>
     {{ render_field(form.subject) }}{{ render_field(form.summary) }}{{ render_field(form.outcome) }}

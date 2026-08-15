@@ -45,6 +45,7 @@ class Contact(db.Model):
     phone: Mapped[str | None] = mapped_column(String(50))
     linkedin_url: Mapped[str | None] = mapped_column(String(500))
     profile_url: Mapped[str | None] = mapped_column(String(500))
+    resume_url: Mapped[str | None] = mapped_column(String(1000))
     notes: Mapped[str | None] = mapped_column(Text)
     relationship_status: Mapped[RelationshipStatus | None] = mapped_column(
         Enum(

@@ -69,6 +69,7 @@ def create() -> str:
     """Create a contact from validated form data."""
     form = ContactForm()
     _set_organization_choices(form)
+    context_organization = _context_organization()
     if request.method == "GET":
         requested_organization = request.args.get("organization_id", type=int)
         if requested_organization in dict(form.organization_id.choices):
@@ -83,7 +84,12 @@ def create() -> str:
                 )
             )
         return redirect(url_for("contacts.detail", contact_id=contact.id))
-    return render_template("contacts/form.html", form=form, page_title="New contact")
+    return render_template(
+        "contacts/form.html",
+        form=form,
+        page_title="New contact",
+        context_organization=context_organization,
+    )
 
 
 @bp.route("/<int:contact_id>/edit", methods=["GET", "POST"])
@@ -120,6 +126,15 @@ def _set_organization_choices(form: ContactForm) -> None:
     form.organization_id.choices = organization_choices()
 
 
+def _context_organization():
+    organization_id = request.args.get("organization_id", type=int)
+    if organization_id is None:
+        return None
+    from app.organizations.services import get_organization
+
+    return get_organization(organization_id)
+
+
 def _form_values(form: ContactForm) -> ContactValues:
     """Extract the model fields accepted by the service layer."""
     return {
@@ -132,6 +147,7 @@ def _form_values(form: ContactForm) -> ContactValues:
         "phone": form.phone.data,
         "linkedin_url": form.linkedin_url.data,
         "profile_url": form.profile_url.data,
+        "resume_url": form.resume_url.data,
         "notes": form.notes.data,
         "relationship_status": form.relationship_status.data,
         "last_contacted_at": form.last_contacted_at.data,

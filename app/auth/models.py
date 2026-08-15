@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.models.application import Application
     from app.models.career_profile import CareerProfile
     from app.models.contact import Contact
+    from app.models.integration import GoogleAccountConnection
     from app.models.job_posting import JobPosting
     from app.models.organization import Organization
     from app.models.task import Task
@@ -45,6 +46,9 @@ class User(UserMixin, db.Model):
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     career_profile: Mapped["CareerProfile | None"] = relationship(
         back_populates="user", cascade="all, delete-orphan", uselist=False
+    )
+    google_connections: Mapped[list["GoogleAccountConnection"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
     )
 
     owned_contacts: Mapped[list["Contact"]] = relationship(back_populates="owner")

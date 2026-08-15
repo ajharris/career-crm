@@ -7,7 +7,7 @@
   <div class="row justify-content-center"><div class="col-xl-9">
     <a class="text-decoration-none" href="{{ url_for('applications.detail', application_id=application.id) if application else url_for('applications.index') }}">← Cancel</a><h1 class="h2 mt-2 mb-4">{{ page_title }}</h1>
     <form class="card card-body border-0 shadow-sm p-4" method="post" novalidate>{{ form.hidden_tag() }}
-      {{ render_field(form.job_posting_id, 'form-select') }}
+      {% if context_job %}<input type="hidden" name="job_posting_id" value="{{ context_job.id }}"><section class="rounded border bg-body-tertiary p-3 mb-3"><div class="text-body-secondary small">Job posting</div><div class="fw-semibold">{{ context_job.title }}</div><div>{{ context_job.organization.name }}</div>{% if context_job.location %}<div class="text-body-secondary">{{ context_job.location }}</div>{% endif %}</section>{% else %}{{ render_field(form.job_posting_id, 'form-select') }}{% endif %}
       <div class="row"><div class="col-md-6">{{ render_field(form.application_date) }}</div><div class="col-md-6">{{ render_field(form.status, 'form-select') }}</div></div>
       {{ render_field(form.source) }}
       <div class="row"><div class="col-md-6">{{ render_field(form.resume_version) }}</div><div class="col-md-6">{{ render_field(form.cover_letter_version) }}</div></div>

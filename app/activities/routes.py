@@ -45,8 +45,18 @@ def create() -> str:
     """Create an activity from validated form data."""
     form = ActivityForm()
     _set_entity_choices(form)
+    context = _creation_context()
     if request.method == "GET":
         _apply_context_defaults(form)
+        if context is not None:
+            for field_name, entity_name in (
+                ("organization_id", "organization"),
+                ("contact_id", "contact"),
+                ("job_posting_id", "job"),
+                ("application_id", "application"),
+            ):
+                if entity := context.get(entity_name):
+                    getattr(form, field_name).data = entity.id
     if form.validate_on_submit():
         activity = create_activity(**_form_values(form))
         flash("Activity created successfully.", "success")
@@ -63,7 +73,12 @@ def create() -> str:
             }
             return redirect(url_for("activities.create", **context))
         return redirect(url_for("activities.detail", activity_id=activity.id))
-    return render_template("activities/form.html", form=form, page_title="New activity")
+    return render_template(
+        "activities/form.html",
+        form=form,
+        page_title="New activity",
+        context=context,
+    )
 
 
 @bp.route("/<int:activity_id>/edit", methods=["GET", "POST"])
@@ -120,6 +135,59 @@ def _apply_context_defaults(form: ActivityForm) -> None:
     if form.contact_id.data is not None:
         contact = get_contact(form.contact_id.data)
         form.organization_id.data = contact.organization_id
+
+
+def _creation_context():
+    """Resolve and expand the entity whose page initiated activity creation."""
+    if application_id := request.args.get("application_id", type=int):
+        from app.applications.services import get_application
+
+        application = get_application(application_id)
+        return {
+            "label": "Application",
+            "title": application.job_posting.title,
+            "organization": application.job_posting.organization,
+            "contact": None,
+            "job": application.job_posting,
+            "application": application,
+        }
+    if contact_id := request.args.get("contact_id", type=int):
+        from app.contacts.services import get_contact
+
+        contact = get_contact(contact_id)
+        return {
+            "label": "Contact",
+            "title": contact.full_name,
+            "organization": contact.organization,
+            "contact": contact,
+            "job": None,
+            "application": None,
+        }
+    if job_id := request.args.get("job_posting_id", type=int):
+        from app.jobs.services import get_job_posting
+
+        job = get_job_posting(job_id)
+        return {
+            "label": "Job posting",
+            "title": job.title,
+            "organization": job.organization,
+            "contact": None,
+            "job": job,
+            "application": None,
+        }
+    if organization_id := request.args.get("organization_id", type=int):
+        from app.organizations.services import get_organization
+
+        organization = get_organization(organization_id)
+        return {
+            "label": "Organization",
+            "title": organization.name,
+            "organization": organization,
+            "contact": None,
+            "job": None,
+            "application": None,
+        }
+    return None
 
 
 def _query_options(form: ActivityFilterForm) -> dict:

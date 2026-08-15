@@ -47,10 +47,24 @@ def add_version(
 ) -> DocumentVersion:
     original = secure_filename(upload.filename or "document")
     suffix = Path(original).suffix.lower()
-    storage_name = f"{uuid4().hex}{suffix}"
-    folder = Path(current_app.config["UPLOAD_FOLDER"])
-    folder.mkdir(parents=True, exist_ok=True)
-    upload.save(folder / storage_name)
+    content = upload.read()
+    mime_type = upload.mimetype or "application/octet-stream"
+    from app.storage.services import upload as upload_to_configured_storage
+
+    stored = upload_to_configured_storage(original, mime_type, content)
+    if stored is None:
+        storage_name = f"{uuid4().hex}{suffix}"
+        folder = Path(current_app.config["UPLOAD_FOLDER"])
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / storage_name).write_bytes(content)
+        storage_provider = "local"
+        external_url = None
+    else:
+        storage_name = stored.identifier
+        storage_provider = "google_drive"
+        external_url = stored.web_url or (
+            f"https://drive.google.com/file/d/{stored.identifier}/view"
+        )
     number = (
         db.session.scalar(
             select(func.max(DocumentVersion.version_number)).where(
@@ -64,8 +78,10 @@ def add_version(
         version_number=number,
         original_filename=original,
         storage_name=storage_name,
-        mime_type=upload.mimetype or "application/octet-stream",
-        size_bytes=(folder / storage_name).stat().st_size,
+        storage_provider=storage_provider,
+        external_url=external_url,
+        mime_type=mime_type,
+        size_bytes=len(content),
         notes=notes,
     )
     db.session.add(version)

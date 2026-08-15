@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Storage Settings · Career CRM{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-12 col-lg-8">
+  <div class="mb-4"><h1 class="h2">Instance Storage</h1><p class="text-body-secondary">Choose where Career CRM stores newly uploaded documents. This setting applies to every user of this instance.</p></div>
+  <section class="card border-0 shadow-sm"><div class="card-body p-4">
+    <h2 class="h5">Google Drive</h2>
+    {% if storage.provider == 'google_drive' %}
+      <p>Connected{% if storage.account_email %} as <strong>{{ storage.account_email }}</strong>{% endif %}. New document uploads are stored in this Google Drive account.</p>
+      <form method="post" action="{{ url_for('storage.folder') }}" class="mb-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="form-label" for="folder_id">Drive folder ID <span class="text-body-secondary">(optional)</span></label>
+        <input class="form-control mb-2" id="folder_id" name="folder_id" value="{{ storage.folder_id or '' }}" autocomplete="off">
+        <div class="form-text mb-3">Leave blank to store files in the connected account's My Drive.</div>
+        <button class="btn btn-primary">Save folder</button>
+      </form>
+      <form method="post" action="{{ url_for('storage.storage_disconnect') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-danger">Disconnect Google Drive</button></form>
+    {% else %}
+      <p>Documents currently use local instance storage.</p>
+      <form method="post" action="{{ url_for('storage.google_drive_connect') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-primary">Connect Google Drive</button></form>
+    {% endif %}
+  </div></section>
+</div></div>
+{% endblock %}

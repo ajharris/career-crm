@@ -92,6 +92,8 @@ def download(version_id):
     )
     if version is None:
         return ("Not found", 404)
+    if version.storage_provider == "google_drive" and version.external_url:
+        return redirect(version.external_url)
     return send_from_directory(
         Path(current_app.config["UPLOAD_FOLDER"]),
         version.storage_name,
